@@ -1,4 +1,5 @@
-import { Component, ElementRef, computed, effect, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, output, signal, viewChild } from '@angular/core';
+import { ScreenBuffer } from './screen-buffer';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
 import { ScreenHelper } from './screen.helper';
 
@@ -12,7 +13,7 @@ import { ScreenHelper } from './screen.helper';
   },
 })
 export class Screen {
-  readonly pixels = input<number[][]>(ScreenHelper.defaultPixels());
+  private readonly buffer = inject(ScreenBuffer);
 
   readonly scaleChange = output<number>();
 
@@ -31,7 +32,7 @@ export class Screen {
 
     effect(() => {
       const canvas = this.canvasRef().nativeElement;
-      const pixels = this.pixels();
+      const pixels = this.buffer.pixels();
 
       // Setting width/height via a template binding (even to an unchanged value)
       // resets the canvas bitmap, wiping out whatever was just drawn. Set them
