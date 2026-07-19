@@ -1,27 +1,3 @@
 <header class="header">
-  <button
-    type="button"
-    class="header__button"
-    (click)="decrease()"
-    [disabled]="!canDecrease()"
-    aria-label="Decrease scale"
-  >
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 11h14v2H5z" />
-    </svg>
-  </button>
-
-  <span class="header__scale">{{ scale() }}x</span>
-
-  <button
-    type="button"
-    class="header__button"
-    (click)="increase()"
-    [disabled]="!canIncrease()"
-    aria-label="Increase scale"
-  >
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z" />
-    </svg>
-  </button>
+  <span class="header__scale">{{ scale().toFixed(2) }}x</span>
 </header>

@@ -3,7 +3,6 @@ import { Header } from './header/header';
 import { LETTER_A } from './screen/glyphs';
 import { Screen } from './screen/screen';
 import { ScreenHelper } from './screen/screen.helper';
-import { DEFAULT_SCALE } from './screen/screen.constants';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +11,6 @@ import { DEFAULT_SCALE } from './screen/screen.constants';
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly scale = signal(DEFAULT_SCALE);
+  protected readonly scale = signal(1);
   protected readonly pixels = ScreenHelper.copy(ScreenHelper.defaultPixels(), LETTER_A, 10, 10);
 }

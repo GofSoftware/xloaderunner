@@ -1,2 +1,2 @@
-<app-header [(scale)]="scale" />
-<app-screen [scale]="scale()" [pixels]="pixels" />
+<app-header [scale]="scale()" />
+<app-screen [pixels]="pixels" (scaleChange)="scale.set($event)" />

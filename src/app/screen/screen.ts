@@ -1,5 +1,5 @@
-import { Component, ElementRef, computed, effect, input, viewChild } from '@angular/core';
-import { DEFAULT_SCALE, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
+import { Component, ElementRef, computed, effect, input, output, signal, viewChild } from '@angular/core';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
 import { ScreenHelper } from './screen.helper';
 
 @Component({
@@ -7,17 +7,28 @@ import { ScreenHelper } from './screen.helper';
   imports: [],
   templateUrl: './screen.html',
   styleUrl: './screen.scss',
+  host: {
+    '(window:resize)': 'onResize()',
+  },
 })
 export class Screen {
   readonly pixels = input<number[][]>(ScreenHelper.defaultPixels());
-  readonly scale = input(DEFAULT_SCALE);
 
-  protected readonly canvasWidth = computed(() => SCREEN_WIDTH * this.scale());
+  readonly scaleChange = output<number>();
+
+  private readonly windowWidth = signal(window.innerWidth);
+
+  protected readonly scale = computed(() => this.windowWidth() / SCREEN_WIDTH);
+  protected readonly canvasWidth = computed(() => this.windowWidth());
   protected readonly canvasHeight = computed(() => SCREEN_HEIGHT * this.scale());
 
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
 
   constructor() {
+    effect(() => {
+      this.scaleChange.emit(this.scale());
+    });
+
     effect(() => {
       const canvas = this.canvasRef().nativeElement;
       const pixels = this.pixels();
@@ -51,5 +62,9 @@ export class Screen {
       }
       ctx.putImageData(imageData, 0, 0);
     });
+  }
+
+  protected onResize(): void {
+    this.windowWidth.set(window.innerWidth);
   }
 }
