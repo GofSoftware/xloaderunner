@@ -1,4 +1,4 @@
-import { BLACK_PIXEL, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
+import { B, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
 
 export class ScreenHelper {
   static unpackRgba(value: number): [number, number, number, number] {
@@ -11,21 +11,19 @@ export class ScreenHelper {
   }
 
   static defaultPixels(): number[][] {
-    return Array.from({ length: SCREEN_HEIGHT }, () => new Array<number>(SCREEN_WIDTH).fill(BLACK_PIXEL));
+    return Array.from({ length: SCREEN_HEIGHT }, () => new Array<number>(SCREEN_WIDTH).fill(B));
   }
 
-  /** Pastes `source` onto `destination` with its top-left corner at (x, y), clipping any part that falls outside `destination`. Returns a new array; `destination` is left untouched. */
-  static copy(destination: number[][], source: number[][], x: number, y: number): number[][] {
-    const result = destination.map((row) => [...row]);
-
+  /** Pastes `source` onto `destination` with its top-left corner at (x, y), mutating `destination` in place and clipping any part that falls outside it. */
+  static copy(destination: number[][], source: number[][], x: number, y: number): void {
     for (let sy = 0; sy < source.length; sy++) {
       const destY = y + sy;
-      if (destY < 0 || destY >= result.length) {
+      if (destY < 0 || destY >= destination.length) {
         continue;
       }
 
       const sourceRow = source[sy];
-      const destRow = result[destY];
+      const destRow = destination[destY];
       for (let sx = 0; sx < sourceRow.length; sx++) {
         const destX = x + sx;
         if (destX < 0 || destX >= destRow.length) {
@@ -34,7 +32,5 @@ export class ScreenHelper {
         destRow[destX] = sourceRow[sx];
       }
     }
-
-    return result;
   }
 }
