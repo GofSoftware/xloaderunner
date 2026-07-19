@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ScreenBuffer } from './screen-buffer';
-import { B, SCREEN_HEIGHT, SCREEN_WIDTH, W } from './screen.constants';
+import { _, SCREEN_HEIGHT, SCREEN_WIDTH, W } from './screen.constants';
 
 /**
  * jsdom doesn't implement a real canvas 2D context, so we stub `getContext`
@@ -59,14 +59,14 @@ describe('ScreenBuffer', () => {
   });
 
   describe('init', () => {
-    it('should size the canvas to the screen resolution and paint the initial (all-black) buffer onto it', () => {
+    it('should size the canvas to the screen resolution and paint the initial (all-transparent) buffer onto it', () => {
       const { canvas, pixelAt } = createTestCanvas();
 
       service.init(canvas);
 
       expect(canvas.width).toBe(SCREEN_WIDTH);
       expect(canvas.height).toBe(SCREEN_HEIGHT);
-      expect(pixelAt(0, 0)).toBe(B);
+      expect(pixelAt(0, 0)).toBe(_);
     });
   });
 
@@ -78,7 +78,7 @@ describe('ScreenBuffer', () => {
       service.startUpdate();
       service.copy([[W]], 0, 0);
 
-      expect(pixelAt(0, 0)).toBe(B);
+      expect(pixelAt(0, 0)).toBe(_);
 
       service.stopUpdate();
 
@@ -95,7 +95,7 @@ describe('ScreenBuffer', () => {
       service.stopUpdate();
 
       // Still one outstanding startUpdate — must not have re-rendered yet.
-      expect(pixelAt(1, 1)).toBe(B);
+      expect(pixelAt(1, 1)).toBe(_);
 
       service.stopUpdate();
 

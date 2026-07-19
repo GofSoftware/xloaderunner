@@ -1,13 +1,13 @@
-import { B, W } from './screen.constants';
+import { _, W } from './screen.constants';
 
 // 8x8 bitmap font glyphs.
 export const LETTER_A: number[][] = [
-  [B, B, B, W, W, B, B, B],
-  [B, B, W, W, W, W, B, B],
-  [B, W, W, B, B, W, W, B],
-  [B, W, W, B, B, W, W, B],
-  [B, W, W, W, W, W, W, B],
-  [B, W, W, B, B, W, W, B],
-  [B, W, W, B, B, W, W, B],
-  [B, B, B, B, B, B, B, B],
+  [_, _, _, W, W, _, _, _],
+  [_, _, W, W, W, W, _, _],
+  [_, W, W, _, _, W, W, _],
+  [_, W, W, _, _, W, W, _],
+  [_, W, W, W, W, W, W, _],
+  [_, W, W, _, _, W, W, _],
+  [_, W, W, _, _, W, W, _],
+  [_, _, _, _, _, _, _, _],
 ];
