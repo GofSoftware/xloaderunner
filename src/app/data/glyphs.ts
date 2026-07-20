@@ -1,4 +1,4 @@
-import { _, W } from '../ui/components/screen/screen.constants';
+import { _, W } from '../engine/screen/screen.constants';
 
 // 8x8 bitmap font glyphs.
 export const LETTER_A: number[][] = [

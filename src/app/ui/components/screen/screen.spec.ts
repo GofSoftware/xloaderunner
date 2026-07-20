@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Screen } from './screen';
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
 
 describe('Screen', () => {
   let component: Screen;
