@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import { Header } from './header/header';
-import { ScreenBuffer } from './screen/screen-buffer';
-import { LETTER_A } from './screen/glyphs';
-import { Screen } from './screen/screen';
-import { MAN_STANDING_FRAME_1, OBJECT_BRICK, OBJECT_STAIRS } from './screen/sprites';
+import { Header } from './ui/components/header/header';
+import { ScreenBuffer } from './ui/components/screen/screen-buffer';
+import { LETTER_A } from './data/glyphs';
+import { MAN_STANDING_FRAME_1, OBJECT_BRICK, OBJECT_STAIRS } from './data/sprites';
+import { Screen } from './ui/components/screen/screen';
 
 @Component({
   selector: 'app-root',

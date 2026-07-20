@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
-import { SCREEN_WIDTH } from './screen/screen.constants';
+import { SCREEN_WIDTH } from './ui/components/screen/screen.constants';
 
 describe('App', () => {
   beforeEach(async () => {
