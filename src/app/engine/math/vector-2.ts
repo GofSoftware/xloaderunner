@@ -8,5 +8,8 @@ export class Vector2 implements IVector2 {
   public x: number = 0;
   public y: number = 0;
 
-  private constructor(x: number, y: number) {}
+  private constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
 }

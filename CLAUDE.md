@@ -63,7 +63,6 @@ The app renders a tiny fixed-resolution pixel "screen" (256×192, a ZX-Spectrum-
 
 ### Known issues (found while reviewing the GameObject/Script addition)
 
-- **`Vector2.create(x, y)` always produces `(0, 0)`.** Its private constructor takes `x`/`y` params but never assigns them (`this.x`/`this.y` stay at their field-initializer default of `0`). Currently dormant — nothing in the codebase calls `Vector2.create()`; `GameObject` positions are passed as plain `{ x, y }` object literals instead, which happen to structurally satisfy the `Vector2` type. Will bite as soon as something actually uses the factory.
 - **`BitmapSpriteRenderer`'s frame-wrap logic looks wrong.** When `spriteIndexTime >= bitmap.length`, it resets via `spriteIndexTime - Math.floor(spriteIndexTime)`, which is just the fractional part of the number (equivalent to `% 1`), not `% bitmap.length`. For any animation with more than one frame this snaps the animation back to indexes 0–1 instead of looping through all frames.
 
 ### Testing notes
