@@ -8,10 +8,12 @@ import {
   OBJECT_STAIRS,
 } from '../data/sprites';
 import { ScreenBuffer } from './screen/screen-buffer';
+import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
 import { BitmapRenderer } from './scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
+import { SoundPlayer } from './audio/sound-player';
 
 const FRAME_RATE = 0;
 
@@ -27,10 +29,18 @@ export class Engine implements IEngineState {
   private gameObjects: GameObject[] = [];
 
   public readonly screenBuffer: ScreenBuffer;
+  public readonly keyboard: Keyboard;
+  public readonly soundPlayer: SoundPlayer;
   public deltaTime: number = 0;
+  public fps: number = 0;
+
+  private fpsFrameCount: number = 0;
+  private fpsElapsedTime: number = 0;
 
   private constructor() {
     this.screenBuffer = ScreenBuffer.create();
+    this.keyboard = Keyboard.create();
+    this.soundPlayer = SoundPlayer.create();
   }
 
   public setRender(uiRender: (buffer: Readonly<number[][]>) => void): void {
@@ -40,12 +50,14 @@ export class Engine implements IEngineState {
   public start(): void {
     this.previousFrameTime = Date.now();
     this.started = true;
+    this.keyboard.attach();
     this.initLevel();
     this.render();
   }
 
   public stop(): void {
     this.started = false;
+    this.keyboard.detach();
     this.gameObjects.forEach((gameObject) => gameObject.destroy());
   }
 
@@ -56,11 +68,28 @@ export class Engine implements IEngineState {
     const currentFrameTime = Date.now();
     this.deltaTime = (currentFrameTime - this.previousFrameTime) / 1000;
     this.previousFrameTime = currentFrameTime;
+    this.updateFps();
 
     this.gameObjects.forEach((gameObject) => gameObject.update());
 
+    if (this.keyboard.isPressed('Enter')) {
+      console.log('PLAY');
+      this.soundPlayer.play(440, 0.1);
+    }
+
     this.uiRender && this.uiRender(this.screenBuffer.buffer);
+    this.keyboard.next();
     setTimeout(() => this.render(), FRAME_RATE);
+  }
+
+  private updateFps(): void {
+    this.fpsFrameCount++;
+    this.fpsElapsedTime += this.deltaTime;
+    if (this.fpsElapsedTime >= 1) {
+      this.fps = this.fpsFrameCount / this.fpsElapsedTime;
+      this.fpsFrameCount = 0;
+      this.fpsElapsedTime = 0;
+    }
   }
 
   private initLevel(): void {

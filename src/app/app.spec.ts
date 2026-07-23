@@ -33,6 +33,6 @@ describe('App', () => {
     await fixture.whenStable();
 
     expect(canvas.style.width).toBe('800px');
-    expect(compiled.querySelector('.header__scale')?.textContent).toContain((800 / SCREEN_WIDTH).toFixed(2));
+    expect(compiled.querySelector('.header__stats')?.textContent).toContain((800 / SCREEN_WIDTH).toFixed(1));
   });
 });

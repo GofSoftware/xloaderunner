@@ -25,6 +25,6 @@ describe('Header', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.header__scale')?.textContent).toContain('2.50x');
+    expect(compiled.querySelector('.header__stats')?.textContent).toContain('2.5x');
   });
 });
