@@ -14,6 +14,7 @@ import { IEngineState } from './i-engine-state';
 import { BitmapRenderer } from './scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { SoundPlayer } from './audio/sound-player';
+import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 
 const FRAME_RATE = 0;
 
@@ -31,6 +32,7 @@ export class Engine implements IEngineState {
   public readonly screenBuffer: ScreenBuffer;
   public readonly keyboard: Keyboard;
   public readonly soundPlayer: SoundPlayer;
+  public readonly musicPlayer: MusicPlayer;
   public deltaTime: number = 0;
   public fps: number = 0;
 
@@ -41,6 +43,7 @@ export class Engine implements IEngineState {
     this.screenBuffer = ScreenBuffer.create();
     this.keyboard = Keyboard.create();
     this.soundPlayer = SoundPlayer.create();
+    this.musicPlayer = MusicPlayer.create(this.soundPlayer);
   }
 
   public setRender(uiRender: (buffer: Readonly<number[][]>) => void): void {
@@ -72,9 +75,13 @@ export class Engine implements IEngineState {
 
     this.gameObjects.forEach((gameObject) => gameObject.update());
 
-    if (this.keyboard.isPressed('Enter')) {
-      console.log('PLAY');
+    if (this.keyboard.wasPressedThisFrame('Enter')) {
       this.soundPlayer.play(440, 0.1);
+    }
+
+    if (this.keyboard.wasPressedThisFrame('Space')) {
+      this.musicPlayer.register('Twinkle', TWINKLE_TWINKLE_LITTLE_STAR);
+      this.musicPlayer.play('Twinkle');
     }
 
     this.uiRender && this.uiRender(this.screenBuffer.buffer);

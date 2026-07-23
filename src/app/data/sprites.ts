@@ -1,4 +1,4 @@
-import { W, R, G, B, _ } from '../engine/screen/screen.constants';
+import { W, R, G, B, _, L} from '../engine/screen/screen.constants';
 
 // 8x8 sprite frames for a standing man tapping one foot: rest -> foot lifts -> foot stamps down.
 export const MAN_STANDING_FRAME_1: number[][] = [
@@ -13,12 +13,12 @@ export const MAN_STANDING_FRAME_1: number[][] = [
 ];
 
 export const MAN_STANDING_FRAME_2: number[][] = [
-  [_, _, W, W, W, W, _, _],
-  [_, _, B, W, W, B, _, _],
-  [_, _, W, W, W, W, _, _],
-  [_, W, _, W, W, _, W, _],
   [_, _, _, W, W, _, _, _],
+  [_, _, _, B, B, _, _, _],
   [_, _, _, W, W, _, _, _],
+  [_, _, W, L, L, W, _, _],
+  [_, W, _, L, L, _, W, _],
+  [_, _, _, L, L, _, _, _],
   [_, _, W, _, _, W, _, _],
   [_, _, W, _, _, W, _, _],
 ];
@@ -35,12 +35,12 @@ export const MAN_STANDING_FRAME_3: number[][] = [
 ];
 
 export const MAN_STANDING_FRAME_4: number[][] = [
-  [_, _, W, W, W, W, _, _],
-  [_, _, B, W, W, B, _, _],
-  [_, _, W, W, W, W, _, _],
-  [_, W, _, W, W, _, W, _],
   [_, _, _, W, W, _, _, _],
+  [_, _, _, B, B, _, _, _],
   [_, _, _, W, W, _, _, _],
+  [_, _, W, L, L, W, _, _],
+  [_, W, _, L, L, _, W, _],
+  [_, _, _, L, L, _, _, _],
   [_, _, W, _, _, W, _, _],
   [_, _, W, _, _, _, _, _],
 ];
