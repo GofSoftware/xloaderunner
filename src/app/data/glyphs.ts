@@ -1,13 +1,13 @@
-import { _, W } from '../engine/screen/screen.constants';
+import { __, Wt } from '../engine/screen/screen.constants';
 
 // 8x8 bitmap font glyphs.
 export const LETTER_A: number[][] = [
-  [_, _, _, W, W, _, _, _],
-  [_, _, W, _, _, W, _, _],
-  [_, W, _, _, _, _, W, _],
-  [_, W, _, _, _, _, W, _],
-  [_, W, W, W, W, W, W, _],
-  [_, W, _, _, _, _, W, _],
-  [_, W, _, _, _, _, W, _],
-  [_, W, _, _, _, _, W, _],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+  [__, Wt, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Wt, __],
+  [__, Wt, Wt, Wt, Wt, Wt, Wt, __],
+  [__, Wt, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Wt, __],
 ];

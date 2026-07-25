@@ -1,4 +1,4 @@
-import { _, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
+import { __, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
 
 export class ScreenHelper {
   static unpackRgba(value: number): [number, number, number, number] {
@@ -11,7 +11,7 @@ export class ScreenHelper {
   }
 
   static defaultPixels(): number[][] {
-    return Array.from({ length: SCREEN_HEIGHT }, () => new Array<number>(SCREEN_WIDTH).fill(_));
+    return Array.from({ length: SCREEN_HEIGHT }, () => new Array<number>(SCREEN_WIDTH).fill(__));
   }
 
   /** Pastes `source` onto `destination` with its top-left corner at (x, y), mutating `destination` in place and clipping any part that falls outside it. */
