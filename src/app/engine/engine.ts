@@ -13,6 +13,7 @@ import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
 import { BitmapRenderer } from './scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
+import { BackgroundStars } from './scripts/background-stars';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 
@@ -103,6 +104,7 @@ export class Engine implements IEngineState {
     this.gameObjects = [];
 
     this.gameObjects.push(
+      GameObject.create(this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject)]),
       GameObject.create(this, { x: 0, y: 0 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A)]),
       GameObject.create(this, { x: 0, y: 24 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_BRICK)]),
       GameObject.create(this, { x: 8, y: 24 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_BRICK)]),

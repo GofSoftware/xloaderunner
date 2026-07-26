@@ -17,7 +17,7 @@ export class ScreenHelper {
   /** Pastes `source` onto `destination` with its top-left corner at (x, y), mutating `destination` in place and clipping any part that falls outside it. */
   static copy(destination: number[][], source: number[][], x: number, y: number): void {
     for (let sy = 0; sy < source.length; sy++) {
-      const destY = y + sy;
+      const destY = Math.floor(y) + sy;
       if (destY < 0 || destY >= destination.length) {
         continue;
       }
@@ -25,7 +25,7 @@ export class ScreenHelper {
       const sourceRow = source[sy];
       const destRow = destination[destY];
       for (let sx = 0; sx < sourceRow.length; sx++) {
-        const destX = x + sx;
+        const destX =  Math.floor(x) + sx;
         if (destX < 0 || destX >= destRow.length) {
           continue;
         }
