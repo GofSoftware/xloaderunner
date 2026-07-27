@@ -1,5 +1,6 @@
 export const SCREEN_WIDTH = 256;
 export const SCREEN_HEIGHT = 192;
+export const CELL_SIZE = 8;
 
 export const __ = 0x00000000;
 export const Wt = 0xffffffff;

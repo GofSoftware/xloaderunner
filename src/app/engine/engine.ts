@@ -1,19 +1,16 @@
 import { LETTER_A } from '../data/glyphs';
-import {
-  MAN_STANDING_FRAME_1,
-  MAN_STANDING_FRAME_2,
-  MAN_STANDING_FRAME_3,
-  MAN_STANDING_FRAME_4,
-  OBJECT_BRICK,
-  OBJECT_STAIRS,
-} from '../data/sprites';
+import { MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4, OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
+import { LEVEL_TILES } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
+import { CELL_SIZE } from './screen/screen.constants';
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
 import { BitmapRenderer } from './scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { BackgroundStars } from './scripts/background-stars';
+import { TileMap, TileType } from './scripts/tile-map';
+import { StateScript } from './scripts/state-script';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 
@@ -24,6 +21,11 @@ export class Engine implements IEngineState {
   public static get instance(): Engine {
     return Engine.engineInstance ?? (Engine.engineInstance = new Engine());
   }
+
+  private static readonly tileBitmaps: Partial<Record<TileType, number[][]>> = {
+    [TileType.Brick]: OBJECT_BRICK,
+    [TileType.Stairs]: OBJECT_STAIRS,
+  };
 
   private uiRender: ((buffer: Readonly<number[][]>) => void) | undefined;
   private started: boolean = false;
@@ -103,22 +105,30 @@ export class Engine implements IEngineState {
   private initLevel(): void {
     this.gameObjects = [];
 
-    this.gameObjects.push(
-      GameObject.create(this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject)]),
-      GameObject.create(this, { x: 0, y: 0 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A)]),
-      GameObject.create(this, { x: 0, y: 24 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_BRICK)]),
-      GameObject.create(this, { x: 8, y: 24 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_BRICK)]),
-      GameObject.create(this, { x: 16, y: 24 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_BRICK)]),
-      GameObject.create(this, { x: 24, y: 24 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_STAIRS)]),
-      GameObject.create(this, { x: 24, y: 32 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_STAIRS)]),
+    const mapGameObject = GameObject.create('Map', this, { x: 0, y: 0 }, [(gameObject: GameObject) => TileMap.create(gameObject)]);
+    const tileMap = mapGameObject.getScript(TileMap)!;
+    LEVEL_TILES.forEach(({ column, row, type }) => tileMap.setTile(column, row, type));
 
-      GameObject.create(this, { x: 8, y: 16 }, [
+    const tileGameObjects = tileMap.getTiles().map(({ column, row, type }) =>
+      GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+        (gameObject: GameObject) => BitmapRenderer.create(gameObject, Engine.tileBitmaps[type]!),
+      ]),
+    );
+
+    this.gameObjects.push(
+      mapGameObject,
+      ...tileGameObjects,
+      GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject)]),
+      GameObject.create('LetterA', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A)]),
+
+      GameObject.create('Player', this, { x: 8, y: 16 }, [
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
             gameObject,
             [MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4, MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4],
             2,
           ),
+        (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
       ]),
     );
 
