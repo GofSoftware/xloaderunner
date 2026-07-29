@@ -1,5 +1,5 @@
 import { LETTER_A } from '../data/glyphs';
-import { MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4, OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
+import { MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2, OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
 import { LEVEL_TILES } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
 import { CELL_SIZE } from './screen/screen.constants';
@@ -117,18 +117,18 @@ export class Engine implements IEngineState {
 
     this.gameObjects.push(
       mapGameObject,
-      ...tileGameObjects,
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject)]),
+      ...tileGameObjects,
       GameObject.create('LetterA', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A)]),
 
       GameObject.create('Player', this, { x: 8, y: 16 }, [
+        (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
             gameObject,
-            [MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4, MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4],
+            [MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2],
             2,
           ),
-        (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
       ]),
     );
 

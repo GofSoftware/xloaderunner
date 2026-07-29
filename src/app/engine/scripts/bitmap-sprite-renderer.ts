@@ -20,9 +20,6 @@ export class BitmapSpriteRenderer extends Script {
   }
 
   public setAnimation(bitmap: number[][][], framePerSecond: number = this.framePerSecond): void {
-    if (this.bitmap === bitmap) {
-      return;
-    }
     this.bitmap = bitmap;
     this.framePerSecond = framePerSecond;
     this.spriteIndexTime = 0;

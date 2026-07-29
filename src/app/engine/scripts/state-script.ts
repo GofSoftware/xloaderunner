@@ -3,7 +3,16 @@ import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { TileMap } from './tile-map';
 import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_3, MAN_STANDING_FRAME_4 } from '../../data/sprites';
+import {
+  MAN_MOVING_LEFT_FRAME_1,
+  MAN_STANDING_FRAME_1,
+  MAN_MOVING_RIGHT_FRAME_1,
+  MAN_STANDING_FRAME_2,
+  OBJECT_EMPTY,
+  MAN_FALLING_FRAME_1,
+  MAN_FALLING_FRAME_3,
+  MAN_FALLING_FRAME_2,
+} from '../../data/sprites';
 
 export enum PlayerState {
   Stand = 'Stand',
@@ -17,9 +26,12 @@ export enum PlayerState {
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
 
-const STAND_ANIMATION = { frames: [MAN_STANDING_FRAME_2, MAN_STANDING_FRAME_4], framesPerSecond: 2 };
-const MOVE_ANIMATION = { frames: [MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_3], framesPerSecond: 6 };
-const FALL_ANIMATION = { frames: [MAN_STANDING_FRAME_1], framesPerSecond: 0 };
+const STAND_ANIMATION = { frames: [MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2], framesPerSecond: 2 };
+const MOVE_ANIMATION = { frames: [MAN_MOVING_LEFT_FRAME_1, MAN_MOVING_RIGHT_FRAME_1], framesPerSecond: 6 };
+const FALL_ANIMATION = {
+  frames: [MAN_FALLING_FRAME_1, MAN_FALLING_FRAME_2, MAN_FALLING_FRAME_3, MAN_FALLING_FRAME_2],
+  framesPerSecond: 10,
+};
 
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
@@ -37,7 +49,7 @@ export class StateScript extends Script {
 
   private readonly gameObject: GameObject;
   private readonly tileMap: TileMap;
-  private state: PlayerState = PlayerState.Stand;
+  private state: PlayerState | undefined;
 
   private constructor(gameObject: GameObject, tileMap: TileMap) {
     super();
@@ -46,9 +58,13 @@ export class StateScript extends Script {
   }
 
   public override update(): void {
+    const previousPosition = { x: this.gameObject.position.x, y: this.gameObject.position.y };
+
     const nextState = this.resolveState();
     this.applyMovement(nextState);
     this.setState(nextState);
+
+    this.clearPreviousPosition(previousPosition);
   }
 
   private resolveState(): PlayerState {
@@ -116,7 +132,23 @@ export class StateScript extends Script {
     return Math.min(Math.max(value, min), max);
   }
 
+  private clearPreviousPosition(previousPosition: { x: number; y: number }): void {
+    const { x, y } = this.gameObject.position;
+    if (Math.floor(previousPosition.x) === Math.floor(x) && Math.floor(previousPosition.y) === Math.floor(y)) {
+      return;
+    }
+
+    if (this.tileMap.isSolidAtPixel(previousPosition.x, previousPosition.y)) {
+      return;
+    }
+
+    this.gameObject.engineState.screenBuffer.copy(OBJECT_EMPTY, previousPosition.x, previousPosition.y);
+  }
+
   private setState(state: PlayerState): void {
+    if (this.state === state) {
+      return;
+    }
     this.state = state;
 
     const spriteRenderer = this.gameObject.getScript(BitmapSpriteRenderer);

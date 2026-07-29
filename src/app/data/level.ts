@@ -6,4 +6,5 @@ export const LEVEL_TILES: ITile[] = [
   { column: 2, row: 3, type: TileType.Brick },
   { column: 3, row: 3, type: TileType.Stairs },
   { column: 3, row: 4, type: TileType.Stairs },
+  { column: 4, row: 8, type: TileType.Brick },
 ];
