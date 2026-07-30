@@ -103,4 +103,77 @@ describe('StateScript', () => {
 
     expect(engineState.screenBuffer.buffer[16][8]).toBe(0xff0000ff);
   });
+
+  it('should finish the current 8px step even if the key is released mid-step', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Brick);
+    engineState.deltaTime = 0.05;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    keyboard.next();
+
+    player.update();
+    player.update();
+    expect(player.position.x).toBeLessThan(16);
+
+    player.update();
+    expect(player.position.x).toBe(16);
+
+    player.update();
+    expect(player.position.x).toBe(16);
+  });
+
+  it('should ignore a direction change until the in-progress step completes', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Brick);
+    engineState.deltaTime = 0.05;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+    keyboard.next();
+
+    player.update();
+    player.update();
+    player.update();
+    expect(player.position.x).toBe(16);
+
+    player.update();
+    expect(player.position.x).toBeLessThan(16);
+  });
+
+  it('should commit to a full 8px fall before re-evaluating whether the player has landed', () => {
+    player.setPosition(100, 16);
+    engineState.deltaTime = 0.05;
+
+    player.update();
+    player.update();
+    expect(player.position.y).toBeLessThan(24);
+
+    player.update();
+    expect(player.position.y).toBe(24);
+  });
+
+  it('should stay in place on a stairs tile even without ground below, when no key is pressed', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 32, y: 16 });
+  });
+
+  it('should still allow climbing while on a stairs tile with no ground below', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+
+    player.update();
+
+    expect(player.position.x).toBe(32);
+    expect(player.position.y).toBeLessThan(16);
+  });
 });

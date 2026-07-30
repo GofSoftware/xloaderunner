@@ -1,18 +1,17 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { TileMap } from './tile-map';
+import { TileMap, TileType } from './tile-map';
 import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { OBJECT_EMPTY } from '../../data/sprites';
 import {
-  MAN_MOVING_LEFT_FRAME_1,
-  MAN_STANDING_FRAME_1,
-  MAN_MOVING_RIGHT_FRAME_1,
-  MAN_STANDING_FRAME_2,
-  OBJECT_EMPTY,
-  MAN_FALLING_FRAME_1,
-  MAN_FALLING_FRAME_3,
-  MAN_FALLING_FRAME_2,
-} from '../../data/sprites';
+  CLIMB_ANIMATION,
+  FALL_ANIMATION,
+  MOVE_ANIMATION_LEFT,
+  MOVE_ANIMATION_RIGHT,
+  ON_STAIRS_ANIMATION,
+  STAND_ANIMATION,
+} from './animations';
 
 export enum PlayerState {
   Stand = 'Stand',
@@ -21,25 +20,19 @@ export enum PlayerState {
   MoveUp = 'MoveUp',
   MoveDown = 'MoveDown',
   Fall = 'Fall',
+  OnStairs = 'OnStairs',
 }
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
-
-const STAND_ANIMATION = { frames: [MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2], framesPerSecond: 2 };
-const MOVE_ANIMATION = { frames: [MAN_MOVING_LEFT_FRAME_1, MAN_MOVING_RIGHT_FRAME_1], framesPerSecond: 6 };
-const FALL_ANIMATION = {
-  frames: [MAN_FALLING_FRAME_1, MAN_FALLING_FRAME_2, MAN_FALLING_FRAME_3, MAN_FALLING_FRAME_2],
-  framesPerSecond: 10,
-};
-
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
-  [PlayerState.MoveLeft]: MOVE_ANIMATION,
-  [PlayerState.MoveRight]: MOVE_ANIMATION,
-  [PlayerState.MoveUp]: MOVE_ANIMATION,
-  [PlayerState.MoveDown]: MOVE_ANIMATION,
+  [PlayerState.MoveLeft]: MOVE_ANIMATION_LEFT,
+  [PlayerState.MoveRight]: MOVE_ANIMATION_RIGHT,
+  [PlayerState.MoveUp]: CLIMB_ANIMATION,
+  [PlayerState.MoveDown]: CLIMB_ANIMATION,
   [PlayerState.Fall]: FALL_ANIMATION,
+  [PlayerState.OnStairs]: ON_STAIRS_ANIMATION,
 };
 
 export class StateScript extends Script {
@@ -47,9 +40,20 @@ export class StateScript extends Script {
     return new StateScript(gameObject, tileMap);
   }
 
+  private static readonly STEP_SPEED: Record<PlayerState, number> = {
+    [PlayerState.Stand]: 0,
+    [PlayerState.MoveLeft]: MOVE_SPEED,
+    [PlayerState.MoveRight]: MOVE_SPEED,
+    [PlayerState.MoveUp]: MOVE_SPEED,
+    [PlayerState.MoveDown]: MOVE_SPEED,
+    [PlayerState.Fall]: FALL_SPEED,
+    [PlayerState.OnStairs]: 0,
+  };
+
   private readonly gameObject: GameObject;
   private readonly tileMap: TileMap;
   private state: PlayerState | undefined;
+  private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
 
   private constructor(gameObject: GameObject, tileMap: TileMap) {
     super();
@@ -60,15 +64,28 @@ export class StateScript extends Script {
   public override update(): void {
     const previousPosition = { x: this.gameObject.position.x, y: this.gameObject.position.y };
 
-    const nextState = this.resolveState();
-    this.applyMovement(nextState);
-    this.setState(nextState);
+    let activeState: PlayerState;
+    if (this.activeStep) {
+      activeState = this.activeStep.state;
+    } else {
+      activeState = this.resolveState();
+      if (StateScript.STEP_SPEED[activeState] > 0) {
+        this.activeStep = { state: activeState, target: this.computeStepTarget(activeState) };
+      }
+    }
 
+    if (this.activeStep) {
+      this.advanceStep();
+    }
+
+    this.setState(activeState);
     this.clearPreviousPosition(previousPosition);
   }
 
   private resolveState(): PlayerState {
-    if (!this.isGroundedBelow()) {
+    const onStairs = this.isOnStairs();
+
+    if (!onStairs && !this.isGroundedBelow()) {
       return PlayerState.Fall;
     }
 
@@ -86,7 +103,7 @@ export class StateScript extends Script {
       return PlayerState.MoveDown;
     }
 
-    return PlayerState.Stand;
+    return onStairs ? PlayerState.OnStairs : PlayerState.Stand;
   }
 
   private isGroundedBelow(): boolean {
@@ -94,38 +111,64 @@ export class StateScript extends Script {
     return this.tileMap.isSolidAtPixel(x, y + CELL_SIZE);
   }
 
-  private applyMovement(state: PlayerState): void {
-    const { deltaTime } = this.gameObject.engineState;
+  private isOnStairs(): boolean {
     const { x, y } = this.gameObject.position;
-    const distance = MOVE_SPEED * deltaTime;
+    return this.tileMap.getTileAtPixel(x, y) === TileType.Stairs;
+  }
 
-    let nextX = x;
-    let nextY = y;
+  private computeStepTarget(state: PlayerState): { x: number; y: number } {
+    const { x, y } = this.gameObject.position;
+    let targetX = x;
+    let targetY = y;
 
     switch (state) {
       case PlayerState.MoveLeft:
-        nextX = x - distance;
+        targetX = x - CELL_SIZE;
         break;
       case PlayerState.MoveRight:
-        nextX = x + distance;
+        targetX = x + CELL_SIZE;
         break;
       case PlayerState.MoveUp:
-        nextY = y - distance;
+        targetY = y - CELL_SIZE;
         break;
       case PlayerState.MoveDown:
-        nextY = y + distance;
-        break;
       case PlayerState.Fall:
-        nextY = y + FALL_SPEED * deltaTime;
+        targetY = y + CELL_SIZE;
         break;
       case PlayerState.Stand:
+      case PlayerState.OnStairs:
         break;
     }
 
-    this.gameObject.setPosition(
-      StateScript.clamp(nextX, 0, SCREEN_WIDTH - CELL_SIZE),
-      StateScript.clamp(nextY, 0, SCREEN_HEIGHT - CELL_SIZE),
-    );
+    return {
+      x: StateScript.clamp(targetX, 0, SCREEN_WIDTH - CELL_SIZE),
+      y: StateScript.clamp(targetY, 0, SCREEN_HEIGHT - CELL_SIZE),
+    };
+  }
+
+  private advanceStep(): void {
+    const { deltaTime } = this.gameObject.engineState;
+    const { x, y } = this.gameObject.position;
+    const { state, target } = this.activeStep!;
+    const distance = StateScript.STEP_SPEED[state] * deltaTime;
+
+    const nextX = StateScript.moveToward(x, target.x, distance);
+    const nextY = StateScript.moveToward(y, target.y, distance);
+    this.gameObject.setPosition(nextX, nextY);
+
+    if (nextX === target.x && nextY === target.y) {
+      this.activeStep = undefined;
+    }
+  }
+
+  private static moveToward(current: number, target: number, maxDelta: number): number {
+    if (current < target) {
+      return Math.min(current + maxDelta, target);
+    }
+    if (current > target) {
+      return Math.max(current - maxDelta, target);
+    }
+    return target;
   }
 
   private static clamp(value: number, min: number, max: number): number {
