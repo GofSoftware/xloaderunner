@@ -96,7 +96,7 @@ export class StateScript extends Script {
     if (keyboard.isPressed('ArrowRight')) {
       return PlayerState.MoveRight;
     }
-    if (keyboard.isPressed('ArrowUp')) {
+    if (onStairs && keyboard.isPressed('ArrowUp')) {
       return PlayerState.MoveUp;
     }
     if (keyboard.isPressed('ArrowDown')) {

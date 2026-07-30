@@ -1,11 +1,32 @@
-import { ITile, TileType } from '../engine/scripts/tile-map';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../engine/screen/screen.constants';
+import { TileType } from '../engine/scripts/tile-map';
 
-export const LEVEL_TILES: ITile[] = [
-  { column: 1, row: 3, type: TileType.Brick },
-  { column: 2, row: 3, type: TileType.Brick },
-  { column: 3, row: 3, type: TileType.Stairs },
-  { column: 3, row: 4, type: TileType.Stairs },
-  ...Array.from({ length: SCREEN_WIDTH / CELL_SIZE }, (_, i) => ({ column: i, row: SCREEN_HEIGHT / CELL_SIZE - 1, type: TileType.Brick })),
-  ...Array.from({ length: (SCREEN_HEIGHT / CELL_SIZE) - 4 }, (_, i) => ({ column: 0, row: i + 3, type: TileType.Stairs })),
+const Em = TileType.Empty;
+const Br = TileType.Brick;
+const St = TileType.Stairs;
+
+export const LEVEL_TILES_ARR: TileType[][] = [
+  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Br, Br, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br],
 ];

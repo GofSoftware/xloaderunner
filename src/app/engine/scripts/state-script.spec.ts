@@ -176,4 +176,12 @@ describe('StateScript', () => {
     expect(player.position.x).toBe(32);
     expect(player.position.y).toBeLessThan(16);
   });
+
+  it('should ignore the up arrow while grounded on a non-stairs tile', () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
 });

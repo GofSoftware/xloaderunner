@@ -1,8 +1,8 @@
 import { LETTER_A } from '../data/glyphs';
-import { MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2, OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
-import { LEVEL_TILES } from '../data/level';
+import { OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
+import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen/screen.constants';
+import { CELL_SIZE } from './screen/screen.constants';
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
@@ -108,13 +108,20 @@ export class Engine implements IEngineState {
 
     const mapGameObject = GameObject.create('Map', this, { x: 0, y: 0 }, [(gameObject: GameObject) => TileMap.create(gameObject)]);
     const tileMap = mapGameObject.getScript(TileMap)!;
-    LEVEL_TILES.forEach(({ column, row, type }) => tileMap.setTile(column, row, type));
 
-    const tileGameObjects = tileMap.getTiles().map(({ column, row, type }) =>
-      GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
-        (gameObject: GameObject) => BitmapRenderer.create(gameObject, Engine.tileBitmaps[type]!),
-      ]),
-    );
+    LEVEL_TILES_ARR.forEach((value, y) => {
+      value.forEach((type, x) => {
+        tileMap.setTile(x, y, type);
+      });
+    });
+
+    const tileGameObjects = tileMap
+      .getTiles()
+      .map(({ column, row, type }) =>
+        GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+          (gameObject: GameObject) => BitmapRenderer.create(gameObject, Engine.tileBitmaps[type]!),
+        ]),
+      );
 
     this.gameObjects.push(
       mapGameObject,
