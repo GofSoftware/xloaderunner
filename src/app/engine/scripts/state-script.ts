@@ -2,7 +2,7 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { TileMap, TileType } from './tile-map';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { CELL_SIZE, FOREGROUND_LAYER, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import { OBJECT_EMPTY } from '../../data/sprites';
 import {
   CLIMB_ANIMATION,
@@ -185,7 +185,7 @@ export class StateScript extends Script {
       return;
     }
 
-    this.gameObject.engineState.screenBuffer.copy(OBJECT_EMPTY, previousPosition.x, previousPosition.y);
+    this.gameObject.engineState.screenBuffer.copy(OBJECT_EMPTY, previousPosition.x, previousPosition.y, FOREGROUND_LAYER);
   }
 
   private setState(state: PlayerState): void {

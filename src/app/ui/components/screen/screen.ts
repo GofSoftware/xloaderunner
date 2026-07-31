@@ -1,4 +1,4 @@
-import { Component, ElementRef, afterNextRender, computed, effect, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, afterNextRender, computed, effect, output, signal, viewChildren } from '@angular/core';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
 import { Engine } from '../../../engine/engine';
 import { ScreenHelper } from '../../../engine/screen/screen.helper';
@@ -22,7 +22,12 @@ export class Screen {
   protected readonly canvasWidth = computed(() => this.windowWidth());
   protected readonly canvasHeight = computed(() => SCREEN_HEIGHT * this.scale());
 
-  private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  protected readonly layerIndices: number[] = Array.from(
+    { length: Engine.instance.screenBuffer.buffers.length },
+    (_, index) => index,
+  );
+
+  private readonly canvasRefs = viewChildren<ElementRef<HTMLCanvasElement>>('layerCanvas');
 
   constructor() {
     effect(() => {
@@ -30,8 +35,8 @@ export class Screen {
     });
 
     afterNextRender(() => {
-      Engine.instance.setRender((buffer: Readonly<number[][]>) => {
-        this.render(buffer);
+      Engine.instance.setRender((buffers: ReadonlyArray<Readonly<number[][]>>) => {
+        this.render(buffers);
       });
     });
   }
@@ -40,22 +45,28 @@ export class Screen {
     this.windowWidth.set(window.innerWidth);
   }
 
-  private render(buffer: Readonly<number[][]>): void {
-    if (!this.canvasRef()?.nativeElement) {
-      return;
-    }
+  private render(buffers: ReadonlyArray<Readonly<number[][]>>): void {
+    const canvasRefs = this.canvasRefs();
+    buffers.forEach((buffer, index) => {
+      const canvas = canvasRefs[index]?.nativeElement;
+      if (canvas) {
+        this.renderLayer(canvas, buffer);
+      }
+    });
+  }
 
+  private renderLayer(canvas: HTMLCanvasElement, buffer: Readonly<number[][]>): void {
     // Setting width/height (even to an unchanged value) resets the canvas
     // bitmap, wiping out whatever was just drawn. Guard so they're only
     // touched when they actually change.
-    if (this.canvasRef().nativeElement.width !== SCREEN_WIDTH) {
-      this.canvasRef().nativeElement.width = SCREEN_WIDTH;
+    if (canvas.width !== SCREEN_WIDTH) {
+      canvas.width = SCREEN_WIDTH;
     }
-    if (this.canvasRef().nativeElement.height !== SCREEN_HEIGHT) {
-      this.canvasRef().nativeElement.height = SCREEN_HEIGHT;
+    if (canvas.height !== SCREEN_HEIGHT) {
+      canvas.height = SCREEN_HEIGHT;
     }
 
-    const ctx = this.canvasRef().nativeElement.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) {
       return;
     }

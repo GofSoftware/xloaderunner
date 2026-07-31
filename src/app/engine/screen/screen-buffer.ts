@@ -1,18 +1,25 @@
 import { ScreenHelper } from './screen.helper';
 
 export class ScreenBuffer {
-  public static create(): ScreenBuffer {
-    return new ScreenBuffer();
+  public static create(layerCount: number): ScreenBuffer {
+    return new ScreenBuffer(layerCount);
   }
 
-  private screenBuffer: number[][] = ScreenHelper.defaultPixels();
+  private readonly layers: number[][][];
 
-  public get buffer(): Readonly<number[][]> {
-    return this.screenBuffer;
+  private constructor(layerCount: number) {
+    this.layers = Array.from({ length: layerCount }, () => ScreenHelper.defaultPixels());
   }
 
-  copy(source: number[][], x: number, y: number): void {
-    ScreenHelper.copy(this.screenBuffer, source, x, y);
+  public get buffers(): ReadonlyArray<Readonly<number[][]>> {
+    return this.layers;
   }
 
+  copy(source: number[][], x: number, y: number, layer: number): void {
+    ScreenHelper.copy(this.layers[layer], source, x, y);
+  }
+
+  clear(): void {
+    this.layers.forEach((layer) => ScreenHelper.clear(layer));
+  }
 }

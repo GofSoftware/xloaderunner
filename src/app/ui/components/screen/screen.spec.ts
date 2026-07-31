@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Screen } from './screen';
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
+import { LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
 
 describe('Screen', () => {
   let component: Screen;
@@ -19,6 +19,11 @@ describe('Screen', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should create one stacked canvas per engine layer', () => {
+    const canvases = (fixture.nativeElement as HTMLElement).querySelectorAll('canvas');
+    expect(canvases.length).toBe(LAYER_COUNT);
   });
 
   it('should size the canvas to the window width, preserving the screen aspect ratio', async () => {

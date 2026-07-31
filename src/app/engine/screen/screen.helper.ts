@@ -14,6 +14,11 @@ export class ScreenHelper {
     return Array.from({ length: SCREEN_HEIGHT }, () => new Array<number>(SCREEN_WIDTH).fill(__));
   }
 
+  /** Resets every pixel in `buffer` to transparent, mutating it in place. */
+  static clear(buffer: number[][]): void {
+    buffer.forEach((row) => row.fill(__));
+  }
+
   /** Pastes `source` onto `destination` with its top-left corner at (x, y), mutating `destination` in place and clipping any part that falls outside it. */
   static copy(destination: number[][], source: number[][], x: number, y: number): void {
     for (let sy = 0; sy < source.length; sy++) {

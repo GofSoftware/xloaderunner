@@ -4,7 +4,7 @@ import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
-import { __, CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { __, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../../data/sprites';
 
@@ -19,7 +19,7 @@ describe('StateScript', () => {
     keyboard = Keyboard.create();
     keyboard.attach();
     engineState = {
-      screenBuffer: ScreenBuffer.create(),
+      screenBuffer: ScreenBuffer.create(LAYER_COUNT),
       keyboard,
       soundPlayer: {} as IEngineState['soundPlayer'],
       musicPlayer: {} as IEngineState['musicPlayer'],
@@ -33,7 +33,7 @@ describe('StateScript', () => {
 
     player = GameObject.create('Player', engineState, { x: 8, y: 16 }, [
       (go) => StateScript.create(go, tileMap),
-      (go) => BitmapSpriteRenderer.create(go, [MAN_MOVING_LEFT_FRAME_1], 1),
+      (go) => BitmapSpriteRenderer.create(go, [MAN_MOVING_LEFT_FRAME_1], 1, FOREGROUND_LAYER),
     ]);
     player.start();
   });
@@ -86,22 +86,22 @@ describe('StateScript', () => {
   });
 
   it('should clear the previous position after moving away from an empty cell', () => {
-    engineState.screenBuffer.copy([[0xffffffff]], 8, 16);
+    engineState.screenBuffer.copy([[0xffffffff]], 8, 16, FOREGROUND_LAYER);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
 
-    expect(engineState.screenBuffer.buffer[16][8]).toBe(__);
+    expect(engineState.screenBuffer.buffers[FOREGROUND_LAYER][16][8]).toBe(__);
   });
 
   it('should leave the previous position untouched if a solid tile already covers it', () => {
     tileMap.setTileAtPixel(8, 16, TileType.Stairs);
-    engineState.screenBuffer.copy([[0xff0000ff]], 8, 16);
+    engineState.screenBuffer.copy([[0xff0000ff]], 8, 16, FOREGROUND_LAYER);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
 
-    expect(engineState.screenBuffer.buffer[16][8]).toBe(0xff0000ff);
+    expect(engineState.screenBuffer.buffers[FOREGROUND_LAYER][16][8]).toBe(0xff0000ff);
   });
 
   it('should finish the current 8px step even if the key is released mid-step', () => {

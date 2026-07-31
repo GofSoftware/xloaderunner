@@ -16,8 +16,8 @@ interface IStar {
 }
 
 export class BackgroundStars extends Script {
-  public static create(gameObject: GameObject, starCount: number = DEFAULT_STAR_COUNT): BackgroundStars {
-    return new BackgroundStars(gameObject, starCount);
+  public static create(gameObject: GameObject, layer: number, starCount: number = DEFAULT_STAR_COUNT): BackgroundStars {
+    return new BackgroundStars(gameObject, layer, starCount);
   }
 
   private static readonly palette: number[] = BackgroundStars.buildPalette();
@@ -42,17 +42,19 @@ export class BackgroundStars extends Script {
   }
 
   private readonly gameObject: GameObject;
+  private readonly layer: number;
   private readonly stars: IStar[];
   private readonly halfWidth: number;
   private readonly halfHeight: number;
 
-  private constructor(gameObject: GameObject, starCount: number) {
+  private constructor(gameObject: GameObject, layer: number, starCount: number) {
     super();
 
     this.halfWidth = SCREEN_WIDTH / 2;
     this.halfHeight = SCREEN_HEIGHT / 2;
 
     this.gameObject = gameObject;
+    this.layer = layer;
     this.stars = Array.from({ length: starCount }, () => BackgroundStars.randomStar(true));
   }
 
@@ -75,18 +77,18 @@ export class BackgroundStars extends Script {
         if (star.step < 0) {
           star.step = 0;
           star.direction = 0;
-          screenBuffer.copy([[BackgroundStars.palette[star.step]]], star.x, star.y); // Clear previous
+          screenBuffer.copy([[BackgroundStars.palette[star.step]]], star.x, star.y, this.layer); // Clear previous
           const newStar = BackgroundStars.randomStar();
           star.x = newStar.x;
           star.y = newStar.y;
         }
       }
 
-      screenBuffer.copy([[BackgroundStars.palette[0]]], star.x, star.y); // Clear previous
+      screenBuffer.copy([[BackgroundStars.palette[0]]], star.x, star.y, this.layer); // Clear previous
 
       this.moveStar(star);
 
-      screenBuffer.copy([[BackgroundStars.palette[star.step]]], star.x, star.y);
+      screenBuffer.copy([[BackgroundStars.palette[star.step]]], star.x, star.y, this.layer);
     }
   }
 

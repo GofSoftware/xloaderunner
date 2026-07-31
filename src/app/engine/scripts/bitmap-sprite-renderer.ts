@@ -2,21 +2,28 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 
 export class BitmapSpriteRenderer extends Script {
-  public static create(gameObject: GameObject, bitmap: number[][][], framePerSecond: number): BitmapSpriteRenderer {
-    return new BitmapSpriteRenderer(gameObject, bitmap, framePerSecond);
+  public static create(
+    gameObject: GameObject,
+    bitmap: number[][][],
+    framePerSecond: number,
+    layer: number,
+  ): BitmapSpriteRenderer {
+    return new BitmapSpriteRenderer(gameObject, bitmap, framePerSecond, layer);
   }
 
   private readonly gameObject: GameObject;
   private bitmap: number[][][];
   private framePerSecond: number;
+  private readonly layer: number;
   private spriteIndexTime: number = 0;
 
-  private constructor(gameObject: GameObject, bitmap: number[][][], framePerSecond: number) {
+  private constructor(gameObject: GameObject, bitmap: number[][][], framePerSecond: number, layer: number) {
     super();
 
     this.gameObject = gameObject;
     this.bitmap = bitmap;
     this.framePerSecond = framePerSecond;
+    this.layer = layer;
   }
 
   public setAnimation(bitmap: number[][][], framePerSecond: number = this.framePerSecond): void {
@@ -34,6 +41,7 @@ export class BitmapSpriteRenderer extends Script {
       this.bitmap[Math.floor(this.spriteIndexTime)],
       this.gameObject.position.x,
       this.gameObject.position.y,
+      this.layer,
     );
   }
 }

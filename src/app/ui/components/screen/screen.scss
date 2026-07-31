@@ -1,6 +1,16 @@
+.screen__layers {
+  position: relative;
+}
+
 canvas {
+  position: absolute;
+  inset: 0;
   display: block;
-  background: black;
+  background: transparent;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+}
+
+canvas:first-child {
+  background: black;
 }

@@ -2,7 +2,7 @@ import { LETTER_A } from '../data/glyphs';
 import { OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
 import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
-import { CELL_SIZE } from './screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
@@ -28,7 +28,7 @@ export class Engine implements IEngineState {
     [TileType.Stairs]: OBJECT_STAIRS,
   };
 
-  private uiRender: ((buffer: Readonly<number[][]>) => void) | undefined;
+  private uiRender: ((buffers: ReadonlyArray<Readonly<number[][]>>) => void) | undefined;
   private started: boolean = false;
   private previousFrameTime: number = 0;
   private gameObjects: GameObject[] = [];
@@ -44,13 +44,13 @@ export class Engine implements IEngineState {
   private fpsElapsedTime: number = 0;
 
   private constructor() {
-    this.screenBuffer = ScreenBuffer.create();
+    this.screenBuffer = ScreenBuffer.create(LAYER_COUNT);
     this.keyboard = Keyboard.create();
     this.soundPlayer = SoundPlayer.create();
     this.musicPlayer = MusicPlayer.create(this.soundPlayer);
   }
 
-  public setRender(uiRender: (buffer: Readonly<number[][]>) => void): void {
+  public setRender(uiRender: (buffers: ReadonlyArray<Readonly<number[][]>>) => void): void {
     this.uiRender = uiRender;
   }
 
@@ -76,6 +76,7 @@ export class Engine implements IEngineState {
     this.deltaTime = (currentFrameTime - this.previousFrameTime) / 1000;
     this.previousFrameTime = currentFrameTime;
     this.updateFps();
+    this.screenBuffer.clear();
 
     this.gameObjects.forEach((gameObject) => gameObject.update());
 
@@ -88,7 +89,7 @@ export class Engine implements IEngineState {
       this.musicPlayer.play('Twinkle');
     }
 
-    this.uiRender && this.uiRender(this.screenBuffer.buffer);
+    this.uiRender && this.uiRender(this.screenBuffer.buffers);
     this.keyboard.next();
     setTimeout(() => this.render(), FRAME_RATE);
   }
@@ -119,19 +120,24 @@ export class Engine implements IEngineState {
       .getTiles()
       .map(({ column, row, type }) =>
         GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
-          (gameObject: GameObject) => BitmapRenderer.create(gameObject, Engine.tileBitmaps[type]!),
+          (gameObject: GameObject) => BitmapRenderer.create(gameObject, Engine.tileBitmaps[type]!, BACKGROUND_LAYER),
         ]),
       );
 
     this.gameObjects.push(
       mapGameObject,
-      GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject)]),
+      GameObject.create('Stars', this, { x: 0, y: 0 }, [
+        (gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER),
+      ]),
       ...tileGameObjects,
-      GameObject.create('LetterA', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A)]),
+      GameObject.create('LetterA', this, { x: 0, y: 0 }, [
+        (gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A, BACKGROUND_LAYER),
+      ]),
 
       GameObject.create('Player', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 20 }, [
         (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
-        (gameObject: GameObject) => BitmapSpriteRenderer.create(gameObject, STAND_ANIMATION.frames, STAND_ANIMATION.framesPerSecond),
+        (gameObject: GameObject) =>
+          BitmapSpriteRenderer.create(gameObject, STAND_ANIMATION.frames, STAND_ANIMATION.framesPerSecond, FOREGROUND_LAYER),
       ]),
     );
 

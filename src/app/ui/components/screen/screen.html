@@ -1,1 +1,5 @@
-<canvas #canvas [style.width.px]="canvasWidth()" [style.height.px]="canvasHeight()"></canvas>
+<div class="screen__layers">
+  @for (layerIndex of layerIndices; track layerIndex) {
+    <canvas #layerCanvas [style.width.px]="canvasWidth()" [style.height.px]="canvasHeight()"></canvas>
+  }
+</div>
