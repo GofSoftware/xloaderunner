@@ -58,6 +58,14 @@ export class TileMap extends Script {
     return this.getTile(column, row) !== TileType.Empty;
   }
 
+  public isWallAtPixel(x: number, y: number): boolean {
+    return this.isWall(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE));
+  }
+
+  public isWall(column: number, row: number): boolean {
+    return this.getTile(column, row) === TileType.Brick;
+  }
+
   public getTiles(): ITile[] {
     const tiles: ITile[] = [];
     for (let row = 0; row < this.rows; row++) {

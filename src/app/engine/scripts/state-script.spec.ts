@@ -4,7 +4,7 @@ import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
-import { __, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../../data/sprites';
 
@@ -57,6 +57,43 @@ describe('StateScript', () => {
     expect(player.position.y).toBe(16);
   });
 
+  it('should not move right when a brick blocks the target cell', () => {
+    tileMap.setTileAtPixel(16, 16, TileType.Brick);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
+  it('should not move left when a brick blocks the target cell', () => {
+    tileMap.setTileAtPixel(0, 16, TileType.Brick);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
+  it('should not move down when a brick blocks the target cell below', () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowDown' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
+  it('should not move up when a brick blocks the target cell above, even while on stairs', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+    tileMap.setTileAtPixel(32, 8, TileType.Brick);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 32, y: 16 });
+  });
+
   it('should fall when there is no brick below, regardless of input', () => {
     player.setPosition(100, 16);
 
@@ -83,25 +120,6 @@ describe('StateScript', () => {
     player.update();
 
     expect(player.position.y).toBe(SCREEN_HEIGHT - CELL_SIZE);
-  });
-
-  it('should clear the previous position after moving away from an empty cell', () => {
-    engineState.screenBuffer.copy([[0xffffffff]], 8, 16, FOREGROUND_LAYER);
-    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
-
-    player.update();
-
-    expect(engineState.screenBuffer.buffers[FOREGROUND_LAYER][16][8]).toBe(__);
-  });
-
-  it('should leave the previous position untouched if a solid tile already covers it', () => {
-    tileMap.setTileAtPixel(8, 16, TileType.Stairs);
-    engineState.screenBuffer.copy([[0xff0000ff]], 8, 16, FOREGROUND_LAYER);
-    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
-
-    player.update();
-
-    expect(engineState.screenBuffer.buffers[FOREGROUND_LAYER][16][8]).toBe(0xff0000ff);
   });
 
   it('should finish the current 8px step even if the key is released mid-step', () => {
@@ -169,6 +187,18 @@ describe('StateScript', () => {
   it('should still allow climbing while on a stairs tile with no ground below', () => {
     player.setPosition(32, 16);
     tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+
+    player.update();
+
+    expect(player.position.x).toBe(32);
+    expect(player.position.y).toBeLessThan(16);
+  });
+
+  it('should keep climbing when the next cell up is also a stairs tile', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+    tileMap.setTileAtPixel(32, 8, TileType.Stairs);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();

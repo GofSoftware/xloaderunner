@@ -2,8 +2,7 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { TileMap, TileType } from './tile-map';
-import { CELL_SIZE, FOREGROUND_LAYER, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { OBJECT_EMPTY } from '../../data/sprites';
+import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -62,8 +61,6 @@ export class StateScript extends Script {
   }
 
   public override update(): void {
-    const previousPosition = { x: this.gameObject.position.x, y: this.gameObject.position.y };
-
     let activeState: PlayerState;
     if (this.activeStep) {
       activeState = this.activeStep.state;
@@ -79,10 +76,10 @@ export class StateScript extends Script {
     }
 
     this.setState(activeState);
-    this.clearPreviousPosition(previousPosition);
   }
 
   private resolveState(): PlayerState {
+    const { x, y } = this.gameObject.position;
     const onStairs = this.isOnStairs();
 
     if (!onStairs && !this.isGroundedBelow()) {
@@ -90,16 +87,16 @@ export class StateScript extends Script {
     }
 
     const { keyboard } = this.gameObject.engineState;
-    if (keyboard.isPressed('ArrowLeft')) {
+    if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
       return PlayerState.MoveLeft;
     }
-    if (keyboard.isPressed('ArrowRight')) {
+    if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
       return PlayerState.MoveRight;
     }
-    if (onStairs && keyboard.isPressed('ArrowUp')) {
+    if (onStairs && keyboard.isPressed('ArrowUp') && !this.tileMap.isWallAtPixel(x, y - CELL_SIZE)) {
       return PlayerState.MoveUp;
     }
-    if (keyboard.isPressed('ArrowDown')) {
+    if (keyboard.isPressed('ArrowDown') && !this.tileMap.isWallAtPixel(x, y + CELL_SIZE)) {
       return PlayerState.MoveDown;
     }
 
@@ -173,19 +170,6 @@ export class StateScript extends Script {
 
   private static clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
-  }
-
-  private clearPreviousPosition(previousPosition: { x: number; y: number }): void {
-    const { x, y } = this.gameObject.position;
-    if (Math.floor(previousPosition.x) === Math.floor(x) && Math.floor(previousPosition.y) === Math.floor(y)) {
-      return;
-    }
-
-    if (this.tileMap.isSolidAtPixel(previousPosition.x, previousPosition.y)) {
-      return;
-    }
-
-    this.gameObject.engineState.screenBuffer.copy(OBJECT_EMPTY, previousPosition.x, previousPosition.y, FOREGROUND_LAYER);
   }
 
   private setState(state: PlayerState): void {
