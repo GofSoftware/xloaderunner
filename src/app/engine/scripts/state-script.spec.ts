@@ -33,7 +33,7 @@ describe('StateScript', () => {
 
     player = GameObject.create('Player', engineState, { x: 8, y: 16 }, [
       (go) => StateScript.create(go, tileMap),
-      (go) => BitmapSpriteRenderer.create(go, [MAN_MOVING_LEFT_FRAME_1], 1, FOREGROUND_LAYER),
+      (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
     ]);
     player.start();
   });
@@ -49,6 +49,7 @@ describe('StateScript', () => {
   });
 
   it('should move right while the right arrow is held and the ground holds', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -92,6 +93,73 @@ describe('StateScript', () => {
     player.update();
 
     expect(player.position).toEqual({ x: 32, y: 16 });
+  });
+
+  it('should step off an unsupported but non-dangerous ledge immediately, without hesitating', () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    expect(player.position.x).toBeGreaterThan(8);
+    expect(player.position.y).toBe(16);
+  });
+
+  it('should hesitate before stepping toward a lava cell, without moving immediately', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    engineState.deltaTime = 0.1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
+  it('should step toward the lava once the hesitation pause elapses while the key is held', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    engineState.deltaTime = 0.1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+    player.update();
+    expect(player.position.x).toBe(8);
+
+    player.update();
+    expect(player.position.x).toBeGreaterThan(8);
+  });
+
+  it('should stay put if the key is released and never pressed again before the pause elapses', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    engineState.deltaTime = 0.1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    keyboard.next();
+
+    player.update();
+    player.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
+  it('should step toward the lava if the key is released and pressed again before the pause elapses', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    engineState.deltaTime = 0.1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    keyboard.next();
+
+    player.update();
+    expect(player.position.x).toBe(8);
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+    player.update();
+
+    expect(player.position.x).toBeGreaterThan(8);
   });
 
   it('should fall when there is no brick below, regardless of input', () => {

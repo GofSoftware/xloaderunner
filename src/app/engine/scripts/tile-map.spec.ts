@@ -39,21 +39,25 @@ describe('TileMap', () => {
     expect(tileMap.isSolidAtPixel(0, 0)).toBe(false);
   });
 
-  it('should not treat crossbar tiles as solid ground', () => {
+  it('should not treat crossbar or lava tiles as solid ground', () => {
     tileMap.setTile(1, 3, TileType.Crossbar);
+    tileMap.setTile(2, 3, TileType.Lava);
 
     expect(tileMap.isSolid(1, 3)).toBe(false);
+    expect(tileMap.isSolid(2, 3)).toBe(false);
   });
 
-  it('should only treat brick tiles as walls, not stairs, crossbars, or empty cells', () => {
+  it('should only treat brick tiles as walls, not stairs, crossbars, lava, or empty cells', () => {
     tileMap.setTile(1, 3, TileType.Brick);
     tileMap.setTile(2, 3, TileType.Stairs);
     tileMap.setTile(4, 3, TileType.Crossbar);
+    tileMap.setTile(5, 3, TileType.Lava);
 
     expect(tileMap.isWall(1, 3)).toBe(true);
     expect(tileMap.isWall(2, 3)).toBe(false);
     expect(tileMap.isWall(3, 3)).toBe(false);
     expect(tileMap.isWall(4, 3)).toBe(false);
+    expect(tileMap.isWall(5, 3)).toBe(false);
   });
 
   it('should convert pixel coordinates to the containing cell when checking for walls', () => {
@@ -61,6 +65,26 @@ describe('TileMap', () => {
 
     expect(tileMap.isWallAtPixel(9, 27)).toBe(true);
     expect(tileMap.isWallAtPixel(0, 0)).toBe(false);
+  });
+
+  it('should only treat lava tiles as dangerous, not brick, stairs, crossbar, or empty cells', () => {
+    tileMap.setTile(1, 3, TileType.Lava);
+    tileMap.setTile(2, 3, TileType.Brick);
+    tileMap.setTile(4, 3, TileType.Stairs);
+    tileMap.setTile(5, 3, TileType.Crossbar);
+
+    expect(tileMap.isDangerous(1, 3)).toBe(true);
+    expect(tileMap.isDangerous(0, 3)).toBe(false);
+    expect(tileMap.isDangerous(2, 3)).toBe(false);
+    expect(tileMap.isDangerous(4, 3)).toBe(false);
+    expect(tileMap.isDangerous(5, 3)).toBe(false);
+  });
+
+  it('should convert pixel coordinates to the containing cell when checking for danger', () => {
+    tileMap.setTileAtPixel(8, 24, TileType.Lava);
+
+    expect(tileMap.isDangerousAtPixel(9, 27)).toBe(true);
+    expect(tileMap.isDangerousAtPixel(0, 0)).toBe(false);
   });
 
   it('should treat out-of-bounds cells as empty and ignore writes to them', () => {

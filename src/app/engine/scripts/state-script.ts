@@ -1,6 +1,7 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { Keyboard } from '../keyboard/keyboard';
 import { TileMap, TileType } from './tile-map';
 import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import {
@@ -30,6 +31,7 @@ export enum PlayerState {
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
+const LEDGE_HESITATION_SECONDS = 0.3;
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
   [PlayerState.MoveLeft]: MOVE_ANIMATION_LEFT,
@@ -65,6 +67,7 @@ export class StateScript extends Script {
   private readonly tileMap: TileMap;
   private state: PlayerState | undefined;
   private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
+  private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; key: string; elapsed: number } | undefined;
 
   private constructor(gameObject: GameObject, tileMap: TileMap) {
     super();
@@ -96,18 +99,18 @@ export class StateScript extends Script {
     const onCrossbar = this.isOnCrossbar();
 
     if (!onStairs && !onCrossbar && !this.isGroundedBelow()) {
+      this.hesitation = undefined;
       return PlayerState.Fall;
     }
 
     const { keyboard } = this.gameObject.engineState;
     if (!onCrossbar) {
-      if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
-        return PlayerState.MoveLeft;
-      }
-      if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
-        return PlayerState.MoveRight;
+      const groundMove = this.resolveGroundMove(keyboard);
+      if (groundMove) {
+        return groundMove;
       }
     } else {
+      this.hesitation = undefined;
       if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
         return PlayerState.OnCrossbarMoveLeft;
       }
@@ -129,6 +132,49 @@ export class StateScript extends Script {
     if (onCrossbar) {
       return PlayerState.OnCrossbar;
     }
+    return PlayerState.Stand;
+  }
+
+  private resolveGroundMove(keyboard: Keyboard): PlayerState | undefined {
+    if (!this.hesitation) {
+      const attempt = this.beginGroundMove(keyboard);
+      if (attempt !== PlayerState.Stand) {
+        return attempt;
+      }
+    }
+
+    this.hesitation!.elapsed += this.gameObject.engineState.deltaTime;
+    if (this.hesitation!.elapsed < LEDGE_HESITATION_SECONDS) {
+      return PlayerState.Stand;
+    }
+    const { state, key } = this.hesitation!;
+    this.hesitation = undefined;
+    return keyboard.isPressed(key) ? state : PlayerState.Stand;
+  }
+
+  private beginGroundMove(keyboard: Keyboard): PlayerState | undefined {
+    const { x, y } = this.gameObject.position;
+
+    if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
+      return this.startGroundMove(PlayerState.MoveLeft, 'ArrowLeft', x - CELL_SIZE, y);
+    }
+    if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
+      return this.startGroundMove(PlayerState.MoveRight, 'ArrowRight', x + CELL_SIZE, y);
+    }
+
+    return undefined;
+  }
+
+  private startGroundMove(
+    state: PlayerState.MoveLeft | PlayerState.MoveRight,
+    key: string,
+    targetX: number,
+    targetY: number,
+  ): PlayerState {
+    if (!this.tileMap.isDangerousAtPixel(targetX, targetY + CELL_SIZE)) {
+      return state;
+    }
+    this.hesitation = { state, key, elapsed: 0 };
     return PlayerState.Stand;
   }
 

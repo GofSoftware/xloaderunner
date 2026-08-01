@@ -10,6 +10,7 @@ export enum TileType {
   Brick = 'Brick',
   Stairs = 'Stairs',
   Crossbar = 'Crossbar',
+  Lava = 'Lava',
 }
 
 export interface ITile {
@@ -56,7 +57,7 @@ export class TileMap extends Script {
   }
 
   public isSolid(column: number, row: number): boolean {
-    return this.getTile(column, row) !== TileType.Empty && this.getTile(column, row) !== TileType.Crossbar;
+    return this.getTile(column, row) === TileType.Brick || this.getTile(column, row) === TileType.Stairs;
   }
 
   public isWallAtPixel(x: number, y: number): boolean {
@@ -65,6 +66,14 @@ export class TileMap extends Script {
 
   public isWall(column: number, row: number): boolean {
     return this.getTile(column, row) === TileType.Brick;
+  }
+
+  public isDangerousAtPixel(x: number, y: number): boolean {
+    return this.isDangerous(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE));
+  }
+
+  public isDangerous(column: number, row: number): boolean {
+    return this.getTile(column, row) === TileType.Lava;
   }
 
   public getTiles(): ITile[] {

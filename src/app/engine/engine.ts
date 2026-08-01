@@ -1,5 +1,17 @@
 import { LETTER_A } from '../data/glyphs';
-import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_STAIRS } from '../data/sprites';
+import {
+  OBJECT_BRICK,
+  OBJECT_CROSSBAR,
+  OBJECT_LAVA_1,
+  OBJECT_LAVA_2,
+  OBJECT_LAVA_3,
+  OBJECT_LAVA_4,
+  OBJECT_LAVA_5,
+  OBJECT_LAVA_6,
+  OBJECT_LAVA_7,
+  OBJECT_LAVA_8,
+  OBJECT_STAIRS,
+} from '../data/sprites';
 import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
 import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
@@ -14,8 +26,11 @@ import { StateScript } from './scripts/state-script';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 import { STAND_ANIMATION } from './scripts/animations';
+import { ITileBitmapDescription, TileBitmapType } from './i-tile-bitmap-description';
 
 const FRAME_RATE = 0;
+
+
 
 export class Engine implements IEngineState {
   private static engineInstance: Engine;
@@ -23,10 +38,17 @@ export class Engine implements IEngineState {
     return Engine.engineInstance ?? (Engine.engineInstance = new Engine());
   }
 
-  private static readonly tileBitmaps: Partial<Record<TileType, number[][]>> = {
-    [TileType.Brick]: OBJECT_BRICK,
-    [TileType.Stairs]: OBJECT_STAIRS,
-    [TileType.Crossbar]: OBJECT_CROSSBAR,
+  private static readonly tileBitmaps: Partial<Record<TileType, ITileBitmapDescription>> = {
+    [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
+    [TileType.Stairs]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_STAIRS },
+    [TileType.Crossbar]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_CROSSBAR },
+    [TileType.Lava]: {
+      bitmapType: TileBitmapType.Animated,
+      animatedBitmap: {
+        bitmap: [OBJECT_LAVA_1, OBJECT_LAVA_2, OBJECT_LAVA_3, OBJECT_LAVA_4, OBJECT_LAVA_5, OBJECT_LAVA_6, OBJECT_LAVA_7, OBJECT_LAVA_8],
+        framePerSecond: 2,
+      },
+    },
   };
 
   private uiRender: ((buffers: ReadonlyArray<Readonly<number[][]>>) => void) | undefined;
@@ -117,13 +139,23 @@ export class Engine implements IEngineState {
       });
     });
 
-    const tileGameObjects = tileMap
-      .getTiles()
-      .map(({ column, row, type }) =>
-        GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
-          (gameObject: GameObject) => BitmapRenderer.create(gameObject, Engine.tileBitmaps[type]!, BACKGROUND_LAYER),
-        ]),
-      );
+    const tileGameObjects = tileMap.getTiles().map(({ column, row, type }) =>
+      GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+        (gameObject: GameObject) => {
+          const tileBitmap = Engine.tileBitmaps[type]!;
+          return tileBitmap.bitmapType === TileBitmapType.Static
+            ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, BACKGROUND_LAYER)
+            : BitmapSpriteRenderer.create(
+                gameObject,
+                {
+                  bitmap: tileBitmap.animatedBitmap!.bitmap,
+                  framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
+                },
+                BACKGROUND_LAYER,
+              );
+        },
+      ]),
+    );
 
     this.gameObjects.push(
       mapGameObject,
@@ -136,7 +168,11 @@ export class Engine implements IEngineState {
       GameObject.create('Player', this, { x: CELL_SIZE * 20, y: CELL_SIZE * 5 }, [
         (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
         (gameObject: GameObject) =>
-          BitmapSpriteRenderer.create(gameObject, STAND_ANIMATION.frames, STAND_ANIMATION.framesPerSecond, FOREGROUND_LAYER),
+          BitmapSpriteRenderer.create(
+            gameObject,
+            { bitmap: STAND_ANIMATION.frames, framePerSecond: STAND_ANIMATION.framesPerSecond },
+            FOREGROUND_LAYER,
+          ),
       ]),
     );
 

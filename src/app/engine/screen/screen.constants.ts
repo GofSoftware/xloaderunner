@@ -14,3 +14,5 @@ export const Gr = 0x00ff00ff;
 export const Bl = 0x0000ffff;
 export const Lg = 0xEEEEEEff;
 export const Mg = 0xCCCCCCff;
+export const Or = 0xf8ab4aff;
+export const Ol = 0xf6c77bff;

@@ -1,14 +1,14 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
+import { ISpriteBitmapDescription } from './i-sprite-bitmap-description';
 
 export class BitmapSpriteRenderer extends Script {
   public static create(
     gameObject: GameObject,
-    bitmap: number[][][],
-    framePerSecond: number,
+    bitmapDescription: ISpriteBitmapDescription,
     layer: number,
   ): BitmapSpriteRenderer {
-    return new BitmapSpriteRenderer(gameObject, bitmap, framePerSecond, layer);
+    return new BitmapSpriteRenderer(gameObject, bitmapDescription, layer);
   }
 
   private readonly gameObject: GameObject;
@@ -17,12 +17,12 @@ export class BitmapSpriteRenderer extends Script {
   private readonly layer: number;
   private spriteIndexTime: number = 0;
 
-  private constructor(gameObject: GameObject, bitmap: number[][][], framePerSecond: number, layer: number) {
+  private constructor(gameObject: GameObject, bitmapDescription: ISpriteBitmapDescription, layer: number) {
     super();
 
     this.gameObject = gameObject;
-    this.bitmap = bitmap;
-    this.framePerSecond = framePerSecond;
+    this.bitmap = bitmapDescription.bitmap;
+    this.framePerSecond = bitmapDescription.framePerSecond;
     this.layer = layer;
   }
 
