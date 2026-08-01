@@ -1,4 +1,3 @@
-import { LETTER_A } from '../data/glyphs';
 import {
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
@@ -23,6 +22,7 @@ import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { BackgroundStars } from './scripts/background-stars';
 import { TileMap, TileType } from './scripts/tile-map';
 import { StateScript } from './scripts/state-script';
+import { TextRenderer } from './scripts/text-renderer';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 import { STAND_ANIMATION } from './scripts/animations';
@@ -161,8 +161,8 @@ export class Engine implements IEngineState {
       mapGameObject,
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
-      GameObject.create('LetterA', this, { x: 0, y: 0 }, [
-        (gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A, BACKGROUND_LAYER),
+      GameObject.create('Title', this, { x: 0, y: 0 }, [
+        (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', BACKGROUND_LAYER),
       ]),
 
       GameObject.create('Player', this, { x: CELL_SIZE * 20, y: CELL_SIZE * 5 }, [
