@@ -8,6 +8,9 @@ import {
   FALL_ANIMATION,
   MOVE_ANIMATION_LEFT,
   MOVE_ANIMATION_RIGHT,
+  ON_CROSSBAR_ANIMATION,
+  ON_CROSSBAR_MOVE_LEFT_ANIMATION,
+  ON_CROSSBAR_MOVE_RIGHT_ANIMATION,
   ON_STAIRS_ANIMATION,
   STAND_ANIMATION,
 } from './animations';
@@ -20,6 +23,9 @@ export enum PlayerState {
   MoveDown = 'MoveDown',
   Fall = 'Fall',
   OnStairs = 'OnStairs',
+  OnCrossbar = 'OnCrossbar',
+  OnCrossbarMoveLeft = 'OnCrossbarMoveLeft',
+  OnCrossbarMoveRight = 'OnCrossbarMoveRight',
 }
 
 const MOVE_SPEED = 40;
@@ -32,6 +38,9 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
   [PlayerState.MoveDown]: CLIMB_ANIMATION,
   [PlayerState.Fall]: FALL_ANIMATION,
   [PlayerState.OnStairs]: ON_STAIRS_ANIMATION,
+  [PlayerState.OnCrossbar]: ON_CROSSBAR_ANIMATION,
+  [PlayerState.OnCrossbarMoveLeft]: ON_CROSSBAR_MOVE_LEFT_ANIMATION,
+  [PlayerState.OnCrossbarMoveRight]: ON_CROSSBAR_MOVE_RIGHT_ANIMATION,
 };
 
 export class StateScript extends Script {
@@ -47,6 +56,9 @@ export class StateScript extends Script {
     [PlayerState.MoveDown]: MOVE_SPEED,
     [PlayerState.Fall]: FALL_SPEED,
     [PlayerState.OnStairs]: 0,
+    [PlayerState.OnCrossbar]: 0,
+    [PlayerState.OnCrossbarMoveLeft]: MOVE_SPEED,
+    [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED
   };
 
   private readonly gameObject: GameObject;
@@ -81,18 +93,29 @@ export class StateScript extends Script {
   private resolveState(): PlayerState {
     const { x, y } = this.gameObject.position;
     const onStairs = this.isOnStairs();
+    const onCrossbar = this.isOnCrossbar();
 
-    if (!onStairs && !this.isGroundedBelow()) {
+    if (!onStairs && !onCrossbar && !this.isGroundedBelow()) {
       return PlayerState.Fall;
     }
 
     const { keyboard } = this.gameObject.engineState;
-    if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
-      return PlayerState.MoveLeft;
+    if (!onCrossbar) {
+      if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
+        return PlayerState.MoveLeft;
+      }
+      if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
+        return PlayerState.MoveRight;
+      }
+    } else {
+      if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
+        return PlayerState.OnCrossbarMoveLeft;
+      }
+      if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
+        return PlayerState.OnCrossbarMoveRight;
+      }
     }
-    if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
-      return PlayerState.MoveRight;
-    }
+
     if (onStairs && keyboard.isPressed('ArrowUp') && !this.tileMap.isWallAtPixel(x, y - CELL_SIZE)) {
       return PlayerState.MoveUp;
     }
@@ -100,7 +123,13 @@ export class StateScript extends Script {
       return PlayerState.MoveDown;
     }
 
-    return onStairs ? PlayerState.OnStairs : PlayerState.Stand;
+    if (onStairs) {
+      return PlayerState.OnStairs;
+    }
+    if (onCrossbar) {
+      return PlayerState.OnCrossbar;
+    }
+    return PlayerState.Stand;
   }
 
   private isGroundedBelow(): boolean {
@@ -111,6 +140,11 @@ export class StateScript extends Script {
   private isOnStairs(): boolean {
     const { x, y } = this.gameObject.position;
     return this.tileMap.getTileAtPixel(x, y) === TileType.Stairs;
+  }
+
+  private isOnCrossbar(): boolean {
+    const { x, y } = this.gameObject.position;
+    return this.tileMap.getTileAtPixel(x, y) === TileType.Crossbar;
   }
 
   private computeStepTarget(state: PlayerState): { x: number; y: number } {
@@ -125,6 +159,12 @@ export class StateScript extends Script {
       case PlayerState.MoveRight:
         targetX = x + CELL_SIZE;
         break;
+      case PlayerState.OnCrossbarMoveLeft:
+        targetX = x - CELL_SIZE;
+        break;
+      case PlayerState.OnCrossbarMoveRight:
+        targetX = x + CELL_SIZE;
+        break;
       case PlayerState.MoveUp:
         targetY = y - CELL_SIZE;
         break;
@@ -134,6 +174,7 @@ export class StateScript extends Script {
         break;
       case PlayerState.Stand:
       case PlayerState.OnStairs:
+      case PlayerState.OnCrossbar:
         break;
     }
 

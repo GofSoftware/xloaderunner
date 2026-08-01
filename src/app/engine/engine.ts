@@ -1,5 +1,5 @@
 import { LETTER_A } from '../data/glyphs';
-import { OBJECT_BRICK, OBJECT_STAIRS } from '../data/sprites';
+import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_STAIRS } from '../data/sprites';
 import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
 import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
@@ -26,6 +26,7 @@ export class Engine implements IEngineState {
   private static readonly tileBitmaps: Partial<Record<TileType, number[][]>> = {
     [TileType.Brick]: OBJECT_BRICK,
     [TileType.Stairs]: OBJECT_STAIRS,
+    [TileType.Crossbar]: OBJECT_CROSSBAR,
   };
 
   private uiRender: ((buffers: ReadonlyArray<Readonly<number[][]>>) => void) | undefined;
@@ -126,15 +127,13 @@ export class Engine implements IEngineState {
 
     this.gameObjects.push(
       mapGameObject,
-      GameObject.create('Stars', this, { x: 0, y: 0 }, [
-        (gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER),
-      ]),
+      GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
       GameObject.create('LetterA', this, { x: 0, y: 0 }, [
         (gameObject: GameObject) => BitmapRenderer.create(gameObject, LETTER_A, BACKGROUND_LAYER),
       ]),
 
-      GameObject.create('Player', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 20 }, [
+      GameObject.create('Player', this, { x: CELL_SIZE * 20, y: CELL_SIZE * 5 }, [
         (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(gameObject, STAND_ANIMATION.frames, STAND_ANIMATION.framesPerSecond, FOREGROUND_LAYER),

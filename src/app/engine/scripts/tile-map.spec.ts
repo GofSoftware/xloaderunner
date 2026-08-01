@@ -39,13 +39,21 @@ describe('TileMap', () => {
     expect(tileMap.isSolidAtPixel(0, 0)).toBe(false);
   });
 
-  it('should only treat brick tiles as walls, not stairs or empty cells', () => {
+  it('should not treat crossbar tiles as solid ground', () => {
+    tileMap.setTile(1, 3, TileType.Crossbar);
+
+    expect(tileMap.isSolid(1, 3)).toBe(false);
+  });
+
+  it('should only treat brick tiles as walls, not stairs, crossbars, or empty cells', () => {
     tileMap.setTile(1, 3, TileType.Brick);
     tileMap.setTile(2, 3, TileType.Stairs);
+    tileMap.setTile(4, 3, TileType.Crossbar);
 
     expect(tileMap.isWall(1, 3)).toBe(true);
     expect(tileMap.isWall(2, 3)).toBe(false);
     expect(tileMap.isWall(3, 3)).toBe(false);
+    expect(tileMap.isWall(4, 3)).toBe(false);
   });
 
   it('should convert pixel coordinates to the containing cell when checking for walls', () => {

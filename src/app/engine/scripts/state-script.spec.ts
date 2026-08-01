@@ -207,6 +207,66 @@ describe('StateScript', () => {
     expect(player.position.y).toBeLessThan(16);
   });
 
+  it('should stay in place on a crossbar tile even without ground below, when no key is pressed', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 32, y: 16 });
+  });
+
+  it('should stop falling once it reaches a crossbar tile', () => {
+    player.setPosition(100, 16);
+    tileMap.setTileAtPixel(100, 24, TileType.Crossbar);
+    engineState.deltaTime = 0.05;
+
+    player.update();
+    player.update();
+    expect(player.position.y).toBeLessThan(24);
+
+    player.update();
+    expect(player.position.y).toBe(24);
+
+    player.update();
+    expect(player.position.y).toBe(24);
+  });
+
+  it('should move left along a crossbar', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
+    tileMap.setTileAtPixel(24, 16, TileType.Crossbar);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+
+    player.update();
+
+    expect(player.position.x).toBeLessThan(32);
+    expect(player.position.y).toBe(16);
+  });
+
+  it('should move right along a crossbar', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
+    tileMap.setTileAtPixel(40, 16, TileType.Crossbar);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    expect(player.position.x).toBeGreaterThan(32);
+    expect(player.position.y).toBe(16);
+  });
+
+  it('should not move along a crossbar when a brick blocks the target cell', () => {
+    player.setPosition(32, 16);
+    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
+    tileMap.setTileAtPixel(24, 16, TileType.Brick);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 32, y: 16 });
+  });
+
   it('should ignore the up arrow while grounded on a non-stairs tile', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 

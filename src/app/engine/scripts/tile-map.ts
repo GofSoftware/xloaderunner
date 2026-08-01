@@ -9,6 +9,7 @@ export enum TileType {
   Empty = 'Empty',
   Brick = 'Brick',
   Stairs = 'Stairs',
+  Crossbar = 'Crossbar',
 }
 
 export interface ITile {
@@ -55,7 +56,7 @@ export class TileMap extends Script {
   }
 
   public isSolid(column: number, row: number): boolean {
-    return this.getTile(column, row) !== TileType.Empty;
+    return this.getTile(column, row) !== TileType.Empty && this.getTile(column, row) !== TileType.Crossbar;
   }
 
   public isWallAtPixel(x: number, y: number): boolean {
