@@ -26,7 +26,10 @@ export class GameObject implements IGameObject {
   private constructor(name: string, engineState: IEngineState, position: Vector2) {
     this.name = name;
     this.engineState = engineState;
-    this.positionInstance = position;
+    // Clone rather than alias - callers may hold onto the position object they
+    // passed in (e.g. a spawn point reused after death), and setPosition()
+    // mutates positionInstance in place.
+    this.positionInstance = { x: position.x, y: position.y };
   }
 
   public get position(): Readonly<Vector2> {

@@ -11,6 +11,7 @@ export enum TileType {
   Stairs = 'Stairs',
   Crossbar = 'Crossbar',
   Lava = 'Lava',
+  PlayerStart = 'PlayerStart',
 }
 
 export interface ITile {

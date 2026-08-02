@@ -441,3 +441,14 @@ export const OBJECT_EXCLAMATION: number[][] = [
   [__, __, __, Or, Or, __, __, __],
   [__, __, __, __, __, __, __, __],
 ];
+
+export const OBJECT_HEART: number[][] = [
+  [__, Rd, Rd, __, __, Rd, Rd, __],
+  [Rd, Rd, Rd, Rd, Rd, Rd, Rd, Rd],
+  [Rd, Rd, Rd, Rd, Rd, Rd, Rd, Rd],
+  [Rd, Rd, Rd, Rd, Rd, Rd, Rd, Rd],
+  [__, Rd, Rd, Rd, Rd, Rd, Rd, __],
+  [__, __, Rd, Rd, Rd, Rd, __, __],
+  [__, __, __, Rd, Rd, __, __, __],
+  [__, __, __, __, __, __, __, __],
+];

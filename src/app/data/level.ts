@@ -5,6 +5,7 @@ const Br = TileType.Brick;
 const St = TileType.Stairs;
 const Cr = TileType.Crossbar;
 const Lv = TileType.Lava;
+const Ps = TileType.PlayerStart;
 
 export const LEVEL_TILES_ARR: TileType[][] = [
   [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
@@ -12,7 +13,7 @@ export const LEVEL_TILES_ARR: TileType[][] = [
   [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
   [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
   [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
+  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Ps, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
   [St, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
   [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
   [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],

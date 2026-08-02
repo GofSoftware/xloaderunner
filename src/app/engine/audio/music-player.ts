@@ -8,6 +8,13 @@ const F4 = 349.23;
 const G4 = 392.0;
 const A4 = 440.0;
 
+export const DEATH_JINGLE: IMusicNote[] = [
+  { frequency: G4, duration: 0.15 },
+  { frequency: F4, duration: 0.15 },
+  { frequency: D4, duration: 0.15 },
+  { frequency: C4, duration: 0.4 },
+];
+
 export const TWINKLE_TWINKLE_LITTLE_STAR: IMusicNote[] = [
   { frequency: C4, duration: 0.4 },
   { frequency: C4, duration: 0.4 },

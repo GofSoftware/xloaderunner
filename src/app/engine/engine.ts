@@ -11,6 +11,8 @@ import {
   OBJECT_LAVA_8,
   OBJECT_STAIRS,
 } from '../data/sprites';
+import { Lives } from './lives';
+import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
 import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
@@ -157,23 +159,33 @@ export class Engine implements IEngineState {
       });
     });
 
-    const tileGameObjects = tileMap.getTiles().map(({ column, row, type }) =>
-      GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
-        (gameObject: GameObject) => {
-          const tileBitmap = Engine.tileBitmaps[type]!;
-          return tileBitmap.bitmapType === TileBitmapType.Static
-            ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, BACKGROUND_LAYER)
-            : BitmapSpriteRenderer.create(
-                gameObject,
-                {
-                  bitmap: tileBitmap.animatedBitmap!.bitmap,
-                  framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
-                },
-                BACKGROUND_LAYER,
-              );
-        },
-      ]),
-    );
+    const tileGameObjects = tileMap
+      .getTiles()
+      .filter(({ type }) => type in Engine.tileBitmaps)
+      .map(({ column, row, type }) =>
+        GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+          (gameObject: GameObject) => {
+            const tileBitmap = Engine.tileBitmaps[type]!;
+            return tileBitmap.bitmapType === TileBitmapType.Static
+              ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, BACKGROUND_LAYER)
+              : BitmapSpriteRenderer.create(
+                  gameObject,
+                  {
+                    bitmap: tileBitmap.animatedBitmap!.bitmap,
+                    framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
+                  },
+                  BACKGROUND_LAYER,
+                );
+          },
+        ]),
+      );
+
+    const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
+    const spawnPosition = startTile
+      ? { x: startTile.column * CELL_SIZE, y: startTile.row * CELL_SIZE }
+      : { x: CELL_SIZE * 20, y: CELL_SIZE * 5 };
+
+    const lives = Lives.create();
 
     this.gameObjects.push(
       mapGameObject,
@@ -182,9 +194,12 @@ export class Engine implements IEngineState {
       GameObject.create('Title', this, { x: 0, y: 0 }, [
         (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', BACKGROUND_LAYER),
       ]),
+      GameObject.create('Lives', this, { x: 0, y: 0 }, [
+        (gameObject: GameObject) => HeartsRenderer.create(gameObject, lives, FOREGROUND_LAYER),
+      ]),
 
-      GameObject.create('Player', this, { x: CELL_SIZE * 20, y: CELL_SIZE * 5 }, [
-        (gameObject: GameObject) => StateScript.create(gameObject, tileMap),
+      GameObject.create('Player', this, spawnPosition, [
+        (gameObject: GameObject) => StateScript.create(gameObject, tileMap, lives, spawnPosition),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
             gameObject,

@@ -3,7 +3,7 @@ import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { Keyboard } from '../keyboard/keyboard';
 import { TileMap, TileType } from './tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -18,6 +18,9 @@ import {
 import { BitmapRenderer } from './bitmap-renderer';
 import { OBJECT_EXCLAMATION } from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
+import { TextRenderer } from './text-renderer';
+import { DEATH_JINGLE } from '../audio/music-player';
+import { Lives } from '../lives';
 
 export enum PlayerState {
   Stand = 'Stand',
@@ -30,11 +33,14 @@ export enum PlayerState {
   OnCrossbar = 'OnCrossbar',
   OnCrossbarMoveLeft = 'OnCrossbarMoveLeft',
   OnCrossbarMoveRight = 'OnCrossbarMoveRight',
+  Dying = 'Dying',
+  GameOver = 'GameOver',
 }
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
 const LEDGE_HESITATION_SECONDS = 0.3;
+const DYING_DURATION_SECONDS = 1;
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
   [PlayerState.MoveLeft]: MOVE_ANIMATION_LEFT,
@@ -46,11 +52,19 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
   [PlayerState.OnCrossbar]: ON_CROSSBAR_ANIMATION,
   [PlayerState.OnCrossbarMoveLeft]: ON_CROSSBAR_MOVE_LEFT_ANIMATION,
   [PlayerState.OnCrossbarMoveRight]: ON_CROSSBAR_MOVE_RIGHT_ANIMATION,
+  // Reuses STAND_ANIMATION as a placeholder - no dedicated death/game-over art yet.
+  [PlayerState.Dying]: STAND_ANIMATION,
+  [PlayerState.GameOver]: STAND_ANIMATION,
 };
 
 export class StateScript extends Script {
-  public static create(gameObject: GameObject, tileMap: TileMap): StateScript {
-    return new StateScript(gameObject, tileMap);
+  public static create(
+    gameObject: GameObject,
+    tileMap: TileMap,
+    lives: Lives,
+    spawnPosition: { x: number; y: number },
+  ): StateScript {
+    return new StateScript(gameObject, tileMap, lives, spawnPosition);
   }
 
   private static readonly STEP_SPEED: Record<PlayerState, number> = {
@@ -63,20 +77,31 @@ export class StateScript extends Script {
     [PlayerState.OnStairs]: 0,
     [PlayerState.OnCrossbar]: 0,
     [PlayerState.OnCrossbarMoveLeft]: MOVE_SPEED,
-    [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED
+    [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED,
+    [PlayerState.Dying]: 0,
+    [PlayerState.GameOver]: 0,
   };
 
   private readonly tileMap: TileMap;
+  private readonly lives: Lives;
+  private readonly spawnPosition: { x: number; y: number };
   private state: PlayerState | undefined;
   private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; key: string; elapsed: number } | undefined;
+  private dying: { elapsed: number } | undefined;
 
-  private constructor(gameObject: GameObject, tileMap: TileMap) {
+  private constructor(gameObject: GameObject, tileMap: TileMap, lives: Lives, spawnPosition: { x: number; y: number }) {
     super(gameObject);
     this.tileMap = tileMap;
+    this.lives = lives;
+    this.spawnPosition = spawnPosition;
   }
 
   public override update(): void {
+    if (this.state === PlayerState.GameOver) {
+      return;
+    }
+
     let activeState: PlayerState;
     if (this.activeStep) {
       activeState = this.activeStep.state;
@@ -96,6 +121,14 @@ export class StateScript extends Script {
 
   private resolveState(): PlayerState {
     const { x, y } = this.gameObject.position;
+
+    if (this.dying) {
+      return this.advanceDying();
+    }
+    if (this.tileMap.isDangerousAtPixel(x, y)) {
+      return this.beginDying();
+    }
+
     const onStairs = this.isOnStairs();
     const onCrossbar = this.isOnCrossbar();
 
@@ -180,6 +213,44 @@ export class StateScript extends Script {
     return PlayerState.Stand;
   }
 
+  private beginDying(): PlayerState {
+    this.hesitation = undefined;
+    this.dying = { elapsed: 0 };
+    const { musicPlayer } = this.gameObject.engineState;
+    musicPlayer.register('Death', DEATH_JINGLE);
+    musicPlayer.play('Death');
+    return PlayerState.Dying;
+  }
+
+  private advanceDying(): PlayerState {
+    this.dying!.elapsed += this.gameObject.engineState.deltaTime;
+    if (this.dying!.elapsed < DYING_DURATION_SECONDS) {
+      return PlayerState.Dying;
+    }
+    this.dying = undefined;
+    return this.respawnOrEndGame();
+  }
+
+  private respawnOrEndGame(): PlayerState {
+    this.lives.loseLife();
+    if (this.lives.isGameOver) {
+      this.showGameOver();
+      return PlayerState.GameOver;
+    }
+    this.gameObject.setPosition(this.spawnPosition.x, this.spawnPosition.y);
+    return PlayerState.Stand;
+  }
+
+  private showGameOver(): void {
+    const gameOverText = GameObject.create(
+      'GameOverText',
+      this.gameObject.engineState,
+      { x: 96, y: 88 },
+      [(gameObject: GameObject) => TextRenderer.create(gameObject, 'GAME OVER', FOREGROUND_LAYER)],
+    );
+    this.gameObject.engineState.addGameObject(gameOverText);
+  }
+
   private isGroundedBelow(): boolean {
     const { x, y } = this.gameObject.position;
     return this.tileMap.isSolidAtPixel(x, y + CELL_SIZE);
@@ -223,6 +294,8 @@ export class StateScript extends Script {
       case PlayerState.Stand:
       case PlayerState.OnStairs:
       case PlayerState.OnCrossbar:
+      case PlayerState.Dying:
+      case PlayerState.GameOver:
         break;
     }
 

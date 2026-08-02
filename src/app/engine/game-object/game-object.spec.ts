@@ -40,5 +40,15 @@ describe('GameObject', () => {
 
       expect(gameObject.position).toEqual({ x: 5, y: 9 });
     });
+
+    it('should not mutate the position object the caller passed in', () => {
+      const initialPosition = { x: 0, y: 0 };
+      const gameObject = GameObject.create('Test', {} as IEngineState, initialPosition, []);
+
+      gameObject.setPosition(5, 9);
+
+      expect(initialPosition).toEqual({ x: 0, y: 0 });
+      expect(gameObject.position).toEqual({ x: 5, y: 9 });
+    });
   });
 });

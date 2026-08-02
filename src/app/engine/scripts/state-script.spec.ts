@@ -7,13 +7,25 @@ import { ScreenBuffer } from '../screen/screen-buffer';
 import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../../data/sprites';
+import { Lives } from '../lives';
 
 describe('StateScript', () => {
   let engineState: IEngineState;
   let keyboard: Keyboard;
   let tileMapGameObject: GameObject;
   let tileMap: TileMap;
+  let lives: Lives;
+  let spawnPosition: { x: number; y: number };
   let player: GameObject;
+
+  function createPlayer(position: { x: number; y: number }, playerLives: Lives): GameObject {
+    const gameObject = GameObject.create('Player', engineState, position, [
+      (go) => StateScript.create(go, tileMap, playerLives, spawnPosition),
+      (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
+    ]);
+    gameObject.start();
+    return gameObject;
+  }
 
   beforeEach(() => {
     keyboard = Keyboard.create();
@@ -22,7 +34,7 @@ describe('StateScript', () => {
       screenBuffer: ScreenBuffer.create(LAYER_COUNT),
       keyboard,
       soundPlayer: {} as IEngineState['soundPlayer'],
-      musicPlayer: {} as IEngineState['musicPlayer'],
+      musicPlayer: { register: () => {}, play: () => {} } as unknown as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
       addGameObject: () => {},
@@ -33,11 +45,9 @@ describe('StateScript', () => {
     tileMap = tileMapGameObject.getScript(TileMap)!;
     tileMap.setTileAtPixel(8, 24, TileType.Brick);
 
-    player = GameObject.create('Player', engineState, { x: 8, y: 16 }, [
-      (go) => StateScript.create(go, tileMap),
-      (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
-    ]);
-    player.start();
+    spawnPosition = { x: 8, y: 16 };
+    lives = Lives.create(2);
+    player = createPlayer({ x: 8, y: 16 }, lives);
   });
 
   afterEach(() => {
@@ -343,5 +353,57 @@ describe('StateScript', () => {
     player.update();
 
     expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
+  it('should transition to Dying and freeze in place when standing on a dangerous tile', () => {
+    player.setPosition(40, 16);
+    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+
+    player.update();
+
+    expect(player.position).toEqual({ x: 40, y: 16 });
+  });
+
+  it('should ignore movement input while dying', () => {
+    engineState.deltaTime = 0.3;
+    player.setPosition(40, 16);
+    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+    player.update();
+
+    expect(player.position).toEqual({ x: 40, y: 16 });
+  });
+
+  it('should respawn at the spawn position and lose a life once the dying timer elapses', () => {
+    player.setPosition(40, 16);
+    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+
+    player.update();
+    expect(lives.count).toBe(2);
+
+    player.update();
+
+    expect(player.position).toEqual(spawnPosition);
+    expect(lives.count).toBe(1);
+  });
+
+  it('should transition to GameOver instead of respawning once lives reach zero, and stop responding to input', () => {
+    const singleLifeLives = Lives.create(1);
+    const dyingPlayer = createPlayer({ x: 40, y: 16 }, singleLifeLives);
+    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+
+    dyingPlayer.update();
+    dyingPlayer.update();
+
+    expect(singleLifeLives.isGameOver).toBe(true);
+    expect(dyingPlayer.position).toEqual({ x: 40, y: 16 });
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+    dyingPlayer.update();
+
+    expect(dyingPlayer.position).toEqual({ x: 40, y: 16 });
   });
 });
