@@ -41,19 +41,17 @@ export class BackgroundStars extends Script {
     };
   }
 
-  private readonly gameObject: GameObject;
   private readonly layer: number;
   private readonly stars: IStar[];
   private readonly halfWidth: number;
   private readonly halfHeight: number;
 
   private constructor(gameObject: GameObject, layer: number, starCount: number) {
-    super();
+    super(gameObject);
 
     this.halfWidth = SCREEN_WIDTH / 2;
     this.halfHeight = SCREEN_HEIGHT / 2;
 
-    this.gameObject = gameObject;
     this.layer = layer;
     this.stars = Array.from({ length: starCount }, () => BackgroundStars.randomStar(true));
   }

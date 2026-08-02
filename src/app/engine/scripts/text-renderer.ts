@@ -11,14 +11,12 @@ export class TextRenderer extends Script {
     return new TextRenderer(gameObject, text, layer);
   }
 
-  private readonly gameObject: GameObject;
   private readonly text: string;
   private readonly layer: number;
 
   private constructor(gameObject: GameObject, text: string, layer: number) {
-    super();
+    super(gameObject);
 
-    this.gameObject = gameObject;
     this.text = text;
     this.layer = layer;
   }

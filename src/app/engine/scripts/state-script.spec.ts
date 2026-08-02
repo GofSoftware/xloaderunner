@@ -25,6 +25,8 @@ describe('StateScript', () => {
       musicPlayer: {} as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
+      addGameObject: () => {},
+      removeGameObject: () => {},
     };
 
     tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);

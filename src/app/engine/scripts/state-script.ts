@@ -3,7 +3,7 @@ import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { Keyboard } from '../keyboard/keyboard';
 import { TileMap, TileType } from './tile-map';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -15,6 +15,9 @@ import {
   ON_STAIRS_ANIMATION,
   STAND_ANIMATION,
 } from './animations';
+import { BitmapRenderer } from './bitmap-renderer';
+import { OBJECT_EXCLAMATION } from '../../data/sprites';
+import { DestroyAfterTime } from './destroy-after-time';
 
 export enum PlayerState {
   Stand = 'Stand',
@@ -63,15 +66,13 @@ export class StateScript extends Script {
     [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED
   };
 
-  private readonly gameObject: GameObject;
   private readonly tileMap: TileMap;
   private state: PlayerState | undefined;
   private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; key: string; elapsed: number } | undefined;
 
   private constructor(gameObject: GameObject, tileMap: TileMap) {
-    super();
-    this.gameObject = gameObject;
+    super(gameObject);
     this.tileMap = tileMap;
   }
 
@@ -175,6 +176,7 @@ export class StateScript extends Script {
       return state;
     }
     this.hesitation = { state, key, elapsed: 0 };
+    this.showExclamation();
     return PlayerState.Stand;
   }
 
@@ -272,5 +274,18 @@ export class StateScript extends Script {
 
     const animation = ANIMATION_BY_STATE[this.state];
     spriteRenderer.setAnimation(animation.frames, animation.framesPerSecond);
+  }
+
+  private showExclamation(): void {
+    const exclamation = GameObject.create(
+      'ExclamationWarning',
+      this.gameObject.engineState,
+      { x: this.gameObject.position.x, y: this.gameObject.position.y - CELL_SIZE - 1 },
+      [
+        (gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_EXCLAMATION, BACKGROUND_LAYER),
+        (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 200),
+      ],
+    );
+    this.gameObject.engineState.addGameObject(exclamation);
   }
 }

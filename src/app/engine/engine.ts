@@ -46,7 +46,7 @@ export class Engine implements IEngineState {
       bitmapType: TileBitmapType.Animated,
       animatedBitmap: {
         bitmap: [OBJECT_LAVA_1, OBJECT_LAVA_2, OBJECT_LAVA_3, OBJECT_LAVA_4, OBJECT_LAVA_5, OBJECT_LAVA_6, OBJECT_LAVA_7, OBJECT_LAVA_8],
-        framePerSecond: 2,
+        framePerSecond: 4,
       },
     },
   };
@@ -89,6 +89,22 @@ export class Engine implements IEngineState {
     this.started = false;
     this.keyboard.detach();
     this.gameObjects.forEach((gameObject) => gameObject.destroy());
+  }
+
+  public addGameObject(gameObject: GameObject, after?: GameObject): void {
+    const index = after ? this.gameObjects.indexOf(after) : -1;
+    if (index >= 0) {
+      this.gameObjects.splice(index + 1, 0, gameObject);
+    } else {
+      this.gameObjects.push(gameObject);
+    }
+  }
+
+  public removeGameObject(gameObject: GameObject): void {
+    const index = this.gameObjects.indexOf(gameObject);
+    if (index >= 0) {
+      this.gameObjects.splice(index, 1);
+    }
   }
 
   private render(): void {

@@ -2,15 +2,23 @@ import { GameObject } from './game-object';
 import { Script } from './script';
 import { IEngineState } from '../i-engine-state';
 
-class FirstScript extends Script {}
-class SecondScript extends Script {}
+class FirstScript extends Script {
+  constructor(gameObject: GameObject) {
+    super(gameObject);
+  }
+}
+class SecondScript extends Script {
+  constructor(gameObject: GameObject) {
+    super(gameObject);
+  }
+}
 
 describe('GameObject', () => {
   describe('getScript', () => {
     it('should find an attached script by its class', () => {
       const gameObject = GameObject.create('Test', {} as IEngineState, { x: 0, y: 0 }, [
-        () => new FirstScript(),
-        () => new SecondScript(),
+        (go) => new FirstScript(go),
+        (go) => new SecondScript(go),
       ]);
 
       expect(gameObject.getScript(FirstScript)).toBeInstanceOf(FirstScript);
@@ -18,7 +26,7 @@ describe('GameObject', () => {
     });
 
     it('should return undefined when no script of that class is attached', () => {
-      const gameObject = GameObject.create('Test', {} as IEngineState, { x: 0, y: 0 }, [() => new FirstScript()]);
+      const gameObject = GameObject.create('Test', {} as IEngineState, { x: 0, y: 0 }, [(go) => new FirstScript(go)]);
 
       expect(gameObject.getScript(SecondScript)).toBeUndefined();
     });

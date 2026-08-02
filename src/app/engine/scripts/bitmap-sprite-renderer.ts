@@ -11,16 +11,14 @@ export class BitmapSpriteRenderer extends Script {
     return new BitmapSpriteRenderer(gameObject, bitmapDescription, layer);
   }
 
-  private readonly gameObject: GameObject;
   private bitmap: number[][][];
   private framePerSecond: number;
   private readonly layer: number;
   private spriteIndexTime: number = 0;
 
   private constructor(gameObject: GameObject, bitmapDescription: ISpriteBitmapDescription, layer: number) {
-    super();
+    super(gameObject);
 
-    this.gameObject = gameObject;
     this.bitmap = bitmapDescription.bitmap;
     this.framePerSecond = bitmapDescription.framePerSecond;
     this.layer = layer;

@@ -16,9 +16,12 @@ export class GameObject implements IGameObject {
   }
 
   public readonly engineState: IEngineState;
+
   private readonly positionInstance: Vector2 = { x: 0, y: 0 };
-  private readonly name: string;
+  public readonly name: string;
   private scriptInstances: Script[] = [];
+
+  public enabled: boolean = true;
 
   private constructor(name: string, engineState: IEngineState, position: Vector2) {
     this.name = name;
@@ -44,10 +47,13 @@ export class GameObject implements IGameObject {
   }
 
   public update(): void {
-    this.scriptInstances.forEach((script) => script.update());
+    if (this.enabled) {
+      this.scriptInstances.forEach((script) => script.update());
+    }
   }
 
   public destroy(): void {
     this.scriptInstances.forEach((script) => script.destroy());
+    this.engineState.removeGameObject(this);
   }
 }

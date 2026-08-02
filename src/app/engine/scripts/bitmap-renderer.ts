@@ -10,14 +10,12 @@ export class BitmapRenderer extends Script {
     return new BitmapRenderer(gameObject, bitmap, layer);
   }
 
-  private readonly gameObject: GameObject;
   private readonly bitmap: number[][];
   private readonly layer: number;
 
   private constructor(gameObject: GameObject, bitmap: number[][], layer: number) {
-    super();
+    super(gameObject);
 
-    this.gameObject = gameObject;
     this.bitmap = bitmap;
     this.layer = layer;
   }

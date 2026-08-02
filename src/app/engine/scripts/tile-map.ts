@@ -30,7 +30,7 @@ export class TileMap extends Script {
   private readonly cells: TileType[][];
 
   private constructor(gameObject: GameObject) {
-    super();
+    super(gameObject);
     this.cells = Array.from({ length: this.rows }, () => new Array<TileType>(this.columns).fill(TileType.Empty));
   }
 
