@@ -88,7 +88,9 @@ export class Engine implements IEngineState {
   public stop(): void {
     this.started = false;
     this.keyboard.detach();
-    this.gameObjects.forEach((gameObject) => gameObject.destroy());
+    // destroy() removes the object from this.gameObjects, so iterate a copy -
+    // forEach over the live array would skip every other element as it shrinks.
+    [...this.gameObjects].forEach((gameObject) => gameObject.destroy());
   }
 
   public addGameObject(gameObject: GameObject, after?: GameObject): void {
