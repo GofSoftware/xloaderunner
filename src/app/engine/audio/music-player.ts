@@ -75,7 +75,7 @@ export class MusicPlayer {
     this.advance(name);
   }
 
-  private advance(name: string): void {
+  private async advance(name: string): Promise<void> {
     const state = this.playbackStates.get(name);
     if (!state) {
       return;
@@ -90,14 +90,18 @@ export class MusicPlayer {
     const note = notes[state.index];
     state.index++;
 
-    if (note.frequency !== 0) {
-      this.soundPlayer.play(note.frequency, note.duration);
+    await this.soundPlayer.play(note.frequency, note.duration);
+
+    // Wait for this note to actually be scheduled (audioContext.resume() can
+    // take a while, especially the first time) before timing the next one -
+    // otherwise a slow resume() lets several notes queue up before any of
+    // them is audible, and they all start together once it finally settles.
+
+    if (this.playbackStates.get(name) !== state) {
+      return; // stop()/play() replaced this playback while we were waiting
     }
 
-    state.timeoutId = setTimeout(() => {
-      state.timeoutId = undefined;
-      this.advance(name);
-    }, note.duration * 1000);
+    this.advance(name);
   }
 
   private clearScheduled(name: string): void {
@@ -107,4 +111,6 @@ export class MusicPlayer {
       state.timeoutId = undefined;
     }
   }
+
+
 }
