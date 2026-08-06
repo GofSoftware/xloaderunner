@@ -87,7 +87,9 @@ export class StateScript extends Script {
   private readonly spawnPosition: { x: number; y: number };
   private state: PlayerState | undefined;
   private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
-  private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; key: string; elapsed: number } | undefined;
+  private hesitation:
+    | { state: PlayerState.MoveLeft | PlayerState.MoveRight; key: string; elapsed: number; warned: boolean }
+    | undefined;
   private dying: { elapsed: number } | undefined;
 
   private constructor(gameObject: GameObject, tileMap: TileMap, lives: Lives, spawnPosition: { x: number; y: number }) {
@@ -170,9 +172,9 @@ export class StateScript extends Script {
   }
 
   private resolveGroundMove(keyboard: Keyboard): PlayerState | undefined {
-    if (!this.hesitation) {
+    if (!this.hesitation || this.hesitation.warned) {
       const attempt = this.beginGroundMove(keyboard);
-      if (attempt !== PlayerState.Stand) {
+      if (attempt !== PlayerState.Stand || !this.hesitation || this.hesitation.warned) {
         return attempt;
       }
     }
@@ -182,7 +184,9 @@ export class StateScript extends Script {
       return PlayerState.Stand;
     }
     const { state, key } = this.hesitation!;
-    this.hesitation = undefined;
+    // Keep remembering this direction as a single-use skip for the next attempt,
+    // instead of clearing it outright - see startGroundMove.
+    this.hesitation = { state, key, elapsed: 0, warned: true };
     return keyboard.isPressed(key) ? state : PlayerState.Stand;
   }
 
@@ -206,9 +210,19 @@ export class StateScript extends Script {
     targetY: number,
   ): PlayerState {
     if (!this.tileMap.isDangerousAtPixel(targetX, targetY + CELL_SIZE)) {
+      this.hesitation = undefined;
       return state;
     }
-    this.hesitation = { state, key, elapsed: 0 };
+
+    // Already hesitated for this direction once - move straight through this
+    // time, but the skip is single-use: consume it so a further encounter
+    // (in this or any other direction) hesitates again.
+    if (this.hesitation?.state === state && this.hesitation.warned) {
+      this.hesitation = undefined;
+      return state;
+    }
+
+    this.hesitation = { state, key, elapsed: 0, warned: false };
     this.showExclamation();
     return PlayerState.Stand;
   }

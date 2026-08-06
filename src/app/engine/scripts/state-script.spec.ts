@@ -174,6 +174,57 @@ describe('StateScript', () => {
     expect(player.position.x).toBeGreaterThan(8);
   });
 
+  it('should skip the hesitation pause the next time the player moves in the same direction after already being warned', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    engineState.deltaTime = 0.1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    keyboard.next();
+
+    player.update();
+    player.update();
+    expect(player.position).toEqual({ x: 8, y: 16 });
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+    player.update();
+
+    expect(player.position.x).toBeGreaterThan(8);
+  });
+
+  it('should require hesitating again after moving in a different direction clears the skip', () => {
+    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    tileMap.setTileAtPixel(0, 24, TileType.Brick);
+    engineState.deltaTime = 0.1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.update();
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    keyboard.next();
+
+    player.update();
+    player.update();
+    expect(player.position).toEqual({ x: 8, y: 16 });
+
+    engineState.deltaTime = 1;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+    player.update();
+    expect(player.position).toEqual({ x: 0, y: 16 });
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
+    keyboard.next();
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+    player.update();
+    expect(player.position.x).toBe(8);
+
+    engineState.deltaTime = 0.1;
+    player.update();
+    expect(player.position.x).toBe(8);
+  });
+
   it('should fall when there is no brick below, regardless of input', () => {
     player.setPosition(100, 16);
 
