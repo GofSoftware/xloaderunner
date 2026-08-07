@@ -25,6 +25,7 @@ import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { BackgroundStars } from './scripts/background-stars';
 import { TileMap, TileType } from './scripts/tile-map';
 import { StateScript } from './scripts/state-script';
+import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { GoldScript } from './scripts/gold-script';
 import { GoldItem } from './scripts/gold-item';
 import { TextRenderer } from './scripts/text-renderer';
@@ -34,8 +35,6 @@ import { STAND_ANIMATION } from './scripts/animations';
 import { ITileBitmapDescription, TileBitmapType } from './i-tile-bitmap-description';
 
 const FRAME_RATE = 0;
-
-
 
 export class Engine implements IEngineState {
   private static engineInstance: Engine;
@@ -220,6 +219,7 @@ export class Engine implements IEngineState {
       ]),
 
       GameObject.create('Player', this, spawnPosition, [
+        (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
         (gameObject: GameObject) => StateScript.create(gameObject, tileMap, lives, spawnPosition),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
         (gameObject: GameObject) =>

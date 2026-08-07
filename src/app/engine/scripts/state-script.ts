@@ -1,7 +1,6 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { Keyboard } from '../keyboard/keyboard';
 import { TileMap, TileType } from './tile-map';
 import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import {
@@ -58,12 +57,7 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
 };
 
 export class StateScript extends Script {
-  public static create(
-    gameObject: GameObject,
-    tileMap: TileMap,
-    lives: Lives,
-    spawnPosition: { x: number; y: number },
-  ): StateScript {
+  public static create(gameObject: GameObject, tileMap: TileMap, lives: Lives, spawnPosition: { x: number; y: number }): StateScript {
     return new StateScript(gameObject, tileMap, lives, spawnPosition);
   }
 
@@ -87,10 +81,13 @@ export class StateScript extends Script {
   private readonly spawnPosition: { x: number; y: number };
   private state: PlayerState | undefined;
   private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
-  private hesitation:
-    | { state: PlayerState.MoveLeft | PlayerState.MoveRight; key: string; elapsed: number; warned: boolean }
-    | undefined;
+  private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
   private dying: { elapsed: number } | undefined;
+
+  private isForcedLeft = false;
+  private isForcedRight = false;
+  private isForcedUp = false;
+  private isForcedDown = false;
 
   private constructor(gameObject: GameObject, tileMap: TileMap, lives: Lives, spawnPosition: { x: number; y: number }) {
     super(gameObject);
@@ -99,8 +96,25 @@ export class StateScript extends Script {
     this.spawnPosition = spawnPosition;
   }
 
+  public forceLeft(): void {
+    this.isForcedLeft = true;
+  }
+
+  public forceRight(): void {
+    this.isForcedRight = true;
+  }
+
+  public forceUp(): void {
+    this.isForcedUp = true;
+  }
+
+  public forceDown(): void {
+    this.isForcedDown = true;
+  }
+
   public override update(): void {
     if (this.state === PlayerState.GameOver) {
+      this.resetForces();
       return;
     }
 
@@ -119,6 +133,14 @@ export class StateScript extends Script {
     }
 
     this.setState(activeState);
+    this.resetForces();
+  }
+
+  private resetForces(): void {
+    this.isForcedLeft = false;
+    this.isForcedRight = false;
+    this.isForcedUp = false;
+    this.isForcedDown = false;
   }
 
   private resolveState(): PlayerState {
@@ -139,26 +161,25 @@ export class StateScript extends Script {
       return PlayerState.Fall;
     }
 
-    const { keyboard } = this.gameObject.engineState;
     if (!onCrossbar) {
-      const groundMove = this.resolveGroundMove(keyboard);
+      const groundMove = this.resolveGroundMove();
       if (groundMove) {
         return groundMove;
       }
     } else {
       this.hesitation = undefined;
-      if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
+      if (this.isForcedLeft && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
         return PlayerState.OnCrossbarMoveLeft;
       }
-      if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
+      if (this.isForcedRight && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
         return PlayerState.OnCrossbarMoveRight;
       }
     }
 
-    if (onStairs && keyboard.isPressed('ArrowUp') && !this.tileMap.isWallAtPixel(x, y - CELL_SIZE)) {
+    if (onStairs && this.isForcedUp && !this.tileMap.isWallAtPixel(x, y - CELL_SIZE)) {
       return PlayerState.MoveUp;
     }
-    if (keyboard.isPressed('ArrowDown') && !this.tileMap.isWallAtPixel(x, y + CELL_SIZE)) {
+    if (this.isForcedDown && !this.tileMap.isWallAtPixel(x, y + CELL_SIZE)) {
       return PlayerState.MoveDown;
     }
 
@@ -171,9 +192,13 @@ export class StateScript extends Script {
     return PlayerState.Stand;
   }
 
-  private resolveGroundMove(keyboard: Keyboard): PlayerState | undefined {
+  private isForced(state: PlayerState.MoveLeft | PlayerState.MoveRight): boolean {
+    return state === PlayerState.MoveLeft ? this.isForcedLeft : this.isForcedRight;
+  }
+
+  private resolveGroundMove(): PlayerState | undefined {
     if (!this.hesitation || this.hesitation.warned) {
-      const attempt = this.beginGroundMove(keyboard);
+      const attempt = this.beginGroundMove();
       if (attempt !== PlayerState.Stand || !this.hesitation || this.hesitation.warned) {
         return attempt;
       }
@@ -183,32 +208,27 @@ export class StateScript extends Script {
     if (this.hesitation!.elapsed < LEDGE_HESITATION_SECONDS) {
       return PlayerState.Stand;
     }
-    const { state, key } = this.hesitation!;
+    const { state } = this.hesitation!;
     // Keep remembering this direction as a single-use skip for the next attempt,
     // instead of clearing it outright - see startGroundMove.
-    this.hesitation = { state, key, elapsed: 0, warned: true };
-    return keyboard.isPressed(key) ? state : PlayerState.Stand;
+    this.hesitation = { state, elapsed: 0, warned: true };
+    return this.isForced(state) ? state : PlayerState.Stand;
   }
 
-  private beginGroundMove(keyboard: Keyboard): PlayerState | undefined {
+  private beginGroundMove(): PlayerState | undefined {
     const { x, y } = this.gameObject.position;
 
-    if (keyboard.isPressed('ArrowLeft') && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
-      return this.startGroundMove(PlayerState.MoveLeft, 'ArrowLeft', x - CELL_SIZE, y);
+    if (this.isForcedLeft && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
+      return this.startGroundMove(PlayerState.MoveLeft, x - CELL_SIZE, y);
     }
-    if (keyboard.isPressed('ArrowRight') && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
-      return this.startGroundMove(PlayerState.MoveRight, 'ArrowRight', x + CELL_SIZE, y);
+    if (this.isForcedRight && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
+      return this.startGroundMove(PlayerState.MoveRight, x + CELL_SIZE, y);
     }
 
     return undefined;
   }
 
-  private startGroundMove(
-    state: PlayerState.MoveLeft | PlayerState.MoveRight,
-    key: string,
-    targetX: number,
-    targetY: number,
-  ): PlayerState {
+  private startGroundMove(state: PlayerState.MoveLeft | PlayerState.MoveRight, targetX: number, targetY: number): PlayerState {
     if (!this.tileMap.isDangerousAtPixel(targetX, targetY + CELL_SIZE)) {
       this.hesitation = undefined;
       return state;
@@ -222,7 +242,7 @@ export class StateScript extends Script {
       return state;
     }
 
-    this.hesitation = { state, key, elapsed: 0, warned: false };
+    this.hesitation = { state, elapsed: 0, warned: false };
     this.showExclamation();
     return PlayerState.Stand;
   }
@@ -256,12 +276,9 @@ export class StateScript extends Script {
   }
 
   private showGameOver(): void {
-    const gameOverText = GameObject.create(
-      'GameOverText',
-      this.gameObject.engineState,
-      { x: 96, y: 88 },
-      [(gameObject: GameObject) => TextRenderer.create(gameObject, 'GAME OVER', FOREGROUND_LAYER)],
-    );
+    const gameOverText = GameObject.create('GameOverText', this.gameObject.engineState, { x: 96, y: 88 }, [
+      (gameObject: GameObject) => TextRenderer.create(gameObject, 'GAME OVER', FOREGROUND_LAYER),
+    ]);
     this.gameObject.engineState.addGameObject(gameOverText);
   }
 

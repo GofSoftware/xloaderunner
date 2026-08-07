@@ -1,6 +1,7 @@
 import { StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { KeyboardInputScript } from './keyboard-input-script';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
@@ -20,6 +21,7 @@ describe('StateScript', () => {
 
   function createPlayer(position: { x: number; y: number }, playerLives: Lives): GameObject {
     const gameObject = GameObject.create('Player', engineState, position, [
+      (go) => KeyboardInputScript.create(go),
       (go) => StateScript.create(go, tileMap, playerLives, spawnPosition),
       (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
     ]);
