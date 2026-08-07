@@ -12,6 +12,7 @@ export enum TileType {
   Crossbar = 'Crossbar',
   Lava = 'Lava',
   PlayerStart = 'PlayerStart',
+  Gold = 'Gold',
 }
 
 export interface ITile {

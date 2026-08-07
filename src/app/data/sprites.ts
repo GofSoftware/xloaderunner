@@ -1,4 +1,4 @@
-import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol } from '../engine/screen/screen.constants';
+import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl } from '../engine/screen/screen.constants';
 
 // 8x8 sprite frames for a standing man tapping one foot: rest -> foot lifts -> foot stamps down.
 export const MAN_MOVING_LEFT_FRAME_1: number[][] = [
@@ -450,5 +450,27 @@ export const OBJECT_HEART: number[][] = [
   [__, Rd, Rd, Rd, Rd, Rd, __, __],
   [__, __, Rd, Rd, Rd, __, __, __],
   [__, __, __, Rd, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+];
+
+export const OBJECT_GOLD: number[][] = [
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, Yl, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Yl, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const OBJECT_GOLD_HUD: number[][] = [
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, Yl, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Yl, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
   [__, __, __, __, __, __, __, __],
 ];

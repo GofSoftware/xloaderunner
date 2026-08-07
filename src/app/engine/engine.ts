@@ -1,6 +1,7 @@
 import {
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
+  OBJECT_GOLD,
   OBJECT_LAVA_1,
   OBJECT_LAVA_2,
   OBJECT_LAVA_3,
@@ -24,6 +25,8 @@ import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { BackgroundStars } from './scripts/background-stars';
 import { TileMap, TileType } from './scripts/tile-map';
 import { StateScript } from './scripts/state-script';
+import { GoldScript } from './scripts/gold-script';
+import { GoldItem } from './scripts/gold-item';
 import { TextRenderer } from './scripts/text-renderer';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
@@ -111,6 +114,10 @@ export class Engine implements IEngineState {
     }
   }
 
+  public getGameObjectsAtPosition(x: number, y: number): GameObject[] {
+    return this.gameObjects.filter((gameObject) => gameObject.position.x === x && gameObject.position.y === y);
+  }
+
   private render(): void {
     if (!this.started) {
       return;
@@ -121,7 +128,10 @@ export class Engine implements IEngineState {
     this.updateFps();
     this.screenBuffer.clear();
 
-    this.gameObjects.forEach((gameObject) => gameObject.update());
+    // destroy() (e.g. GoldScript collecting an item) removes a game object from
+    // this.gameObjects mid-frame, so iterate a copy - forEach over the live
+    // array would skip whichever element shifts into the just-processed slot.
+    [...this.gameObjects].forEach((gameObject) => gameObject.update());
 
     if (this.keyboard.wasPressedThisFrame('Enter')) {
       this.soundPlayer.play(440, 0.1);
@@ -180,6 +190,16 @@ export class Engine implements IEngineState {
         ]),
       );
 
+    const goldGameObjects = tileMap
+      .getTiles()
+      .filter(({ type }) => type === TileType.Gold)
+      .map(({ column, row }) =>
+        GameObject.create(`Gold-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+          (gameObject: GameObject) => GoldItem.create(gameObject),
+          (gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_GOLD, BACKGROUND_LAYER),
+        ]),
+      );
+
     const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
     const spawnPosition = startTile
       ? { x: startTile.column * CELL_SIZE, y: startTile.row * CELL_SIZE }
@@ -191,6 +211,7 @@ export class Engine implements IEngineState {
       mapGameObject,
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
+      ...goldGameObjects,
       GameObject.create('Title', this, { x: 0, y: 0 }, [
         (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', BACKGROUND_LAYER),
       ]),
@@ -200,6 +221,7 @@ export class Engine implements IEngineState {
 
       GameObject.create('Player', this, spawnPosition, [
         (gameObject: GameObject) => StateScript.create(gameObject, tileMap, lives, spawnPosition),
+        (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
             gameObject,

@@ -14,4 +14,5 @@ export interface IEngineState {
 
   addGameObject(gameObject: GameObject, after?: GameObject): void;
   removeGameObject(gameObject: GameObject): void;
+  getGameObjectsAtPosition(x: number, y: number): GameObject[];
 }

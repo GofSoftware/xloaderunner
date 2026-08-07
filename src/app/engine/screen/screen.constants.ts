@@ -16,3 +16,4 @@ export const Lg = 0xEEEEEEff;
 export const Mg = 0xCCCCCCff;
 export const Or = 0xf8ab4aff;
 export const Ol = 0xf6c77bff;
+export const Yl = 0xffd700ff;

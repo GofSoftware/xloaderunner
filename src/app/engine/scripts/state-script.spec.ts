@@ -39,6 +39,7 @@ describe('StateScript', () => {
       fps: 0,
       addGameObject: () => {},
       removeGameObject: () => {},
+      getGameObjectsAtPosition: () => [],
     };
 
     tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
