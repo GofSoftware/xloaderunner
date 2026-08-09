@@ -12,11 +12,11 @@ import {
   OBJECT_LAVA_8,
   OBJECT_STAIRS,
 } from '../data/sprites';
-import { Lives } from './lives';
+import { LivesScript } from './scripts/lives-script';
 import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
+import { BACKGROUND_LAYER, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
@@ -28,6 +28,8 @@ import { StateScript } from './scripts/state-script';
 import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { GoldScript } from './scripts/gold-script';
 import { GoldItem } from './scripts/gold-item';
+import { ObjectPosition } from './scripts/object-position';
+import { MapHelper } from './scripts/map.helper';
 import { TextRenderer } from './scripts/text-renderer';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
@@ -59,6 +61,7 @@ export class Engine implements IEngineState {
   private started: boolean = false;
   private previousFrameTime: number = 0;
   private gameObjects: GameObject[] = [];
+  private gameObjectsByName: Map<string, GameObject[]> = new Map();
 
   public readonly screenBuffer: ScreenBuffer;
   public readonly keyboard: Keyboard;
@@ -104,6 +107,13 @@ export class Engine implements IEngineState {
     } else {
       this.gameObjects.push(gameObject);
     }
+
+    const named = this.gameObjectsByName.get(gameObject.name);
+    if (named) {
+      named.push(gameObject);
+    } else {
+      this.gameObjectsByName.set(gameObject.name, [gameObject]);
+    }
   }
 
   public removeGameObject(gameObject: GameObject): void {
@@ -111,10 +121,22 @@ export class Engine implements IEngineState {
     if (index >= 0) {
       this.gameObjects.splice(index, 1);
     }
+
+    const named = this.gameObjectsByName.get(gameObject.name);
+    if (!named) {
+      return;
+    }
+    const namedIndex = named.indexOf(gameObject);
+    if (namedIndex >= 0) {
+      named.splice(namedIndex, 1);
+    }
+    if (named.length === 0) {
+      this.gameObjectsByName.delete(gameObject.name);
+    }
   }
 
-  public getGameObjectsAtPosition(x: number, y: number): GameObject[] {
-    return this.gameObjects.filter((gameObject) => gameObject.position.x === x && gameObject.position.y === y);
+  public getGameObjectByName(name: string): GameObject | undefined {
+    return this.gameObjectsByName.get(name)?.[0];
   }
 
   private render(): void {
@@ -158,6 +180,7 @@ export class Engine implements IEngineState {
 
   private initLevel(): void {
     this.gameObjects = [];
+    this.gameObjectsByName.clear();
 
     const mapGameObject = GameObject.create('Map', this, { x: 0, y: 0 }, [(gameObject: GameObject) => TileMap.create(gameObject)]);
     const tileMap = mapGameObject.getScript(TileMap)!;
@@ -172,7 +195,8 @@ export class Engine implements IEngineState {
       .getTiles()
       .filter(({ type }) => type in Engine.tileBitmaps)
       .map(({ column, row, type }) =>
-        GameObject.create(`Tile-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+        GameObject.create(`Tile-${column}-${row}`, this, MapHelper.mapToScreen(column, row), [
+          (gameObject: GameObject) => ObjectPosition.create(gameObject, column, row),
           (gameObject: GameObject) => {
             const tileBitmap = Engine.tileBitmaps[type]!;
             return tileBitmap.bitmapType === TileBitmapType.Static
@@ -193,20 +217,18 @@ export class Engine implements IEngineState {
       .getTiles()
       .filter(({ type }) => type === TileType.Gold)
       .map(({ column, row }) =>
-        GameObject.create(`Gold-${column}-${row}`, this, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
+        GameObject.create(`Gold-${column}-${row}`, this, MapHelper.mapToScreen(column, row), [
+          (gameObject: GameObject) => ObjectPosition.create(gameObject, column, row),
           (gameObject: GameObject) => GoldItem.create(gameObject),
           (gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_GOLD, BACKGROUND_LAYER),
         ]),
       );
 
     const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
-    const spawnPosition = startTile
-      ? { x: startTile.column * CELL_SIZE, y: startTile.row * CELL_SIZE }
-      : { x: CELL_SIZE * 20, y: CELL_SIZE * 5 };
+    const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : { column: 20, row: 5 };
+    const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
 
-    const lives = Lives.create();
-
-    this.gameObjects.push(
+    [
       mapGameObject,
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
@@ -215,12 +237,14 @@ export class Engine implements IEngineState {
         (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', BACKGROUND_LAYER),
       ]),
       GameObject.create('Lives', this, { x: 0, y: 0 }, [
-        (gameObject: GameObject) => HeartsRenderer.create(gameObject, lives, FOREGROUND_LAYER),
+        (gameObject: GameObject) => LivesScript.create(gameObject),
+        (gameObject: GameObject) => HeartsRenderer.create(gameObject, FOREGROUND_LAYER),
       ]),
 
       GameObject.create('Player', this, spawnPosition, [
         (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
-        (gameObject: GameObject) => StateScript.create(gameObject, tileMap, lives, spawnPosition),
+        (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
+        (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
@@ -229,7 +253,7 @@ export class Engine implements IEngineState {
             FOREGROUND_LAYER,
           ),
       ]),
-    );
+    ].forEach((gameObject) => this.addGameObject(gameObject));
 
     this.gameObjects.forEach((gameObject) => gameObject.start());
   }

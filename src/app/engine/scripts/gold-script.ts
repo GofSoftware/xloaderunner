@@ -1,8 +1,10 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { GoldItem } from './gold-item';
+import { TileMap } from './tile-map';
+import { ObjectPosition } from './object-position';
 import { CELL_SIZE, SCREEN_WIDTH } from '../screen/screen.constants';
-import { MAX_LIVES } from '../lives';
+import { MAX_LIVES } from './lives-script';
 import { TextHelper } from '../screen/text.helper';
 import { OBJECT_GOLD, OBJECT_GOLD_HUD } from '../../data/sprites';
 
@@ -19,6 +21,14 @@ export class GoldScript extends Script {
     this.hudLayer = hudLayer;
   }
 
+  private get tileMap(): TileMap {
+    return this.gameObject.engineState.getGameObjectByName('Map')!.getScript(TileMap)!;
+  }
+
+  private get objectPosition(): ObjectPosition {
+    return this.gameObject.getScript(ObjectPosition)!;
+  }
+
   public get count(): number {
     return this.collected;
   }
@@ -29,8 +39,8 @@ export class GoldScript extends Script {
   }
 
   private collectAtPlayerPosition(): void {
-    const { x, y } = this.gameObject.position;
-    const gold = this.gameObject.engineState.getGameObjectsAtPosition(x, y).find((gameObject) => gameObject.getScript(GoldItem));
+    const objectsHere = this.tileMap.getObjectsAt(this.objectPosition.column, this.objectPosition.row);
+    const gold = objectsHere.find((gameObject) => gameObject.getScript(GoldItem));
     if (!gold) {
       return;
     }

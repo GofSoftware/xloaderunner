@@ -1,5 +1,5 @@
 import { HeartsRenderer } from './hearts-renderer';
-import { Lives, MAX_LIVES } from '../lives';
+import { LivesScript, MAX_LIVES } from './lives-script';
 import { GameObject } from '../game-object/game-object';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { CELL_SIZE, SCREEN_WIDTH } from '../screen/screen.constants';
@@ -20,8 +20,10 @@ describe('HeartsRenderer', () => {
 
   it('should draw one heart per remaining life, right-anchored in the top row', () => {
     const engineState = createEngineState();
-    const lives = Lives.create(3);
-    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => HeartsRenderer.create(go, lives, 0)]);
+    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
+      (go) => LivesScript.create(go, 3),
+      (go) => HeartsRenderer.create(go, 0),
+    ]);
 
     gameObject.update();
 
@@ -32,9 +34,11 @@ describe('HeartsRenderer', () => {
 
   it('should draw fewer hearts as lives decrease', () => {
     const engineState = createEngineState();
-    const lives = Lives.create(2);
-    lives.loseLife();
-    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => HeartsRenderer.create(go, lives, 0)]);
+    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
+      (go) => LivesScript.create(go, 2),
+      (go) => HeartsRenderer.create(go, 0),
+    ]);
+    gameObject.getScript(LivesScript)!.loseLife();
 
     gameObject.update();
 
@@ -44,8 +48,10 @@ describe('HeartsRenderer', () => {
 
   it('should draw onto the given layer only', () => {
     const engineState = { screenBuffer: ScreenBuffer.create(2) } as IEngineState;
-    const lives = Lives.create(1);
-    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => HeartsRenderer.create(go, lives, 1)]);
+    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
+      (go) => LivesScript.create(go, 1),
+      (go) => HeartsRenderer.create(go, 1),
+    ]);
 
     gameObject.update();
 

@@ -2,12 +2,13 @@ import { vi } from 'vitest';
 import { KeyboardInputScript } from './keyboard-input-script';
 import { StateScript } from './state-script';
 import { TileMap } from './tile-map';
+import { ObjectPosition } from './object-position';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { LAYER_COUNT } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
-import { Lives } from '../lives';
+import { LivesScript } from './lives-script';
 
 describe('KeyboardInputScript', () => {
   let engineState: IEngineState;
@@ -18,6 +19,7 @@ describe('KeyboardInputScript', () => {
   beforeEach(() => {
     keyboard = Keyboard.create();
     keyboard.attach();
+    const gameObjectsByName = new Map<string, GameObject>();
     engineState = {
       screenBuffer: ScreenBuffer.create(LAYER_COUNT),
       keyboard,
@@ -27,15 +29,19 @@ describe('KeyboardInputScript', () => {
       fps: 0,
       addGameObject: () => {},
       removeGameObject: () => {},
-      getGameObjectsAtPosition: () => [],
+      getGameObjectByName: (name: string) => gameObjectsByName.get(name),
     };
 
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
-    const tileMap = tileMapGameObject.getScript(TileMap)!;
+    gameObjectsByName.set('Map', tileMapGameObject);
+
+    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
+    gameObjectsByName.set('Lives', livesGameObject);
 
     player = GameObject.create('Player', engineState, { x: 8, y: 16 }, [
       (go) => KeyboardInputScript.create(go),
-      (go) => StateScript.create(go, tileMap, Lives.create(2), { x: 8, y: 16 }),
+      (go) => StateScript.create(go, { column: 1, row: 2 }),
+      (go) => ObjectPosition.create(go, 1, 2),
     ]);
     player.start();
     stateScript = player.getScript(StateScript)!;

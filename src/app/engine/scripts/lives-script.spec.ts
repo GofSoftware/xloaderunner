@@ -1,16 +1,23 @@
-import { Lives, MAX_LIVES } from './lives';
+import { LivesScript, MAX_LIVES } from './lives-script';
+import { GameObject } from '../game-object/game-object';
+import { IEngineState } from '../i-engine-state';
 
-describe('Lives', () => {
+describe('LivesScript', () => {
+  function createLives(count?: number): LivesScript {
+    const gameObject = GameObject.create('Lives', {} as IEngineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, count)]);
+    return gameObject.getScript(LivesScript)!;
+  }
+
   it('should start at the given count', () => {
-    expect(Lives.create(3).count).toBe(3);
+    expect(createLives(3).count).toBe(3);
   });
 
   it('should default to MAX_LIVES when no count is given', () => {
-    expect(Lives.create().count).toBe(MAX_LIVES);
+    expect(createLives().count).toBe(MAX_LIVES);
   });
 
   it('should decrement the count when a life is lost', () => {
-    const lives = Lives.create(2);
+    const lives = createLives(2);
 
     lives.loseLife();
 
@@ -18,7 +25,7 @@ describe('Lives', () => {
   });
 
   it('should report game over once the count reaches zero', () => {
-    const lives = Lives.create(1);
+    const lives = createLives(1);
 
     expect(lives.isGameOver).toBe(false);
 
@@ -29,7 +36,7 @@ describe('Lives', () => {
   });
 
   it('should not go negative when losing a life after game over', () => {
-    const lives = Lives.create(1);
+    const lives = createLives(1);
 
     lives.loseLife();
     lives.loseLife();

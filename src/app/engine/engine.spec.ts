@@ -104,6 +104,48 @@ describe('Engine', () => {
     });
   });
 
+  describe('getGameObjectByName', () => {
+    it('should find a tracked game object by name', () => {
+      const a = createRecorder('Findable');
+      Engine.instance.addGameObject(a);
+
+      expect(Engine.instance.getGameObjectByName('Findable')).toBe(a);
+    });
+
+    it('should return undefined for a name that is not tracked', () => {
+      expect(Engine.instance.getGameObjectByName('Nope')).toBeUndefined();
+    });
+
+    it('should return the first-added game object when multiple share a name', () => {
+      const first = createRecorder('Duplicate');
+      const second = createRecorder('Duplicate');
+      Engine.instance.addGameObject(first);
+      Engine.instance.addGameObject(second);
+
+      expect(Engine.instance.getGameObjectByName('Duplicate')).toBe(first);
+    });
+
+    it('should stop finding a game object once it is removed', () => {
+      const a = createRecorder('Removable');
+      Engine.instance.addGameObject(a);
+
+      Engine.instance.removeGameObject(a);
+
+      expect(Engine.instance.getGameObjectByName('Removable')).toBeUndefined();
+    });
+
+    it('should fall back to the next same-named game object once the first is removed', () => {
+      const first = createRecorder('Duplicate');
+      const second = createRecorder('Duplicate');
+      Engine.instance.addGameObject(first);
+      Engine.instance.addGameObject(second);
+
+      Engine.instance.removeGameObject(first);
+
+      expect(Engine.instance.getGameObjectByName('Duplicate')).toBe(second);
+    });
+  });
+
   describe('stop', () => {
     it('should destroy every tracked game object, not skip every other one as the array shrinks', () => {
       const destroyed: string[] = [];

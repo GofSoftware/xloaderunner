@@ -30,14 +30,12 @@ export class TileMap extends Script {
   public readonly rows: number = MAP_ROWS;
 
   private readonly cells: TileType[][];
+  private readonly objectsAt: GameObject[][][];
 
   private constructor(gameObject: GameObject) {
     super(gameObject);
     this.cells = Array.from({ length: this.rows }, () => new Array<TileType>(this.columns).fill(TileType.Empty));
-  }
-
-  public setTileAtPixel(x: number, y: number, type: TileType): void {
-    this.setTile(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE), type);
+    this.objectsAt = Array.from({ length: this.rows }, () => Array.from({ length: this.columns }, () => []));
   }
 
   public setTile(column: number, row: number, type: TileType): void {
@@ -46,36 +44,42 @@ export class TileMap extends Script {
     }
   }
 
-  public getTileAtPixel(x: number, y: number): TileType {
-    return this.getTile(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE));
-  }
-
   public getTile(column: number, row: number): TileType {
     return this.isInBounds(column, row) ? this.cells[row][column] : TileType.Empty;
-  }
-
-  public isSolidAtPixel(x: number, y: number): boolean {
-    return this.isSolid(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE));
   }
 
   public isSolid(column: number, row: number): boolean {
     return this.getTile(column, row) === TileType.Brick || this.getTile(column, row) === TileType.Stairs;
   }
 
-  public isWallAtPixel(x: number, y: number): boolean {
-    return this.isWall(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE));
-  }
-
   public isWall(column: number, row: number): boolean {
     return this.getTile(column, row) === TileType.Brick;
   }
 
-  public isDangerousAtPixel(x: number, y: number): boolean {
-    return this.isDangerous(Math.floor(x / CELL_SIZE), Math.floor(y / CELL_SIZE));
-  }
-
   public isDangerous(column: number, row: number): boolean {
     return this.getTile(column, row) === TileType.Lava;
+  }
+
+  public getObjectsAt(column: number, row: number): GameObject[] {
+    return this.isInBounds(column, row) ? [...this.objectsAt[row][column]] : [];
+  }
+
+  public moveObject(gameObject: GameObject, fromColumn: number, fromRow: number, toColumn: number, toRow: number): void {
+    this.removeObject(gameObject, fromColumn, fromRow);
+    if (this.isInBounds(toColumn, toRow)) {
+      this.objectsAt[toRow][toColumn].push(gameObject);
+    }
+  }
+
+  public removeObject(gameObject: GameObject, column: number, row: number): void {
+    if (!this.isInBounds(column, row)) {
+      return;
+    }
+    const cell = this.objectsAt[row][column];
+    const index = cell.indexOf(gameObject);
+    if (index >= 0) {
+      cell.splice(index, 1);
+    }
   }
 
   public getTiles(): ITile[] {

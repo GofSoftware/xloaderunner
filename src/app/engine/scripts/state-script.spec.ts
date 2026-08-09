@@ -2,36 +2,44 @@ import { StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { KeyboardInputScript } from './keyboard-input-script';
+import { ObjectPosition } from './object-position';
+import { MapHelper } from './map.helper';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../../data/sprites';
-import { Lives } from '../lives';
+import { LivesScript } from './lives-script';
 
 describe('StateScript', () => {
   let engineState: IEngineState;
   let keyboard: Keyboard;
-  let tileMapGameObject: GameObject;
   let tileMap: TileMap;
-  let lives: Lives;
-  let spawnPosition: { x: number; y: number };
+  let livesScript: LivesScript;
+  let spawnCell: { column: number; row: number };
   let player: GameObject;
 
-  function createPlayer(position: { x: number; y: number }, playerLives: Lives): GameObject {
+  function createPlayer(position: { x: number; y: number }): GameObject {
+    const { column, row } = MapHelper.screenToMap(position.x, position.y);
     const gameObject = GameObject.create('Player', engineState, position, [
       (go) => KeyboardInputScript.create(go),
-      (go) => StateScript.create(go, tileMap, playerLives, spawnPosition),
+      (go) => StateScript.create(go, spawnCell),
+      (go) => ObjectPosition.create(go, column, row),
       (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
     ]);
     gameObject.start();
     return gameObject;
   }
 
+  function teleportPlayer(target: GameObject, column: number, row: number): void {
+    target.getScript(ObjectPosition)!.teleportTo(column, row);
+  }
+
   beforeEach(() => {
     keyboard = Keyboard.create();
     keyboard.attach();
+    const gameObjectsByName = new Map<string, GameObject>();
     engineState = {
       screenBuffer: ScreenBuffer.create(LAYER_COUNT),
       keyboard,
@@ -41,16 +49,20 @@ describe('StateScript', () => {
       fps: 0,
       addGameObject: () => {},
       removeGameObject: () => {},
-      getGameObjectsAtPosition: () => [],
+      getGameObjectByName: (name: string) => gameObjectsByName.get(name),
     };
 
-    tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
+    const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
     tileMap = tileMapGameObject.getScript(TileMap)!;
-    tileMap.setTileAtPixel(8, 24, TileType.Brick);
+    tileMap.setTile(1, 3, TileType.Brick);
+    gameObjectsByName.set('Map', tileMapGameObject);
 
-    spawnPosition = { x: 8, y: 16 };
-    lives = Lives.create(2);
-    player = createPlayer({ x: 8, y: 16 }, lives);
+    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
+    livesScript = livesGameObject.getScript(LivesScript)!;
+    gameObjectsByName.set('Lives', livesGameObject);
+
+    spawnCell = { column: 1, row: 2 };
+    player = createPlayer({ x: 8, y: 16 });
   });
 
   afterEach(() => {
@@ -64,7 +76,7 @@ describe('StateScript', () => {
   });
 
   it('should move right while the right arrow is held and the ground holds', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Brick);
+    tileMap.setTile(2, 3, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -74,7 +86,7 @@ describe('StateScript', () => {
   });
 
   it('should not move right when a brick blocks the target cell', () => {
-    tileMap.setTileAtPixel(16, 16, TileType.Brick);
+    tileMap.setTile(2, 2, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -83,7 +95,7 @@ describe('StateScript', () => {
   });
 
   it('should not move left when a brick blocks the target cell', () => {
-    tileMap.setTileAtPixel(0, 16, TileType.Brick);
+    tileMap.setTile(0, 2, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
 
     player.update();
@@ -100,9 +112,9 @@ describe('StateScript', () => {
   });
 
   it('should not move up when a brick blocks the target cell above, even while on stairs', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
-    tileMap.setTileAtPixel(32, 8, TileType.Brick);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Stairs);
+    tileMap.setTile(4, 1, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();
@@ -120,7 +132,7 @@ describe('StateScript', () => {
   });
 
   it('should hesitate before stepping toward a lava cell, without moving immediately', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    tileMap.setTile(2, 3, TileType.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -130,7 +142,7 @@ describe('StateScript', () => {
   });
 
   it('should step toward the lava once the hesitation pause elapses while the key is held', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    tileMap.setTile(2, 3, TileType.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -143,7 +155,7 @@ describe('StateScript', () => {
   });
 
   it('should stay put if the key is released and never pressed again before the pause elapses', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    tileMap.setTile(2, 3, TileType.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -159,7 +171,7 @@ describe('StateScript', () => {
   });
 
   it('should step toward the lava if the key is released and pressed again before the pause elapses', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    tileMap.setTile(2, 3, TileType.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -178,7 +190,7 @@ describe('StateScript', () => {
   });
 
   it('should skip the hesitation pause the next time the player moves in the same direction after already being warned', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Lava);
+    tileMap.setTile(2, 3, TileType.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -198,8 +210,8 @@ describe('StateScript', () => {
   });
 
   it('should require hesitating again after moving in a different direction clears the skip', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Lava);
-    tileMap.setTileAtPixel(0, 24, TileType.Brick);
+    tileMap.setTile(2, 3, TileType.Lava);
+    tileMap.setTile(0, 3, TileType.Brick);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -229,7 +241,7 @@ describe('StateScript', () => {
   });
 
   it('should fall when there is no brick below, regardless of input', () => {
-    player.setPosition(100, 16);
+    teleportPlayer(player, 12, 2);
 
     player.update();
 
@@ -240,7 +252,7 @@ describe('StateScript', () => {
     for (let column = 0; column < tileMap.columns; column++) {
       tileMap.setTile(column, 3, TileType.Brick);
     }
-    player.setPosition(SCREEN_WIDTH - CELL_SIZE - 2, 16);
+    teleportPlayer(player, tileMap.columns - 1, 2);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -249,7 +261,7 @@ describe('StateScript', () => {
   });
 
   it('should clamp falling so the player never drops below the screen', () => {
-    player.setPosition(100, SCREEN_HEIGHT - CELL_SIZE - 2);
+    teleportPlayer(player, 12, tileMap.rows - 1);
 
     player.update();
 
@@ -257,7 +269,7 @@ describe('StateScript', () => {
   });
 
   it('should finish the current 8px step even if the key is released mid-step', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Brick);
+    tileMap.setTile(2, 3, TileType.Brick);
     engineState.deltaTime = 0.05;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -278,7 +290,7 @@ describe('StateScript', () => {
   });
 
   it('should ignore a direction change until the in-progress step completes', () => {
-    tileMap.setTileAtPixel(16, 24, TileType.Brick);
+    tileMap.setTile(2, 3, TileType.Brick);
     engineState.deltaTime = 0.05;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -298,7 +310,7 @@ describe('StateScript', () => {
   });
 
   it('should commit to a full 8px fall before re-evaluating whether the player has landed', () => {
-    player.setPosition(100, 16);
+    teleportPlayer(player, 12, 2);
     engineState.deltaTime = 0.05;
 
     player.update();
@@ -310,8 +322,8 @@ describe('StateScript', () => {
   });
 
   it('should stay in place on a stairs tile even without ground below, when no key is pressed', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Stairs);
 
     player.update();
 
@@ -319,8 +331,8 @@ describe('StateScript', () => {
   });
 
   it('should still allow climbing while on a stairs tile with no ground below', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Stairs);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();
@@ -330,9 +342,9 @@ describe('StateScript', () => {
   });
 
   it('should keep climbing when the next cell up is also a stairs tile', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Stairs);
-    tileMap.setTileAtPixel(32, 8, TileType.Stairs);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Stairs);
+    tileMap.setTile(4, 1, TileType.Stairs);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();
@@ -342,8 +354,8 @@ describe('StateScript', () => {
   });
 
   it('should stay in place on a crossbar tile even without ground below, when no key is pressed', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Crossbar);
 
     player.update();
 
@@ -351,8 +363,8 @@ describe('StateScript', () => {
   });
 
   it('should stop falling once it reaches a crossbar tile', () => {
-    player.setPosition(100, 16);
-    tileMap.setTileAtPixel(100, 24, TileType.Crossbar);
+    teleportPlayer(player, 12, 2);
+    tileMap.setTile(12, 3, TileType.Crossbar);
     engineState.deltaTime = 0.05;
 
     player.update();
@@ -367,9 +379,9 @@ describe('StateScript', () => {
   });
 
   it('should move left along a crossbar', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
-    tileMap.setTileAtPixel(24, 16, TileType.Crossbar);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Crossbar);
+    tileMap.setTile(3, 2, TileType.Crossbar);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
 
     player.update();
@@ -379,9 +391,9 @@ describe('StateScript', () => {
   });
 
   it('should move right along a crossbar', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
-    tileMap.setTileAtPixel(40, 16, TileType.Crossbar);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Crossbar);
+    tileMap.setTile(5, 2, TileType.Crossbar);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -391,9 +403,9 @@ describe('StateScript', () => {
   });
 
   it('should not move along a crossbar when a brick blocks the target cell', () => {
-    player.setPosition(32, 16);
-    tileMap.setTileAtPixel(32, 16, TileType.Crossbar);
-    tileMap.setTileAtPixel(24, 16, TileType.Brick);
+    teleportPlayer(player, 4, 2);
+    tileMap.setTile(4, 2, TileType.Crossbar);
+    tileMap.setTile(3, 2, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
 
     player.update();
@@ -410,8 +422,8 @@ describe('StateScript', () => {
   });
 
   it('should transition to Dying and freeze in place when standing on a dangerous tile', () => {
-    player.setPosition(40, 16);
-    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+    teleportPlayer(player, 5, 2);
+    tileMap.setTile(5, 2, TileType.Lava);
 
     player.update();
 
@@ -420,8 +432,8 @@ describe('StateScript', () => {
 
   it('should ignore movement input while dying', () => {
     engineState.deltaTime = 0.3;
-    player.setPosition(40, 16);
-    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+    teleportPlayer(player, 5, 2);
+    tileMap.setTile(5, 2, TileType.Lava);
 
     player.update();
 
@@ -432,32 +444,32 @@ describe('StateScript', () => {
   });
 
   it('should respawn at the spawn position and lose a life once the dying timer elapses', () => {
-    player.setPosition(40, 16);
-    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+    teleportPlayer(player, 5, 2);
+    tileMap.setTile(5, 2, TileType.Lava);
 
     player.update();
-    expect(lives.count).toBe(2);
+    expect(livesScript.count).toBe(2);
 
     player.update();
 
-    expect(player.position).toEqual(spawnPosition);
-    expect(lives.count).toBe(1);
+    expect(player.position).toEqual({ x: 8, y: 16 });
+    expect(livesScript.count).toBe(1);
   });
 
   it('should transition to GameOver instead of respawning once lives reach zero, and stop responding to input', () => {
-    const singleLifeLives = Lives.create(1);
-    const dyingPlayer = createPlayer({ x: 40, y: 16 }, singleLifeLives);
-    tileMap.setTileAtPixel(40, 16, TileType.Lava);
+    livesScript.loseLife();
+    teleportPlayer(player, 5, 2);
+    tileMap.setTile(5, 2, TileType.Lava);
 
-    dyingPlayer.update();
-    dyingPlayer.update();
+    player.update();
+    player.update();
 
-    expect(singleLifeLives.isGameOver).toBe(true);
-    expect(dyingPlayer.position).toEqual({ x: 40, y: 16 });
+    expect(livesScript.isGameOver).toBe(true);
+    expect(player.position).toEqual({ x: 40, y: 16 });
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
-    dyingPlayer.update();
+    player.update();
 
-    expect(dyingPlayer.position).toEqual({ x: 40, y: 16 });
+    expect(player.position).toEqual({ x: 40, y: 16 });
   });
 });

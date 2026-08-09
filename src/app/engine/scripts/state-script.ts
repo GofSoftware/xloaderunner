@@ -2,7 +2,7 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { TileMap, TileType } from './tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -19,7 +19,8 @@ import { OBJECT_EXCLAMATION } from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
 import { TextRenderer } from './text-renderer';
 import { DEATH_JINGLE } from '../audio/music-player';
-import { Lives } from '../lives';
+import { LivesScript } from './lives-script';
+import { ObjectPosition } from './object-position';
 
 export enum PlayerState {
   Stand = 'Stand',
@@ -57,8 +58,8 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
 };
 
 export class StateScript extends Script {
-  public static create(gameObject: GameObject, tileMap: TileMap, lives: Lives, spawnPosition: { x: number; y: number }): StateScript {
-    return new StateScript(gameObject, tileMap, lives, spawnPosition);
+  public static create(gameObject: GameObject, spawnCell: { column: number; row: number }): StateScript {
+    return new StateScript(gameObject, spawnCell);
   }
 
   private static readonly STEP_SPEED: Record<PlayerState, number> = {
@@ -76,11 +77,9 @@ export class StateScript extends Script {
     [PlayerState.GameOver]: 0,
   };
 
-  private readonly tileMap: TileMap;
-  private readonly lives: Lives;
-  private readonly spawnPosition: { x: number; y: number };
+  private readonly spawnCell: { column: number; row: number };
   private state: PlayerState | undefined;
-  private activeStep: { state: PlayerState; target: { x: number; y: number } } | undefined;
+  private movingState: PlayerState | undefined;
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
   private dying: { elapsed: number } | undefined;
 
@@ -89,11 +88,21 @@ export class StateScript extends Script {
   private isForcedUp = false;
   private isForcedDown = false;
 
-  private constructor(gameObject: GameObject, tileMap: TileMap, lives: Lives, spawnPosition: { x: number; y: number }) {
+  private constructor(gameObject: GameObject, spawnCell: { column: number; row: number }) {
     super(gameObject);
-    this.tileMap = tileMap;
-    this.lives = lives;
-    this.spawnPosition = spawnPosition;
+    this.spawnCell = spawnCell;
+  }
+
+  private get objectPosition(): ObjectPosition {
+    return this.gameObject.getScript(ObjectPosition)!;
+  }
+
+  private get tileMap(): TileMap {
+    return this.gameObject.engineState.getGameObjectByName('Map')!.getScript(TileMap)!;
+  }
+
+  private get lives(): LivesScript {
+    return this.gameObject.engineState.getGameObjectByName('Lives')!.getScript(LivesScript)!;
   }
 
   public forceLeft(): void {
@@ -119,17 +128,15 @@ export class StateScript extends Script {
     }
 
     let activeState: PlayerState;
-    if (this.activeStep) {
-      activeState = this.activeStep.state;
+    if (this.objectPosition.isMoving) {
+      activeState = this.movingState!;
     } else {
       activeState = this.resolveState();
       if (StateScript.STEP_SPEED[activeState] > 0) {
-        this.activeStep = { state: activeState, target: this.computeStepTarget(activeState) };
+        this.movingState = activeState;
+        const { column, row } = this.computeStepTarget(activeState);
+        this.objectPosition.moveTo(column, row, StateScript.STEP_SPEED[activeState]);
       }
-    }
-
-    if (this.activeStep) {
-      this.advanceStep();
     }
 
     this.setState(activeState);
@@ -144,12 +151,12 @@ export class StateScript extends Script {
   }
 
   private resolveState(): PlayerState {
-    const { x, y } = this.gameObject.position;
+    const { column, row } = this.objectPosition;
 
     if (this.dying) {
       return this.advanceDying();
     }
-    if (this.tileMap.isDangerousAtPixel(x, y)) {
+    if (this.tileMap.isDangerous(column, row)) {
       return this.beginDying();
     }
 
@@ -168,18 +175,18 @@ export class StateScript extends Script {
       }
     } else {
       this.hesitation = undefined;
-      if (this.isForcedLeft && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
+      if (this.isForcedLeft && !this.tileMap.isWall(column - 1, row)) {
         return PlayerState.OnCrossbarMoveLeft;
       }
-      if (this.isForcedRight && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
+      if (this.isForcedRight && !this.tileMap.isWall(column + 1, row)) {
         return PlayerState.OnCrossbarMoveRight;
       }
     }
 
-    if (onStairs && this.isForcedUp && !this.tileMap.isWallAtPixel(x, y - CELL_SIZE)) {
+    if (onStairs && this.isForcedUp && !this.tileMap.isWall(column, row - 1)) {
       return PlayerState.MoveUp;
     }
-    if (this.isForcedDown && !this.tileMap.isWallAtPixel(x, y + CELL_SIZE)) {
+    if (this.isForcedDown && !this.tileMap.isWall(column, row + 1)) {
       return PlayerState.MoveDown;
     }
 
@@ -216,20 +223,20 @@ export class StateScript extends Script {
   }
 
   private beginGroundMove(): PlayerState | undefined {
-    const { x, y } = this.gameObject.position;
+    const { column, row } = this.objectPosition;
 
-    if (this.isForcedLeft && !this.tileMap.isWallAtPixel(x - CELL_SIZE, y)) {
-      return this.startGroundMove(PlayerState.MoveLeft, x - CELL_SIZE, y);
+    if (this.isForcedLeft && !this.tileMap.isWall(column - 1, row)) {
+      return this.startGroundMove(PlayerState.MoveLeft, column - 1, row);
     }
-    if (this.isForcedRight && !this.tileMap.isWallAtPixel(x + CELL_SIZE, y)) {
-      return this.startGroundMove(PlayerState.MoveRight, x + CELL_SIZE, y);
+    if (this.isForcedRight && !this.tileMap.isWall(column + 1, row)) {
+      return this.startGroundMove(PlayerState.MoveRight, column + 1, row);
     }
 
     return undefined;
   }
 
-  private startGroundMove(state: PlayerState.MoveLeft | PlayerState.MoveRight, targetX: number, targetY: number): PlayerState {
-    if (!this.tileMap.isDangerousAtPixel(targetX, targetY + CELL_SIZE)) {
+  private startGroundMove(state: PlayerState.MoveLeft | PlayerState.MoveRight, targetColumn: number, targetRow: number): PlayerState {
+    if (!this.tileMap.isDangerous(targetColumn, targetRow + 1)) {
       this.hesitation = undefined;
       return state;
     }
@@ -271,7 +278,7 @@ export class StateScript extends Script {
       this.showGameOver();
       return PlayerState.GameOver;
     }
-    this.gameObject.setPosition(this.spawnPosition.x, this.spawnPosition.y);
+    this.objectPosition.teleportTo(this.spawnCell.column, this.spawnCell.row);
     return PlayerState.Stand;
   }
 
@@ -283,44 +290,40 @@ export class StateScript extends Script {
   }
 
   private isGroundedBelow(): boolean {
-    const { x, y } = this.gameObject.position;
-    return this.tileMap.isSolidAtPixel(x, y + CELL_SIZE);
+    const { column, row } = this.objectPosition;
+    return this.tileMap.isSolid(column, row + 1);
   }
 
   private isOnStairs(): boolean {
-    const { x, y } = this.gameObject.position;
-    return this.tileMap.getTileAtPixel(x, y) === TileType.Stairs;
+    const { column, row } = this.objectPosition;
+    return this.tileMap.getTile(column, row) === TileType.Stairs;
   }
 
   private isOnCrossbar(): boolean {
-    const { x, y } = this.gameObject.position;
-    return this.tileMap.getTileAtPixel(x, y) === TileType.Crossbar;
+    const { column, row } = this.objectPosition;
+    return this.tileMap.getTile(column, row) === TileType.Crossbar;
   }
 
-  private computeStepTarget(state: PlayerState): { x: number; y: number } {
-    const { x, y } = this.gameObject.position;
-    let targetX = x;
-    let targetY = y;
+  private computeStepTarget(state: PlayerState): { column: number; row: number } {
+    const { column, row } = this.objectPosition;
+    let targetColumn = column;
+    let targetRow = row;
 
     switch (state) {
       case PlayerState.MoveLeft:
-        targetX = x - CELL_SIZE;
+      case PlayerState.OnCrossbarMoveLeft:
+        targetColumn = column - 1;
         break;
       case PlayerState.MoveRight:
-        targetX = x + CELL_SIZE;
-        break;
-      case PlayerState.OnCrossbarMoveLeft:
-        targetX = x - CELL_SIZE;
-        break;
       case PlayerState.OnCrossbarMoveRight:
-        targetX = x + CELL_SIZE;
+        targetColumn = column + 1;
         break;
       case PlayerState.MoveUp:
-        targetY = y - CELL_SIZE;
+        targetRow = row - 1;
         break;
       case PlayerState.MoveDown:
       case PlayerState.Fall:
-        targetY = y + CELL_SIZE;
+        targetRow = row + 1;
         break;
       case PlayerState.Stand:
       case PlayerState.OnStairs:
@@ -331,34 +334,9 @@ export class StateScript extends Script {
     }
 
     return {
-      x: StateScript.clamp(targetX, 0, SCREEN_WIDTH - CELL_SIZE),
-      y: StateScript.clamp(targetY, 0, SCREEN_HEIGHT - CELL_SIZE),
+      column: StateScript.clamp(targetColumn, 0, this.tileMap.columns - 1),
+      row: StateScript.clamp(targetRow, 0, this.tileMap.rows - 1),
     };
-  }
-
-  private advanceStep(): void {
-    const { deltaTime } = this.gameObject.engineState;
-    const { x, y } = this.gameObject.position;
-    const { state, target } = this.activeStep!;
-    const distance = StateScript.STEP_SPEED[state] * deltaTime;
-
-    const nextX = StateScript.moveToward(x, target.x, distance);
-    const nextY = StateScript.moveToward(y, target.y, distance);
-    this.gameObject.setPosition(nextX, nextY);
-
-    if (nextX === target.x && nextY === target.y) {
-      this.activeStep = undefined;
-    }
-  }
-
-  private static moveToward(current: number, target: number, maxDelta: number): number {
-    if (current < target) {
-      return Math.min(current + maxDelta, target);
-    }
-    if (current > target) {
-      return Math.max(current - maxDelta, target);
-    }
-    return target;
   }
 
   private static clamp(value: number, min: number, max: number): number {

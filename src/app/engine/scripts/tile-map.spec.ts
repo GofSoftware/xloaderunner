@@ -30,15 +30,6 @@ describe('TileMap', () => {
     expect(tileMap.isSolid(1, 3)).toBe(true);
   });
 
-  it('should convert pixel coordinates to the containing cell', () => {
-    tileMap.setTileAtPixel(8, 24, TileType.Brick);
-
-    expect(tileMap.getTile(1, 3)).toBe(TileType.Brick);
-    expect(tileMap.getTileAtPixel(9, 27)).toBe(TileType.Brick);
-    expect(tileMap.isSolidAtPixel(9, 27)).toBe(true);
-    expect(tileMap.isSolidAtPixel(0, 0)).toBe(false);
-  });
-
   it('should not treat crossbar, lava, player-start, or gold tiles as solid ground', () => {
     tileMap.setTile(1, 3, TileType.Crossbar);
     tileMap.setTile(2, 3, TileType.Lava);
@@ -68,13 +59,6 @@ describe('TileMap', () => {
     expect(tileMap.isWall(7, 3)).toBe(false);
   });
 
-  it('should convert pixel coordinates to the containing cell when checking for walls', () => {
-    tileMap.setTileAtPixel(8, 24, TileType.Brick);
-
-    expect(tileMap.isWallAtPixel(9, 27)).toBe(true);
-    expect(tileMap.isWallAtPixel(0, 0)).toBe(false);
-  });
-
   it('should only treat lava tiles as dangerous, not brick, stairs, crossbar, player-start, gold, or empty cells', () => {
     tileMap.setTile(1, 3, TileType.Lava);
     tileMap.setTile(2, 3, TileType.Brick);
@@ -90,13 +74,6 @@ describe('TileMap', () => {
     expect(tileMap.isDangerous(5, 3)).toBe(false);
     expect(tileMap.isDangerous(6, 3)).toBe(false);
     expect(tileMap.isDangerous(7, 3)).toBe(false);
-  });
-
-  it('should convert pixel coordinates to the containing cell when checking for danger', () => {
-    tileMap.setTileAtPixel(8, 24, TileType.Lava);
-
-    expect(tileMap.isDangerousAtPixel(9, 27)).toBe(true);
-    expect(tileMap.isDangerousAtPixel(0, 0)).toBe(false);
   });
 
   it('should treat out-of-bounds cells as empty and ignore writes to them', () => {
@@ -116,5 +93,60 @@ describe('TileMap', () => {
       { column: 0, row: 3, type: TileType.Brick },
       { column: 3, row: 4, type: TileType.Stairs },
     ]);
+  });
+
+  describe('object registry', () => {
+    function createObject(name: string): GameObject {
+      return GameObject.create(name, {} as IEngineState, { x: 0, y: 0 }, []);
+    }
+
+    it('should report no objects at a cell until one is placed there', () => {
+      expect(tileMap.getObjectsAt(2, 3)).toEqual([]);
+    });
+
+    it('should register an object at a cell via moveObject, treating equal from/to as first-time placement', () => {
+      const gameObject = createObject('Object');
+
+      tileMap.moveObject(gameObject, 2, 3, 2, 3);
+
+      expect(tileMap.getObjectsAt(2, 3)).toEqual([gameObject]);
+    });
+
+    it('should move an object from its old cell to a new one', () => {
+      const gameObject = createObject('Object');
+      tileMap.moveObject(gameObject, 2, 3, 2, 3);
+
+      tileMap.moveObject(gameObject, 2, 3, 5, 6);
+
+      expect(tileMap.getObjectsAt(2, 3)).toEqual([]);
+      expect(tileMap.getObjectsAt(5, 6)).toEqual([gameObject]);
+    });
+
+    it('should return a snapshot copy from getObjectsAt, not the internal array', () => {
+      const gameObject = createObject('Object');
+      tileMap.moveObject(gameObject, 2, 3, 2, 3);
+
+      const objects = tileMap.getObjectsAt(2, 3);
+      objects.push(createObject('Intruder'));
+
+      expect(tileMap.getObjectsAt(2, 3)).toEqual([gameObject]);
+    });
+
+    it('should remove an object from its cell', () => {
+      const gameObject = createObject('Object');
+      tileMap.moveObject(gameObject, 2, 3, 2, 3);
+
+      tileMap.removeObject(gameObject, 2, 3);
+
+      expect(tileMap.getObjectsAt(2, 3)).toEqual([]);
+    });
+
+    it('should treat out-of-bounds cells as safe no-ops for the object registry', () => {
+      const gameObject = createObject('Object');
+
+      expect(() => tileMap.moveObject(gameObject, -1, 0, MAP_COLUMNS, 0)).not.toThrow();
+      expect(() => tileMap.removeObject(gameObject, -1, 0)).not.toThrow();
+      expect(tileMap.getObjectsAt(-1, 0)).toEqual([]);
+    });
   });
 });
