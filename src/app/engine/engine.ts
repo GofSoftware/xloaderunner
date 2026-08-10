@@ -1,17 +1,4 @@
-import {
-  OBJECT_BRICK,
-  OBJECT_CROSSBAR,
-  OBJECT_GOLD,
-  OBJECT_LAVA_1,
-  OBJECT_LAVA_2,
-  OBJECT_LAVA_3,
-  OBJECT_LAVA_4,
-  OBJECT_LAVA_5,
-  OBJECT_LAVA_6,
-  OBJECT_LAVA_7,
-  OBJECT_LAVA_8,
-  OBJECT_STAIRS,
-} from '../data/sprites';
+import { OBJECT_GOLD } from '../data/sprites';
 import { LivesScript } from './scripts/lives-script';
 import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LEVEL_TILES_ARR } from '../data/level';
@@ -26,15 +13,16 @@ import { BackgroundStars } from './scripts/background-stars';
 import { TileMap, TileType } from './scripts/tile-map';
 import { StateScript } from './scripts/state-script';
 import { KeyboardInputScript } from './scripts/keyboard-input-script';
+import { BuilderScript } from './scripts/builder-script';
 import { GoldScript } from './scripts/gold-script';
 import { GoldItem } from './scripts/gold-item';
 import { ObjectPosition } from './scripts/object-position';
 import { MapHelper } from './scripts/map.helper';
+import { createTileGameObject } from './scripts/tile-bitmaps';
 import { TextRenderer } from './scripts/text-renderer';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 import { STAND_ANIMATION } from './scripts/animations';
-import { ITileBitmapDescription, TileBitmapType } from './i-tile-bitmap-description';
 
 const FRAME_RATE = 0;
 
@@ -43,19 +31,6 @@ export class Engine implements IEngineState {
   public static get instance(): Engine {
     return Engine.engineInstance ?? (Engine.engineInstance = new Engine());
   }
-
-  private static readonly tileBitmaps: Partial<Record<TileType, ITileBitmapDescription>> = {
-    [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
-    [TileType.Stairs]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_STAIRS },
-    [TileType.Crossbar]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_CROSSBAR },
-    [TileType.Lava]: {
-      bitmapType: TileBitmapType.Animated,
-      animatedBitmap: {
-        bitmap: [OBJECT_LAVA_1, OBJECT_LAVA_2, OBJECT_LAVA_3, OBJECT_LAVA_4, OBJECT_LAVA_5, OBJECT_LAVA_6, OBJECT_LAVA_7, OBJECT_LAVA_8],
-        framePerSecond: 4,
-      },
-    },
-  };
 
   private uiRender: ((buffers: ReadonlyArray<Readonly<number[][]>>) => void) | undefined;
   private started: boolean = false;
@@ -193,25 +168,8 @@ export class Engine implements IEngineState {
 
     const tileGameObjects = tileMap
       .getTiles()
-      .filter(({ type }) => type in Engine.tileBitmaps)
-      .map(({ column, row, type }) =>
-        GameObject.create(`Tile-${column}-${row}`, this, MapHelper.mapToScreen(column, row), [
-          (gameObject: GameObject) => ObjectPosition.create(gameObject, column, row),
-          (gameObject: GameObject) => {
-            const tileBitmap = Engine.tileBitmaps[type]!;
-            return tileBitmap.bitmapType === TileBitmapType.Static
-              ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, BACKGROUND_LAYER)
-              : BitmapSpriteRenderer.create(
-                  gameObject,
-                  {
-                    bitmap: tileBitmap.animatedBitmap!.bitmap,
-                    framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
-                  },
-                  BACKGROUND_LAYER,
-                );
-          },
-        ]),
-      );
+      .map(({ column, row, type }) => createTileGameObject(this, column, row, type))
+      .filter((gameObject): gameObject is GameObject => gameObject !== undefined);
 
     const goldGameObjects = tileMap
       .getTiles()
@@ -243,6 +201,10 @@ export class Engine implements IEngineState {
 
       GameObject.create('Player', this, spawnPosition, [
         (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
+        // Reads the player's cell before StateScript/ObjectPosition can move it this same frame - otherwise,
+        // when the same arrow key both moves the player and specifies a build direction, the build target
+        // would be computed from the cell the player is moving into rather than the cell it started this frame in.
+        (gameObject: GameObject) => BuilderScript.create(gameObject),
         (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
         (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
