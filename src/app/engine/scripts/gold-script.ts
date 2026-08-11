@@ -1,7 +1,7 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { GoldItem } from './gold-item';
-import { TileMap } from './tile-map';
+import { TileMap, TileType } from './tile-map';
 import { ObjectPosition } from './object-position';
 import { CELL_SIZE, SCREEN_WIDTH } from '../screen/screen.constants';
 import { MAX_LIVES } from './lives-script';
@@ -39,12 +39,16 @@ export class GoldScript extends Script {
   }
 
   private collectAtPlayerPosition(): void {
-    const objectsHere = this.tileMap.getObjectsAt(this.objectPosition.column, this.objectPosition.row);
+    const { column, row } = this.objectPosition;
+    const objectsHere = this.tileMap.getObjectsAt(column, row);
     const gold = objectsHere.find((gameObject) => gameObject.getScript(GoldItem));
     if (!gold) {
       return;
     }
-    gold.destroy();
+    this.gameObject.engineState.removeGameObject(gold);
+    // The tile grid still remembers this cell as Gold independently of the collected GameObject -
+    // clear it back to Empty so BuilderScript can build here afterwards.
+    this.tileMap.setTile(column, row, TileType.Empty);
     this.collected++;
   }
 

@@ -9,7 +9,7 @@ export class DestroyAfterTime extends Script {
   private constructor(gameObject: GameObject, private destroyTime: number) {
     super(gameObject);
     setTimeout(() => {
-      this.gameObject.destroy();
+      this.gameObject.engineState.removeGameObject(gameObject);
     }, this.destroyTime);
   }
 }

@@ -16,6 +16,19 @@ class RecordingScript extends Script {
   }
 }
 
+class StartRecordingScript extends Script {
+  constructor(
+    gameObject: GameObject,
+    private readonly started: string[],
+  ) {
+    super(gameObject);
+  }
+
+  public override start(): void {
+    this.started.push(this.gameObject.name);
+  }
+}
+
 class DestroyRecordingScript extends Script {
   constructor(
     gameObject: GameObject,
@@ -82,6 +95,26 @@ describe('Engine', () => {
       expect(log).toContain('C');
       expect(log).not.toContain('Untracked');
     });
+
+    it('should start the game object, so callers never have to start() it themselves', () => {
+      const started: string[] = [];
+      const gameObject = GameObject.create('D', Engine.instance, { x: 0, y: 0 }, [(go) => new StartRecordingScript(go, started)]);
+
+      Engine.instance.addGameObject(gameObject);
+
+      expect(started).toEqual(['D']);
+      expect(gameObject.isStarted).toBe(true);
+    });
+
+    it('should not start a game object a second time if it was already started', () => {
+      const started: string[] = [];
+      const gameObject = GameObject.create('E', Engine.instance, { x: 0, y: 0 }, [(go) => new StartRecordingScript(go, started)]);
+      gameObject.start();
+
+      Engine.instance.addGameObject(gameObject);
+
+      expect(started).toEqual(['E']);
+    });
   });
 
   describe('removeGameObject', () => {
@@ -97,10 +130,45 @@ describe('Engine', () => {
       expect(log.filter((name) => name === 'Duplicate').length).toBe(1);
     });
 
-    it('should do nothing when the game object is not currently tracked', () => {
-      const untracked = createRecorder('Untracked');
+    it('should destroy an untracked game object without throwing, even though there is nothing to untrack', () => {
+      const destroyed: string[] = [];
+      const untracked = GameObject.create('Untracked', Engine.instance, { x: 0, y: 0 }, [
+        (go) => new DestroyRecordingScript(go, destroyed),
+      ]);
 
       expect(() => Engine.instance.removeGameObject(untracked)).not.toThrow();
+      expect(destroyed).toEqual(['Untracked']);
+    });
+
+    it('should destroy the game object, so callers never have to destroy() it themselves', () => {
+      const destroyed: string[] = [];
+      const gameObject = GameObject.create('F', Engine.instance, { x: 0, y: 0 }, [(go) => new DestroyRecordingScript(go, destroyed)]);
+      Engine.instance.addGameObject(gameObject);
+
+      Engine.instance.removeGameObject(gameObject);
+
+      expect(destroyed).toEqual(['F']);
+      expect(gameObject.isDestroyed).toBe(true);
+    });
+
+    it('should not destroy a game object again if it was already destroyed', () => {
+      const destroyed: string[] = [];
+      const gameObject = GameObject.create('G', Engine.instance, { x: 0, y: 0 }, [(go) => new DestroyRecordingScript(go, destroyed)]);
+      Engine.instance.addGameObject(gameObject);
+      gameObject.destroy();
+
+      Engine.instance.removeGameObject(gameObject);
+
+      expect(destroyed).toEqual(['G']);
+    });
+
+    it('should stay tracked after destroy() is called directly - only removeGameObject() untracks it', () => {
+      const gameObject = createRecorder('DirectlyDestroyed');
+      Engine.instance.addGameObject(gameObject);
+
+      gameObject.destroy();
+
+      expect(Engine.instance.getGameObjectByName('DirectlyDestroyed')).toBe(gameObject);
     });
   });
 
@@ -151,9 +219,7 @@ describe('Engine', () => {
       const destroyed: string[] = [];
       const names = ['A', 'B', 'C', 'D', 'E'];
       names.forEach((name) => {
-        const gameObject = GameObject.create(name, Engine.instance, { x: 0, y: 0 }, [
-          (go) => new DestroyRecordingScript(go, destroyed),
-        ]);
+        const gameObject = GameObject.create(name, Engine.instance, { x: 0, y: 0 }, [(go) => new DestroyRecordingScript(go, destroyed)]);
         Engine.instance.addGameObject(gameObject);
       });
 

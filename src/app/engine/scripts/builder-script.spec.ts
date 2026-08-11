@@ -45,7 +45,10 @@ describe('BuilderScript', () => {
       musicPlayer: {} as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
-      addGameObject: (gameObject: GameObject) => gameObjectsByName.set(gameObject.name, gameObject),
+      addGameObject: (gameObject: GameObject) => {
+        gameObjectsByName.set(gameObject.name, gameObject);
+        gameObject.start();
+      },
       removeGameObject: (gameObject: GameObject) => gameObjectsByName.delete(gameObject.name),
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
     };

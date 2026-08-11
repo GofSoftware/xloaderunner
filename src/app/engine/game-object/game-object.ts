@@ -22,6 +22,8 @@ export class GameObject implements IGameObject {
   private scriptInstances: Script[] = [];
 
   public enabled: boolean = true;
+  private started: boolean = false;
+  private destroyed: boolean = false;
 
   private constructor(name: string, engineState: IEngineState, position: Vector2) {
     this.name = name;
@@ -45,7 +47,17 @@ export class GameObject implements IGameObject {
     return this.scriptInstances.find((script): script is T => script instanceof scriptType);
   }
 
+  public get isStarted(): boolean {
+    return this.started;
+  }
+
+  // Idempotent - Engine.addGameObject() calls this on every add, so callers never have to
+  // remember to start() a game object themselves after handing it to the engine.
   public start(): void {
+    if (this.started) {
+      return;
+    }
+    this.started = true;
     this.scriptInstances.forEach((script) => script.start());
   }
 
@@ -55,8 +67,17 @@ export class GameObject implements IGameObject {
     }
   }
 
+  public get isDestroyed(): boolean {
+    return this.destroyed;
+  }
+
+  // Idempotent - Engine.removeGameObject() calls this on every remove, so callers never have to
+  // remember to destroy() a game object themselves before handing it to the engine to untrack.
   public destroy(): void {
+    if (this.destroyed) {
+      return;
+    }
+    this.destroyed = true;
     this.scriptInstances.forEach((script) => script.destroy());
-    this.engineState.removeGameObject(this);
   }
 }

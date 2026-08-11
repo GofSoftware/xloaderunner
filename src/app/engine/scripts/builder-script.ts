@@ -3,6 +3,11 @@ import { GameObject } from '../game-object/game-object';
 import { ObjectPosition } from './object-position';
 import { TileMap, TileType } from './tile-map';
 import { createTileGameObject } from './tile-bitmaps';
+import { MapHelper } from './map.helper';
+import { UPPER_EFFECT_LAYER } from '../screen/screen.constants';
+import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
+import { DestroyAfterTime } from './destroy-after-time';
 
 const TILE_TYPE_BY_KEY: Record<string, TileType> = {
   Digit1: TileType.Brick,
@@ -91,6 +96,25 @@ export class BuilderScript extends Script {
       return;
     }
     this.gameObject.engineState.addGameObject(tileGameObject);
-    tileGameObject.start();
+
+    const smokeGameObject = GameObject.create(
+      `Smoke-${tileGameObject.name}`,
+      this.gameObject.engineState,
+      MapHelper.mapToScreen(column, row),
+      [
+        (gameObject) => ObjectPosition.create(gameObject, targetColumn, targetRow),
+        (gameObject) =>
+          BitmapSpriteRenderer.create(
+            gameObject,
+            { bitmap: [OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4], framePerSecond: 10 },
+            UPPER_EFFECT_LAYER,
+          ),
+        (gameObject) => DestroyAfterTime.create(gameObject, 400),
+      ],
+    );
+    if (!smokeGameObject) {
+      return;
+    }
+    this.gameObject.engineState.addGameObject(smokeGameObject);
   }
 }

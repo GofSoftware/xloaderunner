@@ -2,9 +2,10 @@ export const SCREEN_WIDTH = 256;
 export const SCREEN_HEIGHT = 192;
 export const CELL_SIZE = 8;
 
-export const LAYER_COUNT = 2;
+export const LAYER_COUNT = 3;
 export const BACKGROUND_LAYER = 0;
 export const FOREGROUND_LAYER = 1;
+export const UPPER_EFFECT_LAYER = 2;
 
 export const __ = 0x00000000;
 export const Bk = 0x000000ff;

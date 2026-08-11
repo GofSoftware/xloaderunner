@@ -70,9 +70,9 @@ export class Engine implements IEngineState {
   public stop(): void {
     this.started = false;
     this.keyboard.detach();
-    // destroy() removes the object from this.gameObjects, so iterate a copy -
+    // removeGameObject() removes the object from this.gameObjects, so iterate a copy -
     // forEach over the live array would skip every other element as it shrinks.
-    [...this.gameObjects].forEach((gameObject) => gameObject.destroy());
+    [...this.gameObjects].forEach((gameObject) => this.removeGameObject(gameObject));
   }
 
   public addGameObject(gameObject: GameObject, after?: GameObject): void {
@@ -89,6 +89,8 @@ export class Engine implements IEngineState {
     } else {
       this.gameObjectsByName.set(gameObject.name, [gameObject]);
     }
+
+    gameObject.start();
   }
 
   public removeGameObject(gameObject: GameObject): void {
@@ -98,15 +100,18 @@ export class Engine implements IEngineState {
     }
 
     const named = this.gameObjectsByName.get(gameObject.name);
-    if (!named) {
-      return;
+    if (named) {
+      const namedIndex = named.indexOf(gameObject);
+      if (namedIndex >= 0) {
+        named.splice(namedIndex, 1);
+      }
+      if (named.length === 0) {
+        this.gameObjectsByName.delete(gameObject.name);
+      }
     }
-    const namedIndex = named.indexOf(gameObject);
-    if (namedIndex >= 0) {
-      named.splice(namedIndex, 1);
-    }
-    if (named.length === 0) {
-      this.gameObjectsByName.delete(gameObject.name);
+
+    if (!gameObject.isDestroyed) {
+      gameObject.destroy();
     }
   }
 
@@ -124,7 +129,7 @@ export class Engine implements IEngineState {
     this.updateFps();
     this.screenBuffer.clear();
 
-    // destroy() (e.g. GoldScript collecting an item) removes a game object from
+    // removeGameObject() (e.g. GoldScript collecting an item) removes a game object from
     // this.gameObjects mid-frame, so iterate a copy - forEach over the live
     // array would skip whichever element shifts into the just-processed slot.
     [...this.gameObjects].forEach((gameObject) => gameObject.update());
@@ -216,7 +221,5 @@ export class Engine implements IEngineState {
           ),
       ]),
     ].forEach((gameObject) => this.addGameObject(gameObject));
-
-    this.gameObjects.forEach((gameObject) => gameObject.start());
   }
 }
