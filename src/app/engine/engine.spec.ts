@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { Engine } from './engine';
 import { GameObject } from './game-object/game-object';
 import { Script } from './game-object/script';
+import { TileMap, TileType } from './scripts/tile-map';
 
 class RecordingScript extends Script {
   constructor(
@@ -227,6 +228,18 @@ describe('Engine', () => {
 
       names.forEach((name) => expect(destroyed).toContain(name));
       expect(destroyed.length).toBe(new Set(destroyed).size);
+    });
+  });
+
+  describe('start', () => {
+    it('should clear the PlayerStart tile back to Empty, so BuilderScript can build on the spawn cell', () => {
+      const tileMap = Engine.instance.getGameObjectByName('Map')!.getScript(TileMap)!;
+
+      for (let row = 0; row < tileMap.rows; row++) {
+        for (let column = 0; column < tileMap.columns; column++) {
+          expect(tileMap.getTile(column, row)).not.toBe(TileType.PlayerStart);
+        }
+      }
     });
   });
 });

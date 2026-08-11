@@ -190,6 +190,9 @@ export class Engine implements IEngineState {
     const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
     const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : { column: 20, row: 5 };
     const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
+    // PlayerStart has no bitmap and never renders anything, but the tile grid still remembers it as
+    // non-Empty - clear it so BuilderScript can build on the spawn cell once the player has moved off it.
+    tileMap.setTile(spawnCell.column, spawnCell.row, TileType.Empty);
 
     [
       mapGameObject,
