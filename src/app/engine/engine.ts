@@ -3,7 +3,7 @@ import { LivesScript } from './scripts/lives-script';
 import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LEVEL_TILES_ARR } from '../data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
-import { BACKGROUND_LAYER, FOREGROUND_LAYER, LAYER_COUNT } from './screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, HUD_LAYER, LAYER_COUNT } from './screen/screen.constants';
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
@@ -23,6 +23,9 @@ import { TextRenderer } from './scripts/text-renderer';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
 import { STAND_ANIMATION } from './scripts/animations';
+import { LinearMoveScript } from './scripts/linear-move-script';
+import { DestroyAfterTime } from './scripts/destroy-after-time';
+import { DissolveTextureEffect } from './scripts/effects/dissolve-texture-effect';
 
 const FRAME_RATE = 0;
 
@@ -199,12 +202,14 @@ export class Engine implements IEngineState {
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
       ...goldGameObjects,
-      GameObject.create('Title', this, { x: 0, y: 0 }, [
-        (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', BACKGROUND_LAYER),
+      GameObject.create('Title', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 15 }, [
+        (gameObject: GameObject) => LinearMoveScript.create(gameObject, { x: 0, y: -1 }, 5),
+        (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 2000),
+        (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [DissolveTextureEffect.create(this, 10)]),
       ]),
       GameObject.create('Lives', this, { x: 0, y: 0 }, [
         (gameObject: GameObject) => LivesScript.create(gameObject),
-        (gameObject: GameObject) => HeartsRenderer.create(gameObject, FOREGROUND_LAYER),
+        (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),
       ]),
 
       GameObject.create('Player', this, spawnPosition, [
