@@ -1,4 +1,4 @@
-import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl } from '../engine/screen/screen.constants';
+import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk } from '../engine/screen/screen.constants';
 
 // 8x8 sprite frames for a standing man tapping one foot: rest -> foot lifts -> foot stamps down.
 export const MAN_MOVING_LEFT_FRAME_1: number[][] = [
@@ -302,14 +302,14 @@ export const OBJECT_EMPTY: number[][] = [
 ];
 
 export const OBJECT_BRICK: number[][] = [
-  [Rd, Rd, __, Rd, Rd, Rd, Rd, Rd],
-  [Rd, Rd, __, Rd, Rd, Rd, Rd, Rd],
-  [Rd, Rd, __, Rd, Rd, Rd, Rd, Rd],
-  [__, __, __, __, __, __, __, __],
-  [Rd, Rd, Rd, Rd, Rd, __, Rd, Rd],
-  [Rd, Rd, Rd, Rd, Rd, __, Rd, Rd],
-  [Rd, Rd, Rd, Rd, Rd, __, Rd, Rd],
-  [__, __, __, __, __, __, __, __],
+  [Rd, Rd, Bk, Rd, Rd, Rd, Rd, Rd],
+  [Rd, Rd, Bk, Rd, Rd, Rd, Rd, Rd],
+  [Rd, Rd, Bk, Rd, Rd, Rd, Rd, Rd],
+  [Bk, Bk, Bk, Bk, Bk, Bk, Bk, Bk],
+  [Rd, Rd, Rd, Rd, Rd, Bk, Rd, Rd],
+  [Rd, Rd, Rd, Rd, Rd, Bk, Rd, Rd],
+  [Rd, Rd, Rd, Rd, Rd, Bk, Rd, Rd],
+  [Bk, Bk, Bk, Bk, Bk, Bk, Bk, Bk],
 ];
 
 export const OBJECT_CROSSBAR: number[][] = [

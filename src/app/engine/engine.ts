@@ -1,4 +1,3 @@
-import { OBJECT_GOLD } from '../data/sprites';
 import { LivesScript } from './scripts/lives-script';
 import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LEVEL_TILES_ARR } from '../data/level';
@@ -7,7 +6,6 @@ import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, HUD_LAYER, LAYER_COUNT }
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
-import { BitmapRenderer } from './scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { BackgroundStars } from './scripts/background-stars';
 import { TileMap, TileType } from './scripts/tile-map';
@@ -15,7 +13,6 @@ import { StateScript } from './scripts/state-script';
 import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { BuilderScript } from './scripts/builder-script';
 import { GoldScript } from './scripts/gold-script';
-import { GoldItem } from './scripts/gold-item';
 import { ObjectPosition } from './scripts/object-position';
 import { MapHelper } from './scripts/map.helper';
 import { createTileGameObject } from './scripts/tile-bitmaps';
@@ -179,17 +176,6 @@ export class Engine implements IEngineState {
       .map(({ column, row, type }) => createTileGameObject(this, column, row, type))
       .filter((gameObject): gameObject is GameObject => gameObject !== undefined);
 
-    const goldGameObjects = tileMap
-      .getTiles()
-      .filter(({ type }) => type === TileType.Gold)
-      .map(({ column, row }) =>
-        GameObject.create(`Gold-${column}-${row}`, this, MapHelper.mapToScreen(column, row), [
-          (gameObject: GameObject) => ObjectPosition.create(gameObject, column, row),
-          (gameObject: GameObject) => GoldItem.create(gameObject),
-          (gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_GOLD, BACKGROUND_LAYER),
-        ]),
-      );
-
     const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
     const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : { column: 20, row: 5 };
     const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
@@ -201,7 +187,6 @@ export class Engine implements IEngineState {
       mapGameObject,
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
-      ...goldGameObjects,
       GameObject.create('Title', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 15 }, [
         (gameObject: GameObject) => LinearMoveScript.create(gameObject, { x: 0, y: -1 }, 5),
         (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 2000),
@@ -225,7 +210,7 @@ export class Engine implements IEngineState {
           BitmapSpriteRenderer.create(
             gameObject,
             { bitmap: STAND_ANIMATION.frames, framePerSecond: STAND_ANIMATION.framesPerSecond },
-            FOREGROUND_LAYER,
+            HUD_LAYER,
           ),
       ]),
     ].forEach((gameObject) => this.addGameObject(gameObject));

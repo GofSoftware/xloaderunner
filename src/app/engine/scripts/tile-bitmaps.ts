@@ -1,6 +1,7 @@
 import {
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
+  OBJECT_GOLD,
   OBJECT_LAVA_1,
   OBJECT_LAVA_2,
   OBJECT_LAVA_3,
@@ -12,11 +13,13 @@ import {
   OBJECT_STAIRS,
 } from '../../data/sprites';
 import { GameObject } from '../game-object/game-object';
+import { Script } from '../game-object/script';
 import { IEngineState } from '../i-engine-state';
 import { ITileBitmapDescription, TileBitmapType } from '../i-tile-bitmap-description';
-import { BACKGROUND_LAYER } from '../screen/screen.constants';
+import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER } from '../screen/screen.constants';
 import { BitmapRenderer } from './bitmap-renderer';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { GoldItem } from './gold-item';
 import { MapHelper } from './map.helper';
 import { ObjectPosition } from './object-position';
 import { TileType } from './tile-map';
@@ -25,6 +28,7 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
   [TileType.Stairs]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_STAIRS },
   [TileType.Crossbar]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_CROSSBAR },
+  [TileType.Gold]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_GOLD, layer: MIDDLE_TILE_LAYER },
   [TileType.Lava]: {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {
@@ -41,15 +45,20 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
     return undefined;
   }
 
-  return GameObject.create(`Tile-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), [
-    (gameObject) => ObjectPosition.create(gameObject, column, row),
-    (gameObject) =>
-      tileBitmap.bitmapType === TileBitmapType.Static
-        ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, BACKGROUND_LAYER)
-        : BitmapSpriteRenderer.create(
-            gameObject,
-            { bitmap: tileBitmap.animatedBitmap!.bitmap, framePerSecond: tileBitmap.animatedBitmap!.framePerSecond },
-            BACKGROUND_LAYER,
-          ),
-  ]);
+  const layer = tileBitmap.layer ?? MIDDLE_TILE_LAYER;
+  const scriptFactories: ((gameObject: GameObject) => Script)[] = [(gameObject) => ObjectPosition.create(gameObject, column, row)];
+  if (type === TileType.Gold) {
+    scriptFactories.push((gameObject) => GoldItem.create(gameObject));
+  }
+  scriptFactories.push((gameObject) =>
+    tileBitmap.bitmapType === TileBitmapType.Static
+      ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, layer)
+      : BitmapSpriteRenderer.create(
+          gameObject,
+          { bitmap: tileBitmap.animatedBitmap!.bitmap, framePerSecond: tileBitmap.animatedBitmap!.framePerSecond },
+          layer,
+        ),
+  );
+
+  return GameObject.create(`Tile-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
 }

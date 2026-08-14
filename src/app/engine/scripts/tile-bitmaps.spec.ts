@@ -2,8 +2,10 @@ import { createTileGameObject } from './tile-bitmaps';
 import { ObjectPosition } from './object-position';
 import { BitmapRenderer } from './bitmap-renderer';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { GoldItem } from './gold-item';
 import { TileType } from './tile-map';
-import { CELL_SIZE } from '../screen/screen.constants';
+import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER, CELL_SIZE, LAYER_COUNT } from '../screen/screen.constants';
+import { ScreenBuffer } from '../screen/screen-buffer';
 import { IEngineState } from '../i-engine-state';
 
 describe('createTileGameObject', () => {
@@ -16,7 +18,6 @@ describe('createTileGameObject', () => {
   it('returns undefined for tile types with no visual representation', () => {
     expect(createTileGameObject(engineState, 1, 1, TileType.Empty)).toBeUndefined();
     expect(createTileGameObject(engineState, 1, 1, TileType.PlayerStart)).toBeUndefined();
-    expect(createTileGameObject(engineState, 1, 1, TileType.Gold)).toBeUndefined();
   });
 
   it('positions a static tile at the given cell and gives it a bitmap renderer', () => {
@@ -33,5 +34,34 @@ describe('createTileGameObject', () => {
 
     expect(gameObject.getScript(BitmapSpriteRenderer)).toBeDefined();
     expect(gameObject.getScript(BitmapRenderer)).toBeUndefined();
+  });
+
+  it('tags a gold tile with GoldItem so GoldScript can recognize it', () => {
+    const gameObject = createTileGameObject(engineState, 5, 6, TileType.Gold)!;
+
+    expect(gameObject.getScript(GoldItem)).toBeDefined();
+    expect(gameObject.getScript(BitmapRenderer)).toBeDefined();
+  });
+
+  it('does not tag non-gold tiles with GoldItem', () => {
+    const gameObject = createTileGameObject(engineState, 3, 4, TileType.Brick)!;
+
+    expect(gameObject.getScript(GoldItem)).toBeUndefined();
+  });
+
+  it('draws gold on MIDDLE_TILE_LAYER, not the background layer', () => {
+    const screenBuffer = ScreenBuffer.create(LAYER_COUNT);
+    const renderEngineState = { ...engineState, screenBuffer } as unknown as IEngineState;
+    const gameObject = createTileGameObject(renderEngineState, 5, 6, TileType.Gold)!;
+
+    gameObject.start();
+    gameObject.update();
+
+    const region = (layer: number) =>
+      screenBuffer.buffers[layer].slice(6 * CELL_SIZE, 7 * CELL_SIZE).map((row) => row.slice(5 * CELL_SIZE, 6 * CELL_SIZE));
+    const isBlank = (pixels: number[][]) => pixels.every((row) => row.every((pixel) => pixel === 0));
+
+    expect(isBlank(region(MIDDLE_TILE_LAYER))).toBe(false);
+    expect(isBlank(region(BACKGROUND_LAYER))).toBe(true);
   });
 });
