@@ -203,7 +203,7 @@ export class Engine implements IEngineState {
         // Reads the player's cell before StateScript/ObjectPosition can move it this same frame - otherwise,
         // when the same arrow key both moves the player and specifies a build direction, the build target
         // would be computed from the cell the player is moving into rather than the cell it started this frame in.
-        (gameObject: GameObject) => BuilderScript.create(gameObject),
+        (gameObject: GameObject) => BuilderScript.create(gameObject, HUD_LAYER),
         (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
         (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),

@@ -2,11 +2,12 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { ObjectPosition } from './object-position';
 import { TileMap, TileType } from './tile-map';
-import { createTileGameObject } from './tile-bitmaps';
+import { createTileGameObject, TILE_BITMAPS } from './tile-bitmaps';
 import { MapHelper } from './map.helper';
-import { UPPER_EFFECT_LAYER } from '../screen/screen.constants';
+import { CELL_SIZE, SCREEN_WIDTH, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
+import { MAX_LIVES } from './lives-script';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
+import { OBJECT_HAMMER, OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
 
 const TILE_TYPE_BY_KEY: Record<string, TileType> = {
@@ -28,14 +29,16 @@ const DIRECTION_OFFSET_BY_KEY: Record<string, { column: number; row: number }> =
  * always disarms afterwards, whether or not the target cell was actually free.
  */
 export class BuilderScript extends Script {
-  public static create(gameObject: GameObject): BuilderScript {
-    return new BuilderScript(gameObject);
+  public static create(gameObject: GameObject, hudLayer: number): BuilderScript {
+    return new BuilderScript(gameObject, hudLayer);
   }
 
+  private readonly hudLayer: number;
   private armedType: TileType | undefined;
 
-  private constructor(gameObject: GameObject) {
+  private constructor(gameObject: GameObject, hudLayer: number) {
     super(gameObject);
+    this.hudLayer = hudLayer;
   }
 
   private get tileMap(): TileMap {
@@ -50,6 +53,16 @@ export class BuilderScript extends Script {
     this.handleTypeSelection();
     if (this.armedType) {
       this.handleDirection();
+    }
+    this.drawHud();
+  }
+
+  private drawHud(): void {
+    const { screenBuffer } = this.gameObject.engineState;
+    const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
+    screenBuffer.copy(OBJECT_HAMMER, startX, CELL_SIZE, this.hudLayer);
+    if (this.armedType) {
+      screenBuffer.copy(TILE_BITMAPS[this.armedType]!.staticBitmap!, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
     }
   }
 

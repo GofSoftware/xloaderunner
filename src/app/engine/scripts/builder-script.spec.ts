@@ -3,12 +3,16 @@ import { ObjectPosition } from './object-position';
 import { TileMap, TileType } from './tile-map';
 import { StateScript } from './state-script';
 import { KeyboardInputScript } from './keyboard-input-script';
-import { LivesScript } from './lives-script';
+import { LivesScript, MAX_LIVES } from './lives-script';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
-import { LAYER_COUNT } from '../screen/screen.constants';
+import { CELL_SIZE, LAYER_COUNT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_HAMMER, OBJECT_STAIRS } from '../../data/sprites';
 import { IEngineState } from '../i-engine-state';
+
+const HUD_LAYER = 1;
+const HUD_START_X = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
 
 describe('BuilderScript', () => {
   let engineState: IEngineState;
@@ -25,10 +29,14 @@ describe('BuilderScript', () => {
     keyboard.next();
   }
 
+  function regionAt(x: number): number[][] {
+    return engineState.screenBuffer.buffers[HUD_LAYER].slice(CELL_SIZE, CELL_SIZE * 2).map((row) => row.slice(x, x + CELL_SIZE));
+  }
+
   function createPlayer(column: number, row: number): GameObject {
     const gameObject = GameObject.create('Player', engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
-      (go) => BuilderScript.create(go),
+      (go) => BuilderScript.create(go, HUD_LAYER),
     ]);
     gameObject.start();
     return gameObject;
@@ -174,7 +182,7 @@ describe('BuilderScript', () => {
 
     const movingPlayer = GameObject.create('MovingPlayer', engineState, { x: 5 * 8, y: 5 * 8 }, [
       (go) => KeyboardInputScript.create(go),
-      (go) => BuilderScript.create(go),
+      (go) => BuilderScript.create(go, HUD_LAYER),
       (go) => StateScript.create(go, { column: 5, row: 5 }),
       (go) => ObjectPosition.create(go, 5, 5),
     ]);
@@ -200,5 +208,58 @@ describe('BuilderScript', () => {
 
     press('ArrowRight');
     expect(() => edgePlayer.update()).not.toThrow();
+  });
+
+  describe('HUD', () => {
+    it('always draws the hammer icon, armed or not', () => {
+      player.update();
+
+      expect(regionAt(HUD_START_X)).toEqual(OBJECT_HAMMER);
+    });
+
+    it('shows no build-tile preview while unarmed', () => {
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_HAMMER.map((row) => row.map(() => 0)));
+    });
+
+    it('previews the armed tile type next to the hammer', () => {
+      press('Digit1');
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_BRICK);
+    });
+
+    it('clears the preview once the armed type is cancelled', () => {
+      press('Digit1');
+      player.update();
+      nextFrame();
+
+      press('Digit1');
+      // Mirrors Engine.render() clearing the buffer once per frame before scripts redraw it -
+      // without this, the previous frame's brick preview would still be sitting in the buffer.
+      engineState.screenBuffer.clear();
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_BRICK.map((row) => row.map(() => 0)));
+    });
+
+    it('updates the preview when switching to a different armed type', () => {
+      press('Digit1');
+      player.update();
+      nextFrame();
+
+      press('Digit2');
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_STAIRS);
+    });
+
+    it('previews a crossbar when Digit3 is armed', () => {
+      press('Digit3');
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_CROSSBAR);
+    });
   });
 });

@@ -11,7 +11,8 @@ import { OBJECT_GOLD_HUD } from '../../data/sprites';
 import { IEngineState } from '../i-engine-state';
 
 describe('GoldScript', () => {
-  const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
+  // Cols 0-1 right after the hearts belong to BuilderScript's hammer + build-tile preview.
+  const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE + 2 * CELL_SIZE;
 
   let engineState: IEngineState;
   let tileMap: TileMap;
