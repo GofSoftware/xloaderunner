@@ -187,10 +187,11 @@ export class Engine implements IEngineState {
       mapGameObject,
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
-      GameObject.create('Title', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 15 }, [
+      GameObject.create('Title', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 2 }, [
         (gameObject: GameObject) => LinearMoveScript.create(gameObject, { x: 0, y: -1 }, 5),
-        (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 2000),
-        (gameObject: GameObject) => TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [DissolveTextureEffect.create(this, 10)]),
+        (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 5000),
+        (gameObject: GameObject) =>
+          TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [DissolveTextureEffect.create(this, 0.5, (v) => v * v)]),
       ]),
       GameObject.create('Lives', this, { x: 0, y: 0 }, [
         (gameObject: GameObject) => LivesScript.create(gameObject),

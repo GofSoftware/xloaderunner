@@ -236,7 +236,7 @@ export class StateScript extends Script {
   }
 
   private startGroundMove(state: PlayerState.MoveLeft | PlayerState.MoveRight, targetColumn: number, targetRow: number): PlayerState {
-    if (!this.tileMap.isDangerous(targetColumn, targetRow + 1)) {
+    if (!this.tileMap.isDangerous(targetColumn, targetRow + 1) || this.tileMap.isClimbable(targetColumn, targetRow)) {
       this.hesitation = undefined;
       return state;
     }

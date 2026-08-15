@@ -60,6 +60,10 @@ export class TileMap extends Script {
     return this.getTile(column, row) === TileType.Lava;
   }
 
+  public isClimbable(column: number, row: number): boolean {
+    return this.getTile(column, row) === TileType.Stairs || this.getTile(column, row) === TileType.Crossbar;
+  }
+
   public getObjectsAt(column: number, row: number): GameObject[] {
     return this.isInBounds(column, row) ? [...this.objectsAt[row][column]] : [];
   }
