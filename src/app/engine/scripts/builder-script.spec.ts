@@ -210,6 +210,132 @@ describe('BuilderScript', () => {
     expect(() => edgePlayer.update()).not.toThrow();
   });
 
+  describe('remove', () => {
+    function createTrackedTile(column: number, row: number, type: TileType): GameObject {
+      tileMap.setTile(column, row, type);
+      const tileGameObject = GameObject.create(`Tile-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
+        (go) => ObjectPosition.create(go, column, row),
+      ]);
+      engineState.addGameObject(tileGameObject);
+      return tileGameObject;
+    }
+
+    it('removes a brick at the cell the arrow key points to, and destroys its game object', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('ArrowRight');
+      player.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+      expect(gameObjectsByName.has('Tile-6-5')).toBe(false);
+    });
+
+    it('removes stairs and a crossbar the same way', () => {
+      createTrackedTile(5, 4, TileType.Stairs);
+      createTrackedTile(5, 6, TileType.Crossbar);
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+      press('ArrowUp');
+      player.update();
+      nextFrame();
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+      press('ArrowDown');
+      player.update();
+
+      expect(tileMap.getTile(5, 4)).toBe(TileType.Empty);
+      expect(tileMap.getTile(5, 6)).toBe(TileType.Empty);
+    });
+
+    it('does not remove lava, gold, or player-start tiles', () => {
+      tileMap.setTile(6, 5, TileType.Lava);
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('ArrowRight');
+      player.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Lava);
+    });
+
+    it('cancels the armed removal when Digit0 is pressed again', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('ArrowRight');
+      player.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+    });
+
+    it('switches from an armed build type to remove when Digit0 is pressed', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+
+      press('Digit1');
+      player.update();
+      nextFrame();
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('ArrowRight');
+      player.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+    });
+
+    it('switches from armed remove to a build type when a number key is pressed', () => {
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('Digit1');
+      player.update();
+      nextFrame();
+
+      press('ArrowRight');
+      player.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+    });
+
+    it('disarms after removing so a stale arrow press does not remove again', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+      createTrackedTile(4, 5, TileType.Brick);
+
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('ArrowRight');
+      player.update();
+      nextFrame();
+
+      press('ArrowLeft');
+      player.update();
+
+      expect(tileMap.getTile(4, 5)).toBe(TileType.Brick);
+    });
+  });
+
   describe('HUD', () => {
     it('always draws the hammer icon, armed or not', () => {
       player.update();
@@ -260,6 +386,13 @@ describe('BuilderScript', () => {
       player.update();
 
       expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_CROSSBAR);
+    });
+
+    it('shows no build-tile preview while remove is armed', () => {
+      press('Digit0');
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_HAMMER.map((row) => row.map(() => 0)));
     });
   });
 });

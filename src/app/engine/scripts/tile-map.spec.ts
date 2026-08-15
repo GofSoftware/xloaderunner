@@ -76,6 +76,23 @@ describe('TileMap', () => {
     expect(tileMap.isDangerous(7, 3)).toBe(false);
   });
 
+  it('should only treat brick, stairs, and crossbar tiles as removable, not lava, player-start, gold, or empty cells', () => {
+    tileMap.setTile(1, 3, TileType.Brick);
+    tileMap.setTile(2, 3, TileType.Stairs);
+    tileMap.setTile(3, 3, TileType.Crossbar);
+    tileMap.setTile(4, 3, TileType.Lava);
+    tileMap.setTile(6, 3, TileType.PlayerStart);
+    tileMap.setTile(7, 3, TileType.Gold);
+
+    expect(tileMap.isRemovable(1, 3)).toBe(true);
+    expect(tileMap.isRemovable(2, 3)).toBe(true);
+    expect(tileMap.isRemovable(3, 3)).toBe(true);
+    expect(tileMap.isRemovable(4, 3)).toBe(false);
+    expect(tileMap.isRemovable(5, 3)).toBe(false);
+    expect(tileMap.isRemovable(6, 3)).toBe(false);
+    expect(tileMap.isRemovable(7, 3)).toBe(false);
+  });
+
   it('should treat out-of-bounds cells as empty and ignore writes to them', () => {
     expect(tileMap.getTile(-1, 0)).toBe(TileType.Empty);
     expect(tileMap.getTile(MAP_COLUMNS, 0)).toBe(TileType.Empty);

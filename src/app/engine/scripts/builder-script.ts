@@ -10,11 +10,13 @@ import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { OBJECT_HAMMER, OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
 
-const TILE_TYPE_BY_KEY: Record<string, TileType> = {
+const BUILD_TYPE_BY_KEY: Record<string, TileType> = {
   Digit1: TileType.Brick,
   Digit2: TileType.Stairs,
   Digit3: TileType.Crossbar,
 };
+
+const REMOVE_KEY = 'Digit0';
 
 const DIRECTION_OFFSET_BY_KEY: Record<string, { column: number; row: number }> = {
   ArrowLeft: { column: -1, row: 0 },
@@ -23,10 +25,13 @@ const DIRECTION_OFFSET_BY_KEY: Record<string, { column: number; row: number }> =
   ArrowDown: { column: 0, row: 1 },
 };
 
+type ArmedAction = { kind: 'build'; type: TileType } | { kind: 'remove' };
+
 /**
- * Lets the player place a tile next to themselves: pressing a number key arms the tile type (pressing the
- * same number again disarms), then the next arrow key press picks the direction to build in. Building
- * always disarms afterwards, whether or not the target cell was actually free.
+ * Lets the player place or clear a tile next to themselves: pressing a number key arms a tile type to
+ * build (pressing the same number again disarms) and pressing 0 arms removal instead; either way, the
+ * next arrow key press picks the direction to act in. Acting always disarms afterwards, whether or not
+ * the target cell actually changed. Only Brick/Stairs/Crossbar tiles can be removed.
  */
 export class BuilderScript extends Script {
   public static create(gameObject: GameObject, hudLayer: number): BuilderScript {
@@ -34,7 +39,7 @@ export class BuilderScript extends Script {
   }
 
   private readonly hudLayer: number;
-  private armedType: TileType | undefined;
+  private armed: ArmedAction | undefined;
 
   private constructor(gameObject: GameObject, hudLayer: number) {
     super(gameObject);
@@ -50,8 +55,8 @@ export class BuilderScript extends Script {
   }
 
   public override update(): void {
-    this.handleTypeSelection();
-    if (this.armedType) {
+    this.handleActionSelection();
+    if (this.armed) {
       this.handleDirection();
     }
     this.drawHud();
@@ -61,18 +66,22 @@ export class BuilderScript extends Script {
     const { screenBuffer } = this.gameObject.engineState;
     const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
     screenBuffer.copy(OBJECT_HAMMER, startX, CELL_SIZE, this.hudLayer);
-    if (this.armedType) {
-      screenBuffer.copy(TILE_BITMAPS[this.armedType]!.staticBitmap!, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
+    if (this.armed?.kind === 'build') {
+      screenBuffer.copy(TILE_BITMAPS[this.armed.type]!.staticBitmap!, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
     }
   }
 
-  private handleTypeSelection(): void {
+  private handleActionSelection(): void {
     const { keyboard } = this.gameObject.engineState;
-    for (const [key, type] of Object.entries(TILE_TYPE_BY_KEY)) {
+    if (keyboard.wasPressedThisFrame(REMOVE_KEY)) {
+      this.armed = this.armed?.kind === 'remove' ? undefined : { kind: 'remove' };
+      return;
+    }
+    for (const [key, type] of Object.entries(BUILD_TYPE_BY_KEY)) {
       if (!keyboard.wasPressedThisFrame(key)) {
         continue;
       }
-      this.armedType = this.armedType === type ? undefined : type;
+      this.armed = this.armed?.kind === 'build' && this.armed.type === type ? undefined : { kind: 'build', type };
       return;
     }
   }
@@ -83,15 +92,18 @@ export class BuilderScript extends Script {
       if (!keyboard.wasPressedThisFrame(key)) {
         continue;
       }
-      this.build(offset.column, offset.row);
+      const armed = this.armed!;
+      this.armed = undefined;
+      if (armed.kind === 'build') {
+        this.build(armed.type, offset.column, offset.row);
+      } else {
+        this.remove(offset.column, offset.row);
+      }
       return;
     }
   }
 
-  private build(columnOffset: number, rowOffset: number): void {
-    const type = this.armedType!;
-    this.armedType = undefined;
-
+  private build(type: TileType, columnOffset: number, rowOffset: number): void {
     const { column, row } = this.objectPosition;
     const targetColumn = column + columnOffset;
     const targetRow = row + rowOffset;
@@ -129,5 +141,21 @@ export class BuilderScript extends Script {
       return;
     }
     this.gameObject.engineState.addGameObject(smokeGameObject);
+  }
+
+  private remove(columnOffset: number, rowOffset: number): void {
+    const { column, row } = this.objectPosition;
+    const targetColumn = column + columnOffset;
+    const targetRow = row + rowOffset;
+
+    if (!this.tileMap.isRemovable(targetColumn, targetRow)) {
+      return;
+    }
+
+    const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${targetColumn}-${targetRow}`);
+    if (tileGameObject) {
+      this.gameObject.engineState.removeGameObject(tileGameObject);
+    }
+    this.tileMap.setTile(targetColumn, targetRow, TileType.Empty);
   }
 }
