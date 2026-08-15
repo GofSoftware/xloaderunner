@@ -7,7 +7,14 @@ import { MapHelper } from './map.helper';
 import { CELL_SIZE, SCREEN_WIDTH, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
 import { MAX_LIVES } from './lives-script';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { OBJECT_HAMMER, OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
+import {
+  OBJECT_HAMMER,
+  OBJECT_REMOVE,
+  OBJECT_SMOKE_UP_1,
+  OBJECT_SMOKE_UP_2,
+  OBJECT_SMOKE_UP_3,
+  OBJECT_SMOKE_UP_4,
+} from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
 
 const BUILD_TYPE_BY_KEY: Record<string, TileType> = {
@@ -68,6 +75,8 @@ export class BuilderScript extends Script {
     screenBuffer.copy(OBJECT_HAMMER, startX, CELL_SIZE, this.hudLayer);
     if (this.armed?.kind === 'build') {
       screenBuffer.copy(TILE_BITMAPS[this.armed.type]!.staticBitmap!, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
+    } else if (this.armed?.kind === 'remove') {
+      screenBuffer.copy(OBJECT_REMOVE, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
     }
   }
 

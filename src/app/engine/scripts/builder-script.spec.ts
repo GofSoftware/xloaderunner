@@ -8,7 +8,7 @@ import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_HAMMER, OBJECT_STAIRS } from '../../data/sprites';
+import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_HAMMER, OBJECT_REMOVE, OBJECT_STAIRS } from '../../data/sprites';
 import { IEngineState } from '../i-engine-state';
 
 const HUD_LAYER = 1;
@@ -388,11 +388,23 @@ describe('BuilderScript', () => {
       expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_CROSSBAR);
     });
 
-    it('shows no build-tile preview while remove is armed', () => {
+    it('previews a remove icon next to the hammer while remove is armed', () => {
       press('Digit0');
       player.update();
 
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_HAMMER.map((row) => row.map(() => 0)));
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_REMOVE);
+    });
+
+    it('clears the remove icon once remove is cancelled', () => {
+      press('Digit0');
+      player.update();
+      nextFrame();
+
+      press('Digit0');
+      engineState.screenBuffer.clear();
+      player.update();
+
+      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_REMOVE.map((row) => row.map(() => 0)));
     });
   });
 });
