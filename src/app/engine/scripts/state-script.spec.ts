@@ -85,6 +85,17 @@ describe('StateScript', () => {
     expect(player.position.y).toBe(16);
   });
 
+  it('should not move right when forceRight(false) clears the force before StateScript reads it', () => {
+    tileMap.setTile(2, 3, TileType.Brick);
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+    player.getScript(KeyboardInputScript)!.update();
+    player.getScript(StateScript)!.forceRight(false);
+    player.getScript(StateScript)!.update();
+
+    expect(player.position).toEqual({ x: 8, y: 16 });
+  });
+
   it('should not move right when a brick blocks the target cell', () => {
     tileMap.setTile(2, 2, TileType.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
@@ -162,9 +173,9 @@ describe('StateScript', () => {
     player.update();
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    player.update();
     keyboard.next();
 
-    player.update();
     player.update();
 
     expect(player.position).toEqual({ x: 8, y: 16 });
@@ -178,9 +189,8 @@ describe('StateScript', () => {
     player.update();
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
-    keyboard.next();
-
     player.update();
+    keyboard.next();
     expect(player.position.x).toBe(8);
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
@@ -197,9 +207,9 @@ describe('StateScript', () => {
     player.update();
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    player.update();
     keyboard.next();
 
-    player.update();
     player.update();
     expect(player.position).toEqual({ x: 8, y: 16 });
 
@@ -218,9 +228,9 @@ describe('StateScript', () => {
     player.update();
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    player.update();
     keyboard.next();
 
-    player.update();
     player.update();
     expect(player.position).toEqual({ x: 8, y: 16 });
 
@@ -230,9 +240,9 @@ describe('StateScript', () => {
     expect(player.position).toEqual({ x: 0, y: 16 });
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
-    keyboard.next();
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
     player.update();
+    keyboard.next();
     expect(player.position.x).toBe(8);
 
     engineState.deltaTime = 0.1;
@@ -276,9 +286,9 @@ describe('StateScript', () => {
     player.update();
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    player.update();
     keyboard.next();
 
-    player.update();
     player.update();
     expect(player.position.x).toBeLessThan(16);
 
@@ -298,9 +308,9 @@ describe('StateScript', () => {
 
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+    player.update();
     keyboard.next();
 
-    player.update();
     player.update();
     player.update();
     expect(player.position.x).toBe(16);

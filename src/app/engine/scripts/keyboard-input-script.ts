@@ -18,17 +18,29 @@ export class KeyboardInputScript extends Script {
     }
 
     const { keyboard } = this.gameObject.engineState;
-    if (keyboard.isPressed('ArrowLeft')) {
-      stateScript.forceLeft();
+    if (keyboard.wasPressedThisFrame('ArrowLeft')) {
+      stateScript.forceLeft(true);
     }
-    if (keyboard.isPressed('ArrowRight')) {
-      stateScript.forceRight();
+    if (keyboard.wasPressedThisFrame('ArrowRight')) {
+      stateScript.forceRight(true);
     }
-    if (keyboard.isPressed('ArrowUp')) {
-      stateScript.forceUp();
+    if (keyboard.wasPressedThisFrame('ArrowUp')) {
+      stateScript.forceUp(true);
     }
-    if (keyboard.isPressed('ArrowDown')) {
-      stateScript.forceDown();
+    if (keyboard.wasPressedThisFrame('ArrowDown')) {
+      stateScript.forceDown(true);
+    }
+    if (keyboard.wasReleasedThisFrame('ArrowLeft')) {
+      stateScript.forceLeft(false);
+    }
+    if (keyboard.wasReleasedThisFrame('ArrowRight')) {
+      stateScript.forceRight(false);
+    }
+    if (keyboard.wasReleasedThisFrame('ArrowUp')) {
+      stateScript.forceUp(false);
+    }
+    if (keyboard.wasReleasedThisFrame('ArrowDown')) {
+      stateScript.forceDown(false);
     }
   }
 }

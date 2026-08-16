@@ -42,6 +42,23 @@ describe('BuilderScript', () => {
     return gameObject;
   }
 
+  function createMovingPlayer(): GameObject {
+    for (let column = 0; column <= 8; column++) {
+      tileMap.setTile(column, 6, TileType.Brick);
+    }
+    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
+    gameObjectsByName.set('Lives', livesGameObject);
+
+    const movingPlayer = GameObject.create('MovingPlayer', engineState, { x: 5 * 8, y: 5 * 8 }, [
+      (go) => KeyboardInputScript.create(go),
+      (go) => BuilderScript.create(go, HUD_LAYER),
+      (go) => StateScript.create(go, { column: 5, row: 5 }),
+      (go) => ObjectPosition.create(go, 5, 5),
+    ]);
+    movingPlayer.start();
+    return movingPlayer;
+  }
+
   beforeEach(() => {
     keyboard = Keyboard.create();
     keyboard.attach();
@@ -174,19 +191,7 @@ describe('BuilderScript', () => {
   });
 
   it('builds in the cell adjacent to the player even when the same arrow key also moves it that frame', () => {
-    for (let column = 0; column <= 8; column++) {
-      tileMap.setTile(column, 6, TileType.Brick);
-    }
-    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
-    gameObjectsByName.set('Lives', livesGameObject);
-
-    const movingPlayer = GameObject.create('MovingPlayer', engineState, { x: 5 * 8, y: 5 * 8 }, [
-      (go) => KeyboardInputScript.create(go),
-      (go) => BuilderScript.create(go, HUD_LAYER),
-      (go) => StateScript.create(go, { column: 5, row: 5 }),
-      (go) => ObjectPosition.create(go, 5, 5),
-    ]);
-    movingPlayer.start();
+    const movingPlayer = createMovingPlayer();
 
     press('Digit1');
     movingPlayer.update();
@@ -197,6 +202,35 @@ describe('BuilderScript', () => {
 
     expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
     expect(tileMap.getTile(7, 5)).toBe(TileType.Empty);
+  });
+
+  it('does not move the player into a newly built climbable tile in the same frame', () => {
+    const movingPlayer = createMovingPlayer();
+
+    press('Digit3');
+    movingPlayer.update();
+    nextFrame();
+
+    press('ArrowRight');
+    movingPlayer.update();
+
+    expect(tileMap.getTile(6, 5)).toBe(TileType.Crossbar);
+    expect(movingPlayer.position).toEqual({ x: 5 * 8, y: 5 * 8 });
+  });
+
+  it('does not move the player into a cell it just removed a wall from in the same frame', () => {
+    const movingPlayer = createMovingPlayer();
+    tileMap.setTile(6, 5, TileType.Brick);
+
+    press('Digit0');
+    movingPlayer.update();
+    nextFrame();
+
+    press('ArrowRight');
+    movingPlayer.update();
+
+    expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+    expect(movingPlayer.position).toEqual({ x: 5 * 8, y: 5 * 8 });
   });
 
   it('does not build outside the map bounds', () => {

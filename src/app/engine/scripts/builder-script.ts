@@ -1,6 +1,7 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { ObjectPosition } from './object-position';
+import { StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { createTileGameObject, TILE_BITMAPS } from './tile-bitmaps';
 import { MapHelper } from './map.helper';
@@ -32,13 +33,22 @@ const DIRECTION_OFFSET_BY_KEY: Record<string, { column: number; row: number }> =
   ArrowDown: { column: 0, row: 1 },
 };
 
+const RESET_FORCE_BY_KEY: Record<string, (stateScript: StateScript) => void> = {
+  ArrowLeft: (stateScript) => stateScript.forceLeft(false),
+  ArrowRight: (stateScript) => stateScript.forceRight(false),
+  ArrowUp: (stateScript) => stateScript.forceUp(false),
+  ArrowDown: (stateScript) => stateScript.forceDown(false),
+};
+
 type ArmedAction = { kind: 'build'; type: TileType } | { kind: 'remove' };
 
 /**
  * Lets the player place or clear a tile next to themselves: pressing a number key arms a tile type to
  * build (pressing the same number again disarms) and pressing 0 arms removal instead; either way, the
  * next arrow key press picks the direction to act in. Acting always disarms afterwards, whether or not
- * the target cell actually changed. Only Brick/Stairs/Crossbar tiles can be removed.
+ * the target cell actually changed. Only Brick/Stairs/Crossbar tiles can be removed. The direction key
+ * that resolves an armed action also resets that direction's force on StateScript, so the same key
+ * press that picked a build/remove direction doesn't also move the player that frame.
  */
 export class BuilderScript extends Script {
   public static create(gameObject: GameObject, hudLayer: number): BuilderScript {
@@ -59,6 +69,10 @@ export class BuilderScript extends Script {
 
   private get objectPosition(): ObjectPosition {
     return this.gameObject.getScript(ObjectPosition)!;
+  }
+
+  private get stateScript(): StateScript | undefined {
+    return this.gameObject.getScript(StateScript);
   }
 
   public override update(): void {
@@ -103,6 +117,9 @@ export class BuilderScript extends Script {
       }
       const armed = this.armed!;
       this.armed = undefined;
+      if (this.stateScript) {
+        RESET_FORCE_BY_KEY[key](this.stateScript);
+      }
       if (armed.kind === 'build') {
         this.build(armed.type, offset.column, offset.row);
       } else {

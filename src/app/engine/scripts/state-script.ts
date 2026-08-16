@@ -105,20 +105,20 @@ export class StateScript extends Script {
     return this.gameObject.engineState.getGameObjectByName('Lives')!.getScript(LivesScript)!;
   }
 
-  public forceLeft(): void {
-    this.isForcedLeft = true;
+  public forceLeft(value: boolean): void {
+    this.isForcedLeft = value;
   }
 
-  public forceRight(): void {
-    this.isForcedRight = true;
+  public forceRight(value: boolean): void {
+    this.isForcedRight = value;
   }
 
-  public forceUp(): void {
-    this.isForcedUp = true;
+  public forceUp(value: boolean): void {
+    this.isForcedUp = value;
   }
 
-  public forceDown(): void {
-    this.isForcedDown = true;
+  public forceDown(value: boolean): void {
+    this.isForcedDown = value;
   }
 
   public override update(): void {
@@ -140,7 +140,6 @@ export class StateScript extends Script {
     }
 
     this.setState(activeState);
-    this.resetForces();
   }
 
   private resetForces(): void {
