@@ -42,6 +42,9 @@ const RESET_FORCE_BY_KEY: Record<string, (stateScript: StateScript) => void> = {
 
 type ArmedAction = { kind: 'build'; type: TileType } | { kind: 'remove' };
 
+// Changes the behavior of the arrow keys right after the build, if true, player will move into the place where the tile has been built
+const MOVE_TOWARDS = true;
+
 /**
  * Lets the player place or clear a tile next to themselves: pressing a number key arms a tile type to
  * build (pressing the same number again disarms) and pressing 0 arms removal instead; either way, the
@@ -117,7 +120,7 @@ export class BuilderScript extends Script {
       }
       const armed = this.armed!;
       this.armed = undefined;
-      if (this.stateScript) {
+      if (this.stateScript && !MOVE_TOWARDS) {
         RESET_FORCE_BY_KEY[key](this.stateScript);
       }
       if (armed.kind === 'build') {

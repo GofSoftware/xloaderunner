@@ -58,25 +58,11 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
 };
 
 export class StateScript extends Script {
-  public static create(gameObject: GameObject, spawnCell: { column: number; row: number }): StateScript {
-    return new StateScript(gameObject, spawnCell);
+  public static create(gameObject: GameObject, spawnCell: { column: number; row: number }, runSpeedMultiplier: number = 1): StateScript {
+    return new StateScript(gameObject, spawnCell, runSpeedMultiplier);
   }
 
-  private static readonly STEP_SPEED: Record<PlayerState, number> = {
-    [PlayerState.Stand]: 0,
-    [PlayerState.MoveLeft]: MOVE_SPEED,
-    [PlayerState.MoveRight]: MOVE_SPEED,
-    [PlayerState.MoveUp]: MOVE_SPEED,
-    [PlayerState.MoveDown]: MOVE_SPEED,
-    [PlayerState.Fall]: FALL_SPEED,
-    [PlayerState.OnStairs]: 0,
-    [PlayerState.OnCrossbar]: 0,
-    [PlayerState.OnCrossbarMoveLeft]: MOVE_SPEED,
-    [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED,
-    [PlayerState.Dying]: 0,
-    [PlayerState.GameOver]: 0,
-  };
-
+  private readonly stepSpeed: Record<PlayerState, number>;
   private readonly spawnCell: { column: number; row: number };
   private state: PlayerState | undefined;
   private movingState: PlayerState | undefined;
@@ -88,9 +74,24 @@ export class StateScript extends Script {
   private isForcedUp = false;
   private isForcedDown = false;
 
-  private constructor(gameObject: GameObject, spawnCell: { column: number; row: number }) {
+  private constructor(gameObject: GameObject, spawnCell: { column: number; row: number }, runSpeedMultiplier: number) {
     super(gameObject);
     this.spawnCell = spawnCell;
+    this.stepSpeed = {
+      [PlayerState.Stand]: 0,
+      [PlayerState.MoveLeft]: MOVE_SPEED * runSpeedMultiplier,
+      [PlayerState.MoveRight]: MOVE_SPEED * runSpeedMultiplier,
+      [PlayerState.MoveUp]: MOVE_SPEED * runSpeedMultiplier,
+      [PlayerState.MoveDown]: MOVE_SPEED * runSpeedMultiplier,
+      // Falling is gravity, not running - it stays the same for every StateScript regardless of runSpeedMultiplier.
+      [PlayerState.Fall]: FALL_SPEED,
+      [PlayerState.OnStairs]: 0,
+      [PlayerState.OnCrossbar]: 0,
+      [PlayerState.OnCrossbarMoveLeft]: MOVE_SPEED * runSpeedMultiplier,
+      [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED * runSpeedMultiplier,
+      [PlayerState.Dying]: 0,
+      [PlayerState.GameOver]: 0,
+    };
   }
 
   private get objectPosition(): ObjectPosition {
@@ -132,10 +133,10 @@ export class StateScript extends Script {
       activeState = this.movingState!;
     } else {
       activeState = this.resolveState();
-      if (StateScript.STEP_SPEED[activeState] > 0) {
+      if (this.stepSpeed[activeState] > 0) {
         this.movingState = activeState;
         const { column, row } = this.computeStepTarget(activeState);
-        this.objectPosition.moveTo(column, row, StateScript.STEP_SPEED[activeState]);
+        this.objectPosition.moveTo(column, row, this.stepSpeed[activeState]);
       }
     }
 

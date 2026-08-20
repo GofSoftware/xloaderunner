@@ -12,6 +12,7 @@ import { TileMap, TileType } from './scripts/tile-map';
 import { StateScript } from './scripts/state-script';
 import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { BuilderScript } from './scripts/builder-script';
+import { EnemyScript } from './scripts/enemy-script';
 import { GoldScript } from './scripts/gold-script';
 import { ObjectPosition } from './scripts/object-position';
 import { MapHelper } from './scripts/map.helper';
@@ -25,6 +26,7 @@ import { DestroyAfterTime } from './scripts/destroy-after-time';
 import { DissolveTextureEffect } from './scripts/effects/dissolve-texture-effect';
 
 const FRAME_RATE = 0;
+const ENEMY_SPEED_SLOWDOWN = 1.5;
 
 export class Engine implements IEngineState {
   private static engineInstance: Engine;
@@ -207,6 +209,18 @@ export class Engine implements IEngineState {
         (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
         (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
+        (gameObject: GameObject) =>
+          BitmapSpriteRenderer.create(
+            gameObject,
+            { bitmap: STAND_ANIMATION.frames, framePerSecond: STAND_ANIMATION.framesPerSecond },
+            HUD_LAYER,
+          ),
+      ]),
+
+      GameObject.create('Enemy', this, MapHelper.mapToScreen(20, 1), [
+        (gameObject: GameObject) => EnemyScript.create(gameObject),
+        (gameObject: GameObject) => StateScript.create(gameObject, { column: 20, row: 1 }, 1 / ENEMY_SPEED_SLOWDOWN),
+        (gameObject: GameObject) => ObjectPosition.create(gameObject, 20, 1),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
             gameObject,
