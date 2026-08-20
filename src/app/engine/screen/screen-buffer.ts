@@ -15,8 +15,8 @@ export class ScreenBuffer {
     return this.layers;
   }
 
-  copy(source: number[][], x: number, y: number, layer: number): void {
-    ScreenHelper.copy(this.layers[layer], source, x, y);
+  copy(source: number[][], x: number, y: number, layer: number, colorOverrides: ((color: number) => number)[] = []): void {
+    ScreenHelper.copy(this.layers[layer], source, x, y, colorOverrides);
   }
 
   clear(): void {

@@ -226,6 +226,7 @@ export class Engine implements IEngineState {
             gameObject,
             { bitmap: STAND_ANIMATION.frames, framePerSecond: STAND_ANIMATION.framesPerSecond },
             HUD_LAYER,
+            [(color: number) => color & 0xff5a5aff],
           ),
       ]),
     ].forEach((gameObject) => this.addGameObject(gameObject));
