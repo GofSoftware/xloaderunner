@@ -1,18 +1,18 @@
-import { BuilderScript } from './builder-script';
+import { BuildableTileType, BuilderScript, DEFAULT_BUILD_COUNTS } from './builder-script';
 import { ObjectPosition } from './object-position';
 import { TileMap, TileType } from './tile-map';
 import { StateScript } from './state-script';
 import { KeyboardInputScript } from './keyboard-input-script';
-import { LivesScript, MAX_LIVES } from './lives-script';
+import { LivesScript } from './lives-script';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
-import { CELL_SIZE, LAYER_COUNT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { OBJECT_HAMMER } from '../../data/sprites';
+import { CELL_SIZE, LAYER_COUNT } from '../screen/screen.constants';
+import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_STAIRS } from '../../data/sprites';
+import { GLYPH_MAP } from '../../data/glyphs';
 import { IEngineState } from '../i-engine-state';
 
 const HUD_LAYER = 1;
-const HUD_START_X = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
 
 describe('BuilderScript', () => {
   let engineState: IEngineState;
@@ -33,14 +33,23 @@ describe('BuilderScript', () => {
     keyboard.next();
   }
 
-  function regionAt(x: number): number[][] {
-    return engineState.screenBuffer.buffers[HUD_LAYER].slice(CELL_SIZE, CELL_SIZE * 2).map((row) => row.slice(x, x + CELL_SIZE));
+  function hudRegionAt(x: number): number[][] {
+    return engineState.screenBuffer.buffers[HUD_LAYER].slice(0, CELL_SIZE).map((row) => row.slice(x, x + CELL_SIZE));
   }
 
-  function createPlayer(column: number, row: number): GameObject {
+  function createTrackedTile(column: number, row: number, type: TileType): GameObject {
+    tileMap.setTile(column, row, type);
+    const tileGameObject = GameObject.create(`Tile-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
+      (go) => ObjectPosition.create(go, column, row),
+    ]);
+    engineState.addGameObject(tileGameObject);
+    return tileGameObject;
+  }
+
+  function createPlayer(column: number, row: number, counts?: Record<BuildableTileType, number>): GameObject {
     const gameObject = GameObject.create('Player', engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
-      (go) => BuilderScript.create(go, HUD_LAYER),
+      (go) => (counts ? BuilderScript.create(go, HUD_LAYER, counts) : BuilderScript.create(go, HUD_LAYER)),
     ]);
     gameObject.start();
     return gameObject;
@@ -140,16 +149,62 @@ describe('BuilderScript', () => {
     expect(() => edgePlayer.update()).not.toThrow();
   });
 
-  describe('remove', () => {
-    function createTrackedTile(column: number, row: number, type: TileType): GameObject {
-      tileMap.setTile(column, row, type);
-      const tileGameObject = GameObject.create(`Tile-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
-        (go) => ObjectPosition.create(go, column, row),
-      ]);
-      engineState.addGameObject(tileGameObject);
-      return tileGameObject;
-    }
+  describe('supply', () => {
+    it('refuses to build a type once its supply reaches zero', () => {
+      const brickless = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 0 });
 
+      press('Digit1');
+      brickless.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+    });
+
+    it('decrements the supply of the type just built', () => {
+      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 1 });
+
+      press('Digit1');
+      limited.update();
+      nextFrame();
+      // The first brick already occupies (6, 5); move the offset by removing it and re-pressing
+      // Digit1 to confirm the supply - not just the occupied cell - is what blocks the second build.
+      tileMap.setTile(6, 5, TileType.Empty);
+
+      press('Digit1');
+      limited.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+    });
+
+    it('restocks the supply of the removed type after a remove', () => {
+      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 1 });
+
+      press('Digit1');
+      limited.update();
+      nextFrame();
+
+      press('Digit0');
+      limited.update();
+      nextFrame();
+
+      press('Digit1');
+      limited.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+    });
+
+    it('never displays a restocked supply above 99', () => {
+      const nearlyFull = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 99 });
+      createTrackedTile(6, 5, TileType.Brick);
+
+      press('Digit0');
+      nearlyFull.update();
+
+      expect(hudRegionAt(CELL_SIZE)).toEqual(GLYPH_MAP['9']);
+      expect(hudRegionAt(CELL_SIZE * 2)).toEqual(GLYPH_MAP['9']);
+    });
+  });
+
+  describe('remove', () => {
     it('removes a brick immediately in the cell the player faces, and destroys its game object', () => {
       createTrackedTile(6, 5, TileType.Brick);
 
@@ -209,10 +264,28 @@ describe('BuilderScript', () => {
   });
 
   describe('HUD', () => {
-    it('always draws the hammer icon', () => {
+    const items: { type: TileType; icon: number[][]; x: number }[] = [
+      { type: TileType.Brick, icon: OBJECT_BRICK, x: 0 },
+      { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3 },
+      { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6 },
+    ];
+
+    it('draws every buildable type at the top-left corner, icon followed by its two-digit supply', () => {
       player.update();
 
-      expect(regionAt(HUD_START_X)).toEqual(OBJECT_HAMMER);
+      for (const { icon, x } of items) {
+        expect(hudRegionAt(x)).toEqual(icon);
+        expect(hudRegionAt(x + CELL_SIZE)).toEqual(GLYPH_MAP['1']);
+        expect(hudRegionAt(x + CELL_SIZE * 2)).toEqual(GLYPH_MAP['0']);
+      }
+    });
+
+    it('updates the displayed supply after a build', () => {
+      press('Digit1');
+      player.update();
+
+      expect(hudRegionAt(CELL_SIZE)).toEqual(GLYPH_MAP['0']);
+      expect(hudRegionAt(CELL_SIZE * 2)).toEqual(GLYPH_MAP['9']);
     });
   });
 });

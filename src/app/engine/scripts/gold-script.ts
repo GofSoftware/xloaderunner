@@ -54,8 +54,7 @@ export class GoldScript extends Script {
 
   private drawHud(): void {
     const { screenBuffer } = this.gameObject.engineState;
-    // Cols 0-1 right after the hearts are BuilderScript's hammer + build-tile preview -
-    // the gold icon and count start right after those, at cols 2-3.
+    // Cols 0-1 right after the hearts are left blank - the gold icon and count start at cols 2-3.
     const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE + 2 * CELL_SIZE;
     TextHelper.print(screenBuffer, `${this.collected}`, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
     screenBuffer.copy(OBJECT_GOLD_HUD, startX, CELL_SIZE, this.hudLayer);

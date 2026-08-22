@@ -5,13 +5,23 @@ import { Direction, StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { createTileGameObject } from './tile-bitmaps';
 import { MapHelper } from './map.helper';
-import { CELL_SIZE, SCREEN_WIDTH, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
-import { MAX_LIVES } from './lives-script';
+import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { OBJECT_HAMMER, OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
+import {
+  OBJECT_BRICK,
+  OBJECT_CROSSBAR,
+  OBJECT_SMOKE_UP_1,
+  OBJECT_SMOKE_UP_2,
+  OBJECT_SMOKE_UP_3,
+  OBJECT_SMOKE_UP_4,
+  OBJECT_STAIRS,
+} from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
+import { TextHelper } from '../screen/text.helper';
 
-const BUILD_TYPE_BY_KEY: Record<string, TileType> = {
+export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar;
+
+const BUILD_TYPE_BY_KEY: Record<string, BuildableTileType> = {
   Digit1: TileType.Brick,
   Digit2: TileType.Stairs,
   Digit3: TileType.Crossbar,
@@ -26,22 +36,50 @@ const OFFSET_BY_DIRECTION: Record<Direction, { column: number; row: number }> = 
   [Direction.Down]: { column: 0, row: 1 },
 };
 
+const BUILD_ORDER: BuildableTileType[] = [TileType.Brick, TileType.Stairs, TileType.Crossbar];
+
+const ICON_BY_TYPE: Record<BuildableTileType, number[][]> = {
+  [TileType.Brick]: OBJECT_BRICK,
+  [TileType.Stairs]: OBJECT_STAIRS,
+  [TileType.Crossbar]: OBJECT_CROSSBAR,
+};
+
+// Icon (1 cell) + a 2-digit count (2 cells) per buildable type.
+const HUD_ITEM_WIDTH = CELL_SIZE * 3;
+const MAX_HUD_COUNT = 99;
+
+export const DEFAULT_BUILD_COUNTS: Record<BuildableTileType, number> = {
+  [TileType.Brick]: 10,
+  [TileType.Stairs]: 10,
+  [TileType.Crossbar]: 10,
+};
+
 /**
  * Lets the player place or clear a tile in the cell they're currently facing: pressing a number key
  * builds that tile type immediately, and pressing 0 removes instead - both act right away, in the
  * direction of the Player's current StateScript.direction (defaulting to Right if there's no
  * StateScript to ask). Only Brick/Stairs/Crossbar tiles can be removed.
+ *
+ * Each buildable type has a limited supply, shown at the top-left of the HUD as icon + remaining
+ * count (capped for display at 99). Building one decrements its type's count (and refuses to build
+ * once it reaches 0); removing a previously-placed tile of that type restocks it by one.
  */
 export class BuilderScript extends Script {
-  public static create(gameObject: GameObject, hudLayer: number): BuilderScript {
-    return new BuilderScript(gameObject, hudLayer);
+  public static create(
+    gameObject: GameObject,
+    hudLayer: number,
+    counts: Record<BuildableTileType, number> = DEFAULT_BUILD_COUNTS,
+  ): BuilderScript {
+    return new BuilderScript(gameObject, hudLayer, counts);
   }
 
   private readonly hudLayer: number;
+  private readonly counts: Record<BuildableTileType, number>;
 
-  private constructor(gameObject: GameObject, hudLayer: number) {
+  private constructor(gameObject: GameObject, hudLayer: number, counts: Record<BuildableTileType, number>) {
     super(gameObject);
     this.hudLayer = hudLayer;
+    this.counts = { ...counts };
   }
 
   private get tileMap(): TileMap {
@@ -63,8 +101,12 @@ export class BuilderScript extends Script {
 
   private drawHud(): void {
     const { screenBuffer } = this.gameObject.engineState;
-    const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
-    screenBuffer.copy(OBJECT_HAMMER, startX, CELL_SIZE, this.hudLayer);
+    BUILD_ORDER.forEach((type, index) => {
+      const x = index * HUD_ITEM_WIDTH;
+      screenBuffer.copy(ICON_BY_TYPE[type], x, 0, this.hudLayer);
+      const count = Math.min(this.counts[type], MAX_HUD_COUNT).toString().padStart(2, '0');
+      TextHelper.print(screenBuffer, count, x + CELL_SIZE, 0, this.hudLayer);
+    });
   }
 
   private handleAction(): void {
@@ -83,7 +125,7 @@ export class BuilderScript extends Script {
     }
   }
 
-  private build(type: TileType, columnOffset: number, rowOffset: number): void {
+  private build(type: BuildableTileType, columnOffset: number, rowOffset: number): void {
     const { column, row } = this.objectPosition;
     const targetColumn = column + columnOffset;
     const targetRow = row + rowOffset;
@@ -94,7 +136,11 @@ export class BuilderScript extends Script {
     if (this.tileMap.getTile(targetColumn, targetRow) !== TileType.Empty) {
       return;
     }
+    if (this.counts[type] <= 0) {
+      return;
+    }
 
+    this.counts[type]--;
     this.tileMap.setTile(targetColumn, targetRow, type);
     const tileGameObject = createTileGameObject(this.gameObject.engineState, targetColumn, targetRow, type);
     if (!tileGameObject) {
@@ -132,10 +178,12 @@ export class BuilderScript extends Script {
       return;
     }
 
+    const removedType = this.tileMap.getTile(targetColumn, targetRow) as BuildableTileType;
     const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${targetColumn}-${targetRow}`);
     if (tileGameObject) {
       this.gameObject.engineState.removeGameObject(tileGameObject);
     }
     this.tileMap.setTile(targetColumn, targetRow, TileType.Empty);
+    this.counts[removedType] = Math.min(this.counts[removedType] + 1, MAX_HUD_COUNT);
   }
 }
