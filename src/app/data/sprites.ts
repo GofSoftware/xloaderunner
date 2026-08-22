@@ -45,6 +45,61 @@ export const MAN_STANDING_FRAME_1: number[][] = [
   [__, __, Wt, __, __, Wt, __, __],
 ];
 
+export const MAN_STANDING_FRAME_2: number[][] = [
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, __, Bl, Bl, __, __, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Wt, __, Wt, Wt, __, Wt, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+  [__, __, Wt, __, __, __, __, __],
+];
+
+export const MAN_STANDING_LOOK_LEFT_FRAME_1: number[][] = [
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, __, Bl, Wt, __, __, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, Lg, Lg, Wt, __, __],
+  [__, Wt, __, Lg, Lg, __, Wt, __],
+  [__, __, __, Lg, Lg, __, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+];
+
+export const MAN_STANDING_LOOK_LEFT_FRAME_2: number[][] = [
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, __, Bl, Wt, __, __, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Wt, __, Wt, Wt, __, Wt, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+  [__, __, Wt, __, __, __, __, __],
+];
+
+export const MAN_STANDING_LOOK_RIGHT_FRAME_1: number[][] = [
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, __, Wt, Bl, __, __, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, Lg, Lg, Wt, __, __],
+  [__, Wt, __, Lg, Lg, __, Wt, __],
+  [__, __, __, Lg, Lg, __, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+];
+
+export const MAN_STANDING_LOOK_RIGHT_FRAME_2: number[][] = [
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, __, Wt, Bl, __, __, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Wt, __, Wt, Wt, __, Wt, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, Wt, __, __, Wt, __, __],
+  [__, __, Wt, __, __, __, __, __],
+];
+
 export const MAN_MOVING_RIGHT_FRAME_1: number[][] = [
   [__, __, __, __, Wt, Wt, __, __],
   [__, __, __, __, Wt, Bl, __, __],
@@ -78,17 +133,6 @@ export const MAN_MOVING_RIGHT_FRAME_3: number[][] = [
   [__, __, __, Wt, Wt, __, __, __],
   [__, __, Wt, Wt, Wt, Wt, __, __],
   [__, __, __, __, __, Wt, __, __],
-];
-
-export const MAN_STANDING_FRAME_2: number[][] = [
-  [__, __, __, Wt, Wt, __, __, __],
-  [__, __, __, Bl, Bl, __, __, __],
-  [__, __, __, Wt, Wt, __, __, __],
-  [__, __, Wt, Wt, Wt, Wt, __, __],
-  [__, Wt, __, Wt, Wt, __, Wt, __],
-  [__, __, __, Wt, Wt, __, __, __],
-  [__, __, Wt, __, __, Wt, __, __],
-  [__, __, Wt, __, __, __, __, __],
 ];
 
 export const MAN_FALLING_FRAME_1: number[][] = [

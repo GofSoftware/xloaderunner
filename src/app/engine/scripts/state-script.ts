@@ -2,7 +2,7 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { TileMap, TileType } from './tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -13,6 +13,8 @@ import {
   ON_CROSSBAR_MOVE_RIGHT_ANIMATION,
   ON_STAIRS_ANIMATION,
   STAND_ANIMATION,
+  STAND_ANIMATION_LOOK_LEFT,
+  STAND_ANIMATION_LOOK_RIGHT,
 } from './animations';
 import { BitmapRenderer } from './bitmap-renderer';
 import { OBJECT_EXCLAMATION } from '../../data/sprites';
@@ -24,6 +26,10 @@ import { ObjectPosition } from './object-position';
 
 export enum PlayerState {
   Stand = 'Stand',
+  TurnLeft = 'TurnLeft',
+  TurnRight = 'TurnRight',
+  TurnUp = 'TurnUp',
+  TurnDown = 'TurnDown',
   MoveLeft = 'MoveLeft',
   MoveRight = 'MoveRight',
   MoveUp = 'MoveUp',
@@ -37,12 +43,27 @@ export enum PlayerState {
   GameOver = 'GameOver',
 }
 
+export enum Direction {
+  Left = 'Left',
+  Right = 'Right',
+  Up = 'Up',
+  Down = 'Down',
+}
+
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
 const LEDGE_HESITATION_SECONDS = 0.3;
+// Kept tiny on purpose: long enough to swallow a direction key tap as a pure look-around,
+// short enough that holding the key to actually run never reads as a pause.
+const TURN_DELAY_SECONDS = 0.08;
 const DYING_DURATION_SECONDS = 1;
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
+  [PlayerState.TurnLeft]: STAND_ANIMATION_LOOK_LEFT,
+  [PlayerState.TurnRight]: STAND_ANIMATION_LOOK_RIGHT,
+  // Reuses STAND_ANIMATION as a placeholder - no dedicated look-up/look-down art yet.
+  [PlayerState.TurnUp]: STAND_ANIMATION,
+  [PlayerState.TurnDown]: STAND_ANIMATION,
   [PlayerState.MoveLeft]: MOVE_ANIMATION_LEFT,
   [PlayerState.MoveRight]: MOVE_ANIMATION_RIGHT,
   [PlayerState.MoveUp]: CLIMB_ANIMATION,
@@ -55,6 +76,12 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
   // Reuses STAND_ANIMATION as a placeholder - no dedicated death/game-over art yet.
   [PlayerState.Dying]: STAND_ANIMATION,
   [PlayerState.GameOver]: STAND_ANIMATION,
+};
+const TURN_STATE_BY_DIRECTION: Record<Direction, PlayerState> = {
+  [Direction.Left]: PlayerState.TurnLeft,
+  [Direction.Right]: PlayerState.TurnRight,
+  [Direction.Up]: PlayerState.TurnUp,
+  [Direction.Down]: PlayerState.TurnDown,
 };
 
 export class StateScript extends Script {
@@ -69,6 +96,15 @@ export class StateScript extends Script {
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
   private dying: { elapsed: number } | undefined;
 
+  // currentDirection is the way the sprite is looking, updated the instant a new direction is
+  // requested. lastMoveDirection is the direction last committed to (undefined until the player's
+  // first move) and is what turnPause gates against - so reversing an established direction always
+  // pauses briefly before the first step, but the player's very first move, holding the same
+  // direction, or re-affirming it after the pause, never does.
+  private currentDirection: Direction = Direction.Right;
+  private lastMoveDirection: Direction | undefined;
+  private turnPause: { direction: Direction; elapsed: number } | undefined;
+
   private isForcedLeft = false;
   private isForcedRight = false;
   private isForcedUp = false;
@@ -79,6 +115,10 @@ export class StateScript extends Script {
     this.spawnCell = spawnCell;
     this.stepSpeed = {
       [PlayerState.Stand]: 0,
+      [PlayerState.TurnLeft]: 0,
+      [PlayerState.TurnRight]: 0,
+      [PlayerState.TurnUp]: 0,
+      [PlayerState.TurnDown]: 0,
       [PlayerState.MoveLeft]: MOVE_SPEED * runSpeedMultiplier,
       [PlayerState.MoveRight]: MOVE_SPEED * runSpeedMultiplier,
       [PlayerState.MoveUp]: MOVE_SPEED * runSpeedMultiplier,
@@ -104,6 +144,10 @@ export class StateScript extends Script {
 
   private get lives(): LivesScript {
     return this.gameObject.engineState.getGameObjectByName('Lives')!.getScript(LivesScript)!;
+  }
+
+  public get direction(): Direction {
+    return this.currentDirection;
   }
 
   public forceLeft(value: boolean): void {
@@ -176,18 +220,18 @@ export class StateScript extends Script {
     } else {
       this.hesitation = undefined;
       if (this.isForcedLeft && !this.tileMap.isWall(column - 1, row)) {
-        return PlayerState.OnCrossbarMoveLeft;
+        return this.beginDirectionalMove(Direction.Left, () => PlayerState.OnCrossbarMoveLeft);
       }
       if (this.isForcedRight && !this.tileMap.isWall(column + 1, row)) {
-        return PlayerState.OnCrossbarMoveRight;
+        return this.beginDirectionalMove(Direction.Right, () => PlayerState.OnCrossbarMoveRight);
       }
     }
 
     if (onStairs && this.isForcedUp && !this.tileMap.isWall(column, row - 1)) {
-      return PlayerState.MoveUp;
+      return this.beginDirectionalMove(Direction.Up, () => PlayerState.MoveUp);
     }
     if (this.isForcedDown && !this.tileMap.isWall(column, row + 1)) {
-      return PlayerState.MoveDown;
+      return this.beginDirectionalMove(Direction.Down, () => PlayerState.MoveDown);
     }
 
     if (onStairs) {
@@ -226,13 +270,37 @@ export class StateScript extends Script {
     const { column, row } = this.objectPosition;
 
     if (this.isForcedLeft && !this.tileMap.isWall(column - 1, row)) {
-      return this.startGroundMove(PlayerState.MoveLeft, column - 1, row);
+      return this.beginDirectionalMove(Direction.Left, () => this.startGroundMove(PlayerState.MoveLeft, column - 1, row));
     }
     if (this.isForcedRight && !this.tileMap.isWall(column + 1, row)) {
-      return this.startGroundMove(PlayerState.MoveRight, column + 1, row);
+      return this.beginDirectionalMove(Direction.Right, () => this.startGroundMove(PlayerState.MoveRight, column + 1, row));
     }
 
     return undefined;
+  }
+
+  // Faces the sprite toward `direction` immediately, but only actually starts moving once the
+  // player has been requesting that same direction for TURN_DELAY_SECONDS - see the field comments
+  // on currentDirection/lastMoveDirection/turnPause for why the two directions are tracked separately.
+  private beginDirectionalMove(direction: Direction, onReady: () => PlayerState): PlayerState {
+    this.currentDirection = direction;
+    if (this.lastMoveDirection === undefined || this.lastMoveDirection === direction) {
+      this.lastMoveDirection = direction;
+      this.turnPause = undefined;
+      return onReady();
+    }
+
+    if (!this.turnPause || this.turnPause.direction !== direction) {
+      this.turnPause = { direction, elapsed: 0 };
+    }
+    this.turnPause.elapsed += this.gameObject.engineState.deltaTime;
+    if (this.turnPause.elapsed < TURN_DELAY_SECONDS) {
+      return TURN_STATE_BY_DIRECTION[direction];
+    }
+
+    this.turnPause = undefined;
+    this.lastMoveDirection = direction;
+    return onReady();
   }
 
   private startGroundMove(state: PlayerState.MoveLeft | PlayerState.MoveRight, targetColumn: number, targetRow: number): PlayerState {
@@ -279,6 +347,9 @@ export class StateScript extends Script {
       return PlayerState.GameOver;
     }
     this.objectPosition.teleportTo(this.spawnCell.column, this.spawnCell.row);
+    this.currentDirection = Direction.Right;
+    this.lastMoveDirection = undefined;
+    this.turnPause = undefined;
     return PlayerState.Stand;
   }
 
@@ -326,6 +397,10 @@ export class StateScript extends Script {
         targetRow = row + 1;
         break;
       case PlayerState.Stand:
+      case PlayerState.TurnLeft:
+      case PlayerState.TurnRight:
+      case PlayerState.TurnUp:
+      case PlayerState.TurnDown:
       case PlayerState.OnStairs:
       case PlayerState.OnCrossbar:
       case PlayerState.Dying:
@@ -354,7 +429,13 @@ export class StateScript extends Script {
       return;
     }
 
-    const animation = ANIMATION_BY_STATE[this.state];
+    let animation = ANIMATION_BY_STATE[this.state];
+    if (this.state === PlayerState.Stand && this.currentDirection === Direction.Left) {
+      animation = STAND_ANIMATION_LOOK_LEFT;
+    }
+    if (this.state === PlayerState.Stand && this.currentDirection === Direction.Right) {
+      animation = STAND_ANIMATION_LOOK_RIGHT;
+    }
     spriteRenderer.setAnimation(animation.frames, animation.framesPerSecond);
   }
 

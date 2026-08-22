@@ -1,4 +1,4 @@
-import { StateScript } from './state-script';
+import { Direction, StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { KeyboardInputScript } from './keyboard-input-script';
@@ -315,6 +315,11 @@ describe('StateScript', () => {
     player.update();
     expect(player.position.x).toBe(16);
 
+    // Reversing direction faces the player left right away, but - same as a fresh key tap -
+    // takes a couple more frames of holding it before the turn delay elapses and it actually steps.
+    player.update();
+    expect(player.position.x).toBe(16);
+
     player.update();
     expect(player.position.x).toBeLessThan(16);
   });
@@ -481,5 +486,79 @@ describe('StateScript', () => {
     player.update();
 
     expect(player.position).toEqual({ x: 40, y: 16 });
+  });
+
+  describe('direction', () => {
+    it('defaults to Right before the player has ever moved', () => {
+      expect(player.getScript(StateScript)!.direction).toBe(Direction.Right);
+    });
+
+    it('faces left immediately on the very first move, with no turn delay', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+
+      player.update();
+
+      expect(player.getScript(StateScript)!.direction).toBe(Direction.Left);
+      expect(player.position.x).toBeLessThan(8);
+    });
+
+    it('turns to face a new direction immediately, but only starts running after the turn delay elapses', () => {
+      // Same run-right-then-reverse sequence as 'should ignore a direction change until the
+      // in-progress step completes' above - see that test for the frame-by-frame trace.
+      tileMap.setTile(2, 3, TileType.Brick);
+      engineState.deltaTime = 0.05;
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      player.update();
+
+      window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+      player.update();
+      keyboard.next();
+
+      player.update();
+      player.update();
+      expect(player.position.x).toBe(16);
+
+      player.update();
+      expect(player.getScript(StateScript)!.direction).toBe(Direction.Left);
+      expect(player.position.x).toBe(16);
+
+      player.update();
+      expect(player.position.x).toBeLessThan(16);
+    });
+
+    it('never pauses while continuing to hold the same direction', () => {
+      tileMap.setTile(2, 3, TileType.Brick);
+      engineState.deltaTime = 0.05;
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      player.update();
+      player.update();
+      player.update();
+
+      expect(player.position.x).toBeGreaterThan(8);
+    });
+
+    it('lets a released key be re-affirmed in the same direction without paying the turn delay again', () => {
+      tileMap.setTile(2, 3, TileType.Brick);
+      engineState.deltaTime = 0.05;
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+      player.update();
+      player.update();
+      player.update();
+      player.update();
+      expect(player.position.x).toBe(16);
+
+      window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+      player.update();
+      keyboard.next();
+      expect(player.position.x).toBe(16);
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+      player.update();
+
+      expect(player.position.x).toBeGreaterThan(16);
+    });
   });
 });
