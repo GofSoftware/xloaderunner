@@ -186,4 +186,20 @@ describe('EnemyScript', () => {
     expect(forces.left).toHaveBeenCalledWith(false);
     expect(forces.up).toHaveBeenCalledWith(false);
   });
+
+  it('treats a temporarily-blasted brick as solid ground and walks out over the hole, unlike StateScript', () => {
+    createFloor(6, 0, 10);
+    tileMap.setTile(5, 6, TileType.BlastedBrick);
+    createPlayer(8, 5);
+    const enemy = createEnemy(2, 5);
+    const stateScript = enemy.getScript(StateScript)!;
+    const forces = spyOnForces(stateScript);
+
+    enemy.getScript(EnemyScript)!.update();
+
+    expect(forces.right).toHaveBeenCalledWith(true);
+    expect(forces.left).toHaveBeenCalledWith(false);
+    expect(forces.up).toHaveBeenCalledWith(false);
+    expect(forces.down).toHaveBeenCalledWith(false);
+  });
 });

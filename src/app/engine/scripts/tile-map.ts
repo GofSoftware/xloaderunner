@@ -8,6 +8,10 @@ export const MAP_ROWS = Math.floor(SCREEN_HEIGHT / CELL_SIZE);
 export enum TileType {
   Empty = 'Empty',
   Brick = 'Brick',
+  // A temporarily-blasted-open Brick: walkable/fallable-through like Empty (it's intentionally not
+  // special-cased in isWall/isSolid/isClimbable/isDangerous below) but not Empty itself, so
+  // BuilderScript still refuses to build over it.
+  BlastedBrick = 'BlastedBrick',
   Stairs = 'Stairs',
   Crossbar = 'Crossbar',
   Lava = 'Lava',

@@ -15,7 +15,9 @@ interface ICell {
  * Player itself could reach under StateScript's movement rules: a horizontal step requires the
  * current cell to be grounded or on a climbable tile, an upward step requires standing on stairs,
  * and a downward step is always available (falling, or climbing down) as long as the target cell
- * isn't a wall or lava.
+ * isn't a wall or lava. Pathfinding treats a temporarily-blasted brick as solid ground - unlike
+ * StateScript, which correctly falls through it - so the enemy naively walks out over a dug hole
+ * instead of routing around it, same as it would over an intact floor.
  */
 export class EnemyScript extends Script {
   public static create(gameObject: GameObject): EnemyScript {
@@ -116,7 +118,11 @@ export class EnemyScript extends Script {
   }
 
   private isSupported(column: number, row: number): boolean {
-    return this.tileMap.isSolid(column, row + 1) || this.tileMap.isClimbable(column, row);
+    return (
+      this.tileMap.isSolid(column, row + 1) ||
+      this.tileMap.getTile(column, row + 1) === TileType.BlastedBrick ||
+      this.tileMap.isClimbable(column, row)
+    );
   }
 
   private isPassable(column: number, row: number): boolean {

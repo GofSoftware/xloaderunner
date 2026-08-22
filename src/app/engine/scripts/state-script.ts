@@ -96,10 +96,11 @@ export class StateScript extends Script {
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
   private dying: { elapsed: number } | undefined;
 
-  // currentDirection is the way the sprite is looking, updated the instant a new direction is
-  // requested. lastMoveDirection is the direction last committed to (undefined until the player's
-  // first move) and is what turnPause gates against - so reversing an established direction always
-  // pauses briefly before the first step, but the player's very first move, holding the same
+  // currentDirection is the way the sprite is looking, updated by updateFacingDirection() from
+  // whichever arrow key is held - regardless of whether a step that way is actually possible.
+  // lastMoveDirection is the direction last actually committed to (undefined until the player's
+  // first move) and is what turnPause gates against - so reversing an established movement direction
+  // always pauses briefly before the first step, but the player's very first move, holding the same
   // direction, or re-affirming it after the pause, never does.
   private currentDirection: Direction = Direction.Right;
   private lastMoveDirection: Direction | undefined;
@@ -195,6 +196,7 @@ export class StateScript extends Script {
   }
 
   private resolveState(): PlayerState {
+    this.updateFacingDirection();
     const { column, row } = this.objectPosition;
 
     if (this.dying) {
@@ -243,6 +245,22 @@ export class StateScript extends Script {
     return PlayerState.Stand;
   }
 
+  // Faces the sprite toward whichever direction is currently pressed, regardless of whether a step
+  // that way is actually possible right now (a wall in the way, not being on stairs, etc.) - pressing
+  // a direction key always turns the player to look that way. Left/Right/Up/Down is the priority order
+  // when more than one is held at once.
+  private updateFacingDirection(): void {
+    if (this.isForcedLeft) {
+      this.currentDirection = Direction.Left;
+    } else if (this.isForcedRight) {
+      this.currentDirection = Direction.Right;
+    } else if (this.isForcedUp) {
+      this.currentDirection = Direction.Up;
+    } else if (this.isForcedDown) {
+      this.currentDirection = Direction.Down;
+    }
+  }
+
   private isForced(state: PlayerState.MoveLeft | PlayerState.MoveRight): boolean {
     return state === PlayerState.MoveLeft ? this.isForcedLeft : this.isForcedRight;
   }
@@ -279,11 +297,11 @@ export class StateScript extends Script {
     return undefined;
   }
 
-  // Faces the sprite toward `direction` immediately, but only actually starts moving once the
-  // player has been requesting that same direction for TURN_DELAY_SECONDS - see the field comments
-  // on currentDirection/lastMoveDirection/turnPause for why the two directions are tracked separately.
+  // updateFacingDirection() has already turned the sprite toward `direction` by the time this runs -
+  // this only decides whether a step is actually allowed to start yet, pausing briefly the first time
+  // it reverses an already-established movement direction. See the field comments on
+  // currentDirection/lastMoveDirection/turnPause for why the two directions are tracked separately.
   private beginDirectionalMove(direction: Direction, onReady: () => PlayerState): PlayerState {
-    this.currentDirection = direction;
     if (this.lastMoveDirection === undefined || this.lastMoveDirection === direction) {
       this.lastMoveDirection = direction;
       this.turnPause = undefined;

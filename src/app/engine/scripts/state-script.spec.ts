@@ -540,6 +540,37 @@ describe('StateScript', () => {
       expect(player.position.x).toBeGreaterThan(8);
     });
 
+    it('turns to face up even while grounded on a non-stairs tile, where climbing is impossible', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+
+      player.update();
+
+      expect(player.getScript(StateScript)!.direction).toBe(Direction.Up);
+      expect(player.position).toEqual({ x: 8, y: 16 });
+    });
+
+    it('turns to face right even when a brick blocks the step', () => {
+      tileMap.setTile(2, 2, TileType.Brick);
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      player.update();
+
+      expect(player.getScript(StateScript)!.direction).toBe(Direction.Right);
+      expect(player.position).toEqual({ x: 8, y: 16 });
+    });
+
+    it('turns to face up even when a brick blocks the step above, while on stairs', () => {
+      teleportPlayer(player, 4, 2);
+      tileMap.setTile(4, 2, TileType.Stairs);
+      tileMap.setTile(4, 1, TileType.Brick);
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+
+      player.update();
+
+      expect(player.getScript(StateScript)!.direction).toBe(Direction.Up);
+      expect(player.position).toEqual({ x: 32, y: 16 });
+    });
+
     it('lets a released key be re-affirmed in the same direction without paying the turn delay again', () => {
       tileMap.setTile(2, 3, TileType.Brick);
       engineState.deltaTime = 0.05;

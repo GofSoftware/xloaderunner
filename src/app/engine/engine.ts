@@ -12,6 +12,7 @@ import { TileMap, TileType } from './scripts/tile-map';
 import { StateScript } from './scripts/state-script';
 import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { BuilderScript } from './scripts/builder-script';
+import { BlastedBrickScript } from './scripts/blasted-brick-script';
 import { EnemyScript } from './scripts/enemy-script';
 import { GoldScript } from './scripts/gold-script';
 import { ObjectPosition } from './scripts/object-position';
@@ -140,7 +141,7 @@ export class Engine implements IEngineState {
       this.soundPlayer.play(440, 0.1);
     }
 
-    if (this.keyboard.wasPressedThisFrame('Space')) {
+    if (this.keyboard.wasPressedThisFrame('KeyT')) {
       this.musicPlayer.register('Twinkle', TWINKLE_TWINKLE_LITTLE_STAR);
       this.musicPlayer.play('Twinkle');
     }
@@ -206,6 +207,7 @@ export class Engine implements IEngineState {
         // when the same arrow key both moves the player and specifies a build direction, the build target
         // would be computed from the cell the player is moving into rather than the cell it started this frame in.
         (gameObject: GameObject) => BuilderScript.create(gameObject, HUD_LAYER),
+        (gameObject: GameObject) => BlastedBrickScript.create(gameObject),
         (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
         (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
