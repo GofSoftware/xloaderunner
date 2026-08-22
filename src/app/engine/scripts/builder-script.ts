@@ -1,21 +1,14 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { ObjectPosition } from './object-position';
-import { StateScript } from './state-script';
+import { Direction, StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
-import { createTileGameObject, TILE_BITMAPS } from './tile-bitmaps';
+import { createTileGameObject } from './tile-bitmaps';
 import { MapHelper } from './map.helper';
 import { CELL_SIZE, SCREEN_WIDTH, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
 import { MAX_LIVES } from './lives-script';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import {
-  OBJECT_HAMMER,
-  OBJECT_REMOVE,
-  OBJECT_SMOKE_UP_1,
-  OBJECT_SMOKE_UP_2,
-  OBJECT_SMOKE_UP_3,
-  OBJECT_SMOKE_UP_4,
-} from '../../data/sprites';
+import { OBJECT_HAMMER, OBJECT_SMOKE_UP_1, OBJECT_SMOKE_UP_2, OBJECT_SMOKE_UP_3, OBJECT_SMOKE_UP_4 } from '../../data/sprites';
 import { DestroyAfterTime } from './destroy-after-time';
 
 const BUILD_TYPE_BY_KEY: Record<string, TileType> = {
@@ -26,32 +19,18 @@ const BUILD_TYPE_BY_KEY: Record<string, TileType> = {
 
 const REMOVE_KEY = 'Digit0';
 
-const DIRECTION_OFFSET_BY_KEY: Record<string, { column: number; row: number }> = {
-  ArrowLeft: { column: -1, row: 0 },
-  ArrowRight: { column: 1, row: 0 },
-  ArrowUp: { column: 0, row: -1 },
-  ArrowDown: { column: 0, row: 1 },
+const OFFSET_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
+  [Direction.Left]: { column: -1, row: 0 },
+  [Direction.Right]: { column: 1, row: 0 },
+  [Direction.Up]: { column: 0, row: -1 },
+  [Direction.Down]: { column: 0, row: 1 },
 };
-
-const RESET_FORCE_BY_KEY: Record<string, (stateScript: StateScript) => void> = {
-  ArrowLeft: (stateScript) => stateScript.forceLeft(false),
-  ArrowRight: (stateScript) => stateScript.forceRight(false),
-  ArrowUp: (stateScript) => stateScript.forceUp(false),
-  ArrowDown: (stateScript) => stateScript.forceDown(false),
-};
-
-type ArmedAction = { kind: 'build'; type: TileType } | { kind: 'remove' };
-
-// Changes the behavior of the arrow keys right after the build, if true, player will move into the place where the tile has been built
-const MOVE_TOWARDS = true;
 
 /**
- * Lets the player place or clear a tile next to themselves: pressing a number key arms a tile type to
- * build (pressing the same number again disarms) and pressing 0 arms removal instead; either way, the
- * next arrow key press picks the direction to act in. Acting always disarms afterwards, whether or not
- * the target cell actually changed. Only Brick/Stairs/Crossbar tiles can be removed. The direction key
- * that resolves an armed action also resets that direction's force on StateScript, so the same key
- * press that picked a build/remove direction doesn't also move the player that frame.
+ * Lets the player place or clear a tile in the cell they're currently facing: pressing a number key
+ * builds that tile type immediately, and pressing 0 removes instead - both act right away, in the
+ * direction of the Player's current StateScript.direction (defaulting to Right if there's no
+ * StateScript to ask). Only Brick/Stairs/Crossbar tiles can be removed.
  */
 export class BuilderScript extends Script {
   public static create(gameObject: GameObject, hudLayer: number): BuilderScript {
@@ -59,7 +38,6 @@ export class BuilderScript extends Script {
   }
 
   private readonly hudLayer: number;
-  private armed: ArmedAction | undefined;
 
   private constructor(gameObject: GameObject, hudLayer: number) {
     super(gameObject);
@@ -74,15 +52,12 @@ export class BuilderScript extends Script {
     return this.gameObject.getScript(ObjectPosition)!;
   }
 
-  private get stateScript(): StateScript | undefined {
-    return this.gameObject.getScript(StateScript);
+  private get facingDirection(): Direction {
+    return this.gameObject.getScript(StateScript)?.direction ?? Direction.Right;
   }
 
   public override update(): void {
-    this.handleActionSelection();
-    if (this.armed) {
-      this.handleDirection();
-    }
+    this.handleAction();
     this.drawHud();
   }
 
@@ -90,45 +65,21 @@ export class BuilderScript extends Script {
     const { screenBuffer } = this.gameObject.engineState;
     const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;
     screenBuffer.copy(OBJECT_HAMMER, startX, CELL_SIZE, this.hudLayer);
-    if (this.armed?.kind === 'build') {
-      screenBuffer.copy(TILE_BITMAPS[this.armed.type]!.staticBitmap!, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
-    } else if (this.armed?.kind === 'remove') {
-      screenBuffer.copy(OBJECT_REMOVE, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
-    }
   }
 
-  private handleActionSelection(): void {
+  private handleAction(): void {
     const { keyboard } = this.gameObject.engineState;
+    const { column: columnOffset, row: rowOffset } = OFFSET_BY_DIRECTION[this.facingDirection];
+
     if (keyboard.wasPressedThisFrame(REMOVE_KEY)) {
-      this.armed = this.armed?.kind === 'remove' ? undefined : { kind: 'remove' };
+      this.remove(columnOffset, rowOffset);
       return;
     }
     for (const [key, type] of Object.entries(BUILD_TYPE_BY_KEY)) {
-      if (!keyboard.wasPressedThisFrame(key)) {
-        continue;
+      if (keyboard.wasPressedThisFrame(key)) {
+        this.build(type, columnOffset, rowOffset);
+        return;
       }
-      this.armed = this.armed?.kind === 'build' && this.armed.type === type ? undefined : { kind: 'build', type };
-      return;
-    }
-  }
-
-  private handleDirection(): void {
-    const { keyboard } = this.gameObject.engineState;
-    for (const [key, offset] of Object.entries(DIRECTION_OFFSET_BY_KEY)) {
-      if (!keyboard.wasPressedThisFrame(key)) {
-        continue;
-      }
-      const armed = this.armed!;
-      this.armed = undefined;
-      if (this.stateScript && !MOVE_TOWARDS) {
-        RESET_FORCE_BY_KEY[key](this.stateScript);
-      }
-      if (armed.kind === 'build') {
-        this.build(armed.type, offset.column, offset.row);
-      } else {
-        this.remove(offset.column, offset.row);
-      }
-      return;
     }
   }
 

@@ -8,7 +8,7 @@ import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_HAMMER, OBJECT_REMOVE, OBJECT_STAIRS } from '../../data/sprites';
+import { OBJECT_HAMMER } from '../../data/sprites';
 import { IEngineState } from '../i-engine-state';
 
 const HUD_LAYER = 1;
@@ -23,6 +23,10 @@ describe('BuilderScript', () => {
 
   function press(code: string): void {
     window.dispatchEvent(new KeyboardEvent('keydown', { code }));
+  }
+
+  function release(code: string): void {
+    window.dispatchEvent(new KeyboardEvent('keyup', { code }));
   }
 
   function nextFrame(): void {
@@ -42,6 +46,8 @@ describe('BuilderScript', () => {
     return gameObject;
   }
 
+  // A player with a real StateScript, standing on a brick floor, so pressing an arrow key actually
+  // turns/moves it and BuilderScript can read a facing direction other than the Right fallback.
   function createMovingPlayer(): GameObject {
     for (let column = 0; column <= 8; column++) {
       tileMap.setTile(column, 6, TileType.Brick);
@@ -89,75 +95,33 @@ describe('BuilderScript', () => {
     keyboard.detach();
   });
 
-  it('does nothing on an arrow key press while unarmed', () => {
+  it('does nothing when no build/remove key is pressed', () => {
     press('ArrowRight');
     player.update();
 
     expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
   });
 
-  it('arms brick and builds it in the cell the arrow key points to', () => {
+  it('builds a brick immediately, in the cell the player faces (Right by default)', () => {
     press('Digit1');
-    player.update();
-    nextFrame();
-
-    press('ArrowRight');
     player.update();
 
     expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
     expect(gameObjectsByName.has('Tile-6-5')).toBe(true);
   });
 
-  it('builds stairs above the player when Digit2 then ArrowUp is pressed', () => {
+  it('builds stairs immediately when Digit2 is pressed', () => {
     press('Digit2');
     player.update();
-    nextFrame();
 
-    press('ArrowUp');
-    player.update();
-
-    expect(tileMap.getTile(5, 4)).toBe(TileType.Stairs);
+    expect(tileMap.getTile(6, 5)).toBe(TileType.Stairs);
   });
 
-  it('builds a crossbar below the player when Digit3 then ArrowDown is pressed', () => {
+  it('builds a crossbar immediately when Digit3 is pressed', () => {
     press('Digit3');
     player.update();
-    nextFrame();
 
-    press('ArrowDown');
-    player.update();
-
-    expect(tileMap.getTile(5, 6)).toBe(TileType.Crossbar);
-  });
-
-  it('cancels the armed type when the same number key is pressed again', () => {
-    press('Digit1');
-    player.update();
-    nextFrame();
-
-    press('Digit1');
-    player.update();
-    nextFrame();
-
-    press('ArrowRight');
-    player.update();
-
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
-  });
-
-  it('switches the armed type when a different number key is pressed while armed', () => {
-    press('Digit1');
-    player.update();
-    nextFrame();
-
-    press('Digit2');
-    player.update();
-    nextFrame();
-
-    press('ArrowLeft');
-    player.update();
-
-    expect(tileMap.getTile(4, 5)).toBe(TileType.Stairs);
+    expect(tileMap.getTile(6, 5)).toBe(TileType.Crossbar);
   });
 
   it('does not build over a cell that is already occupied', () => {
@@ -165,82 +129,14 @@ describe('BuilderScript', () => {
 
     press('Digit1');
     player.update();
-    nextFrame();
-
-    press('ArrowRight');
-    player.update();
 
     expect(gameObjectsByName.has('Tile-6-5')).toBe(false);
-  });
-
-  it('disarms after a failed build so a stale arrow press cannot trigger a later build', () => {
-    tileMap.setTile(6, 5, TileType.Brick);
-
-    press('Digit1');
-    player.update();
-    nextFrame();
-
-    press('ArrowRight');
-    player.update();
-    nextFrame();
-
-    press('ArrowLeft');
-    player.update();
-
-    expect(tileMap.getTile(4, 5)).toBe(TileType.Empty);
-  });
-
-  it('builds in the cell adjacent to the player even when the same arrow key also moves it that frame', () => {
-    const movingPlayer = createMovingPlayer();
-
-    press('Digit1');
-    movingPlayer.update();
-    nextFrame();
-
-    press('ArrowRight');
-    movingPlayer.update();
-
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-    expect(tileMap.getTile(7, 5)).toBe(TileType.Empty);
-  });
-
-  it('does not move the player into a newly built climbable tile in the same frame', () => {
-    const movingPlayer = createMovingPlayer();
-
-    press('Digit3');
-    movingPlayer.update();
-    nextFrame();
-
-    press('ArrowRight');
-    movingPlayer.update();
-
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Crossbar);
-    expect(movingPlayer.position).toEqual({ x: 5 * 8, y: 5 * 8 });
-  });
-
-  it('does not move the player into a cell it just removed a wall from in the same frame', () => {
-    const movingPlayer = createMovingPlayer();
-    tileMap.setTile(6, 5, TileType.Brick);
-
-    press('Digit0');
-    movingPlayer.update();
-    nextFrame();
-
-    press('ArrowRight');
-    movingPlayer.update();
-
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
-    expect(movingPlayer.position).toEqual({ x: 5 * 8, y: 5 * 8 });
   });
 
   it('does not build outside the map bounds', () => {
     const edgePlayer = createPlayer(tileMap.columns - 1, 5);
 
     press('Digit1');
-    edgePlayer.update();
-    nextFrame();
-
-    press('ArrowRight');
     expect(() => edgePlayer.update()).not.toThrow();
   });
 
@@ -254,39 +150,24 @@ describe('BuilderScript', () => {
       return tileGameObject;
     }
 
-    it('removes a brick at the cell the arrow key points to, and destroys its game object', () => {
+    it('removes a brick immediately in the cell the player faces, and destroys its game object', () => {
       createTrackedTile(6, 5, TileType.Brick);
 
       press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('ArrowRight');
       player.update();
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
       expect(gameObjectsByName.has('Tile-6-5')).toBe(false);
     });
 
-    it('removes stairs and a crossbar the same way', () => {
-      createTrackedTile(5, 4, TileType.Stairs);
-      createTrackedTile(5, 6, TileType.Crossbar);
+    it('removes stairs and a crossbar the same way, on separate presses', () => {
+      createTrackedTile(6, 5, TileType.Stairs);
 
       press('Digit0');
       player.update();
       nextFrame();
-      press('ArrowUp');
-      player.update();
-      nextFrame();
 
-      press('Digit0');
-      player.update();
-      nextFrame();
-      press('ArrowDown');
-      player.update();
-
-      expect(tileMap.getTile(5, 4)).toBe(TileType.Empty);
-      expect(tileMap.getTile(5, 6)).toBe(TileType.Empty);
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
     });
 
     it('does not remove lava, gold, or player-start tiles', () => {
@@ -294,151 +175,44 @@ describe('BuilderScript', () => {
 
       press('Digit0');
       player.update();
-      nextFrame();
-
-      press('ArrowRight');
-      player.update();
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Lava);
     });
+  });
 
-    it('cancels the armed removal when Digit0 is pressed again', () => {
-      createTrackedTile(6, 5, TileType.Brick);
-
-      press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('ArrowRight');
+  describe('facing direction', () => {
+    it('builds to the right by default, with no StateScript to ask', () => {
+      press('Digit1');
       player.update();
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
     });
 
-    it('switches from an armed build type to remove when Digit0 is pressed', () => {
-      createTrackedTile(6, 5, TileType.Brick);
-
-      press('Digit1');
-      player.update();
-      nextFrame();
-
-      press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('ArrowRight');
-      player.update();
-
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
-    });
-
-    it('switches from armed remove to a build type when a number key is pressed', () => {
-      press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('Digit1');
-      player.update();
-      nextFrame();
-
-      press('ArrowRight');
-      player.update();
-
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-    });
-
-    it('disarms after removing so a stale arrow press does not remove again', () => {
-      createTrackedTile(6, 5, TileType.Brick);
-      createTrackedTile(4, 5, TileType.Brick);
-
-      press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('ArrowRight');
-      player.update();
-      nextFrame();
+    it('builds in whichever direction the player is currently facing, not always to the right', () => {
+      const movingPlayer = createMovingPlayer();
+      const objectPosition = movingPlayer.getScript(ObjectPosition)!;
 
       press('ArrowLeft');
-      player.update();
+      movingPlayer.update();
+      release('ArrowLeft');
+      movingPlayer.update();
+      nextFrame();
 
-      expect(tileMap.getTile(4, 5)).toBe(TileType.Brick);
+      const { column, row } = objectPosition;
+      press('Digit1');
+      movingPlayer.update();
+
+      expect(tileMap.getTile(column - 1, row)).toBe(TileType.Brick);
+      // Sanity check: it did not fall back to building on the original (Right) side.
+      expect(tileMap.getTile(column + 1, row)).toBe(TileType.Empty);
     });
   });
 
   describe('HUD', () => {
-    it('always draws the hammer icon, armed or not', () => {
+    it('always draws the hammer icon', () => {
       player.update();
 
       expect(regionAt(HUD_START_X)).toEqual(OBJECT_HAMMER);
-    });
-
-    it('shows no build-tile preview while unarmed', () => {
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_HAMMER.map((row) => row.map(() => 0)));
-    });
-
-    it('previews the armed tile type next to the hammer', () => {
-      press('Digit1');
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_BRICK);
-    });
-
-    it('clears the preview once the armed type is cancelled', () => {
-      press('Digit1');
-      player.update();
-      nextFrame();
-
-      press('Digit1');
-      // Mirrors Engine.render() clearing the buffer once per frame before scripts redraw it -
-      // without this, the previous frame's brick preview would still be sitting in the buffer.
-      engineState.screenBuffer.clear();
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_BRICK.map((row) => row.map(() => 0)));
-    });
-
-    it('updates the preview when switching to a different armed type', () => {
-      press('Digit1');
-      player.update();
-      nextFrame();
-
-      press('Digit2');
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_STAIRS);
-    });
-
-    it('previews a crossbar when Digit3 is armed', () => {
-      press('Digit3');
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_CROSSBAR);
-    });
-
-    it('previews a remove icon next to the hammer while remove is armed', () => {
-      press('Digit0');
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_REMOVE);
-    });
-
-    it('clears the remove icon once remove is cancelled', () => {
-      press('Digit0');
-      player.update();
-      nextFrame();
-
-      press('Digit0');
-      engineState.screenBuffer.clear();
-      player.update();
-
-      expect(regionAt(HUD_START_X + CELL_SIZE)).toEqual(OBJECT_REMOVE.map((row) => row.map(() => 0)));
     });
   });
 });
