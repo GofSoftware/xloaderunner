@@ -10,6 +10,7 @@ import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import {
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
+  OBJECT_REMOVE,
   OBJECT_SMOKE_UP_1,
   OBJECT_SMOKE_UP_2,
   OBJECT_SMOKE_UP_3,
@@ -44,15 +45,19 @@ const ICON_BY_TYPE: Record<BuildableTileType, number[][]> = {
   [TileType.Crossbar]: OBJECT_CROSSBAR,
 };
 
-// Icon (1 cell) + a 2-digit count (2 cells) per buildable type.
+// Icon (1 cell) + a 2-digit count (2 cells) per HUD item (one per buildable type, plus remove).
 const HUD_ITEM_WIDTH = CELL_SIZE * 3;
 const MAX_HUD_COUNT = 99;
+// One slot past the last buildable type's item.
+const REMOVE_HUD_X = BUILD_ORDER.length * HUD_ITEM_WIDTH;
 
 export const DEFAULT_BUILD_COUNTS: Record<BuildableTileType, number> = {
   [TileType.Brick]: 10,
   [TileType.Stairs]: 10,
   [TileType.Crossbar]: 10,
 };
+
+export const DEFAULT_REMOVE_COUNT = 10;
 
 /**
  * Lets the player place or clear a tile in the cell they're currently facing: pressing a number key
@@ -62,24 +67,29 @@ export const DEFAULT_BUILD_COUNTS: Record<BuildableTileType, number> = {
  *
  * Each buildable type has a limited supply, shown at the top-left of the HUD as icon + remaining
  * count (capped for display at 99). Building one decrements its type's count (and refuses to build
- * once it reaches 0); removing a previously-placed tile of that type restocks it by one.
+ * once it reaches 0); removing a previously-placed tile of that type restocks it by one. Removing is
+ * itself a limited action, shown the same way with the remove icon - it decrements on every successful
+ * removal (and refuses once it reaches 0) but is never restocked.
  */
 export class BuilderScript extends Script {
   public static create(
     gameObject: GameObject,
     hudLayer: number,
     counts: Record<BuildableTileType, number> = DEFAULT_BUILD_COUNTS,
+    removeCount: number = DEFAULT_REMOVE_COUNT,
   ): BuilderScript {
-    return new BuilderScript(gameObject, hudLayer, counts);
+    return new BuilderScript(gameObject, hudLayer, counts, removeCount);
   }
 
   private readonly hudLayer: number;
   private readonly counts: Record<BuildableTileType, number>;
+  private removeCount: number;
 
-  private constructor(gameObject: GameObject, hudLayer: number, counts: Record<BuildableTileType, number>) {
+  private constructor(gameObject: GameObject, hudLayer: number, counts: Record<BuildableTileType, number>, removeCount: number) {
     super(gameObject);
     this.hudLayer = hudLayer;
     this.counts = { ...counts };
+    this.removeCount = removeCount;
   }
 
   private get tileMap(): TileMap {
@@ -104,9 +114,16 @@ export class BuilderScript extends Script {
     BUILD_ORDER.forEach((type, index) => {
       const x = index * HUD_ITEM_WIDTH;
       screenBuffer.copy(ICON_BY_TYPE[type], x, 0, this.hudLayer);
-      const count = Math.min(this.counts[type], MAX_HUD_COUNT).toString().padStart(2, '0');
-      TextHelper.print(screenBuffer, count, x + CELL_SIZE, 0, this.hudLayer);
+      this.drawCount(this.counts[type], x + CELL_SIZE);
     });
+    screenBuffer.copy(OBJECT_REMOVE, REMOVE_HUD_X, 0, this.hudLayer);
+    this.drawCount(this.removeCount, REMOVE_HUD_X + CELL_SIZE);
+  }
+
+  private drawCount(value: number, x: number): void {
+    const { screenBuffer } = this.gameObject.engineState;
+    const count = Math.min(value, MAX_HUD_COUNT).toString().padStart(2, '0');
+    TextHelper.print(screenBuffer, count, x, 0, this.hudLayer);
   }
 
   private handleAction(): void {
@@ -177,6 +194,9 @@ export class BuilderScript extends Script {
     if (!this.tileMap.isRemovable(targetColumn, targetRow)) {
       return;
     }
+    if (this.removeCount <= 0) {
+      return;
+    }
 
     const removedType = this.tileMap.getTile(targetColumn, targetRow) as BuildableTileType;
     const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${targetColumn}-${targetRow}`);
@@ -185,5 +205,6 @@ export class BuilderScript extends Script {
     }
     this.tileMap.setTile(targetColumn, targetRow, TileType.Empty);
     this.counts[removedType] = Math.min(this.counts[removedType] + 1, MAX_HUD_COUNT);
+    this.removeCount--;
   }
 }

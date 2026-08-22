@@ -1,4 +1,4 @@
-import { BuildableTileType, BuilderScript, DEFAULT_BUILD_COUNTS } from './builder-script';
+import { BuildableTileType, BuilderScript, DEFAULT_BUILD_COUNTS, DEFAULT_REMOVE_COUNT } from './builder-script';
 import { ObjectPosition } from './object-position';
 import { TileMap, TileType } from './tile-map';
 import { StateScript } from './state-script';
@@ -8,7 +8,7 @@ import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT } from '../screen/screen.constants';
-import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_STAIRS } from '../../data/sprites';
+import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_REMOVE, OBJECT_STAIRS } from '../../data/sprites';
 import { GLYPH_MAP } from '../../data/glyphs';
 import { IEngineState } from '../i-engine-state';
 
@@ -46,10 +46,15 @@ describe('BuilderScript', () => {
     return tileGameObject;
   }
 
-  function createPlayer(column: number, row: number, counts?: Record<BuildableTileType, number>): GameObject {
+  function createPlayer(
+    column: number,
+    row: number,
+    counts: Record<BuildableTileType, number> = DEFAULT_BUILD_COUNTS,
+    removeCount: number = DEFAULT_REMOVE_COUNT,
+  ): GameObject {
     const gameObject = GameObject.create('Player', engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
-      (go) => (counts ? BuilderScript.create(go, HUD_LAYER, counts) : BuilderScript.create(go, HUD_LAYER)),
+      (go) => BuilderScript.create(go, HUD_LAYER, counts, removeCount),
     ]);
     gameObject.start();
     return gameObject;
@@ -233,6 +238,35 @@ describe('BuilderScript', () => {
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Lava);
     });
+
+    it('refuses to remove once the remove supply reaches zero', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+      const removeless = createPlayer(5, 5, DEFAULT_BUILD_COUNTS, 0);
+
+      press('Digit0');
+      removeless.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+      expect(gameObjectsByName.has('Tile-6-5')).toBe(true);
+    });
+
+    it('decrements the remove supply on every successful removal, and is never restocked', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+      const limited = createPlayer(5, 5, DEFAULT_BUILD_COUNTS, 1);
+
+      press('Digit0');
+      limited.update();
+      nextFrame();
+
+      expect(hudRegionAt(CELL_SIZE * 10)).toEqual(GLYPH_MAP['0']);
+
+      createTrackedTile(6, 5, TileType.Brick);
+      press('Digit0');
+      limited.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+      expect(gameObjectsByName.has('Tile-6-5')).toBe(true);
+    });
   });
 
   describe('facing direction', () => {
@@ -264,19 +298,20 @@ describe('BuilderScript', () => {
   });
 
   describe('HUD', () => {
-    const items: { type: TileType; icon: number[][]; x: number }[] = [
-      { type: TileType.Brick, icon: OBJECT_BRICK, x: 0 },
-      { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3 },
-      { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6 },
+    const items: { type: TileType; icon: number[][]; x: number; digits: [string, string] }[] = [
+      { type: TileType.Brick, icon: OBJECT_BRICK, x: 0, digits: ['1', '0'] },
+      { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3, digits: ['1', '0'] },
+      { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6, digits: ['1', '0'] },
+      { type: TileType.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 9, digits: ['1', '0'] },
     ];
 
-    it('draws every buildable type at the top-left corner, icon followed by its two-digit supply', () => {
+    it('draws every buildable type, plus remove, at the top-left corner, icon followed by its two-digit supply', () => {
       player.update();
 
-      for (const { icon, x } of items) {
+      for (const { icon, x, digits } of items) {
         expect(hudRegionAt(x)).toEqual(icon);
-        expect(hudRegionAt(x + CELL_SIZE)).toEqual(GLYPH_MAP['1']);
-        expect(hudRegionAt(x + CELL_SIZE * 2)).toEqual(GLYPH_MAP['0']);
+        expect(hudRegionAt(x + CELL_SIZE)).toEqual(GLYPH_MAP[digits[0]]);
+        expect(hudRegionAt(x + CELL_SIZE * 2)).toEqual(GLYPH_MAP[digits[1]]);
       }
     });
 
@@ -286,6 +321,16 @@ describe('BuilderScript', () => {
 
       expect(hudRegionAt(CELL_SIZE)).toEqual(GLYPH_MAP['0']);
       expect(hudRegionAt(CELL_SIZE * 2)).toEqual(GLYPH_MAP['9']);
+    });
+
+    it('updates the displayed remove supply after a removal', () => {
+      createTrackedTile(6, 5, TileType.Brick);
+
+      press('Digit0');
+      player.update();
+
+      expect(hudRegionAt(CELL_SIZE * 10)).toEqual(GLYPH_MAP['0']);
+      expect(hudRegionAt(CELL_SIZE * 11)).toEqual(GLYPH_MAP['9']);
     });
   });
 });
