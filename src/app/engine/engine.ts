@@ -221,7 +221,7 @@ export class Engine implements IEngineState {
 
       GameObject.create('Enemy', this, MapHelper.mapToScreen(20, 1), [
         (gameObject: GameObject) => EnemyScript.create(gameObject),
-        (gameObject: GameObject) => StateScript.create(gameObject, { column: 20, row: 1 }, 1 / ENEMY_SPEED_SLOWDOWN),
+        (gameObject: GameObject) => StateScript.create(gameObject, { column: 20, row: 1 }, 1 / ENEMY_SPEED_SLOWDOWN, true),
         (gameObject: GameObject) => ObjectPosition.create(gameObject, 20, 1),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(

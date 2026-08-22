@@ -17,7 +17,8 @@ interface ICell {
  * and a downward step is always available (falling, or climbing down) as long as the target cell
  * isn't a wall or lava. Pathfinding treats a temporarily-blasted brick as solid ground - unlike
  * StateScript, which correctly falls through it - so the enemy naively walks out over a dug hole
- * instead of routing around it, same as it would over an intact floor.
+ * instead of routing around it, same as it would over an intact floor. StateScript then drops it one
+ * cell into the hole and pins it there (Trapped) until the brick reforms.
  */
 export class EnemyScript extends Script {
   public static create(gameObject: GameObject): EnemyScript {

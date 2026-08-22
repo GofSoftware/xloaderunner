@@ -35,6 +35,7 @@ export enum PlayerState {
   MoveUp = 'MoveUp',
   MoveDown = 'MoveDown',
   Fall = 'Fall',
+  Trapped = 'Trapped',
   OnStairs = 'OnStairs',
   OnCrossbar = 'OnCrossbar',
   OnCrossbarMoveLeft = 'OnCrossbarMoveLeft',
@@ -69,6 +70,9 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
   [PlayerState.MoveUp]: CLIMB_ANIMATION,
   [PlayerState.MoveDown]: CLIMB_ANIMATION,
   [PlayerState.Fall]: FALL_ANIMATION,
+  // Trapped reuses the falling animation - visually indistinguishable from Fall, but pinned in place
+  // (see stepSpeed below and the getsTrappedInHoles check in resolveState).
+  [PlayerState.Trapped]: FALL_ANIMATION,
   [PlayerState.OnStairs]: ON_STAIRS_ANIMATION,
   [PlayerState.OnCrossbar]: ON_CROSSBAR_ANIMATION,
   [PlayerState.OnCrossbarMoveLeft]: ON_CROSSBAR_MOVE_LEFT_ANIMATION,
@@ -85,12 +89,20 @@ const TURN_STATE_BY_DIRECTION: Record<Direction, PlayerState> = {
 };
 
 export class StateScript extends Script {
-  public static create(gameObject: GameObject, spawnCell: { column: number; row: number }, runSpeedMultiplier: number = 1): StateScript {
-    return new StateScript(gameObject, spawnCell, runSpeedMultiplier);
+  public static create(
+    gameObject: GameObject,
+    spawnCell: { column: number; row: number },
+    runSpeedMultiplier: number = 1,
+    getsTrappedInHoles: boolean = false,
+  ): StateScript {
+    return new StateScript(gameObject, spawnCell, runSpeedMultiplier, getsTrappedInHoles);
   }
 
   private readonly stepSpeed: Record<PlayerState, number>;
   private readonly spawnCell: { column: number; row: number };
+  // Whether landing on a blasted-open brick pins this character in place (Trapped) instead of
+  // falling straight through it - used to trap Enemy in a dug hole, but not the Player.
+  private readonly getsTrappedInHoles: boolean;
   private state: PlayerState | undefined;
   private movingState: PlayerState | undefined;
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
@@ -111,9 +123,15 @@ export class StateScript extends Script {
   private isForcedUp = false;
   private isForcedDown = false;
 
-  private constructor(gameObject: GameObject, spawnCell: { column: number; row: number }, runSpeedMultiplier: number) {
+  private constructor(
+    gameObject: GameObject,
+    spawnCell: { column: number; row: number },
+    runSpeedMultiplier: number,
+    getsTrappedInHoles: boolean,
+  ) {
     super(gameObject);
     this.spawnCell = spawnCell;
+    this.getsTrappedInHoles = getsTrappedInHoles;
     this.stepSpeed = {
       [PlayerState.Stand]: 0,
       [PlayerState.TurnLeft]: 0,
@@ -126,6 +144,8 @@ export class StateScript extends Script {
       [PlayerState.MoveDown]: MOVE_SPEED * runSpeedMultiplier,
       // Falling is gravity, not running - it stays the same for every StateScript regardless of runSpeedMultiplier.
       [PlayerState.Fall]: FALL_SPEED,
+      // Pinned in place - see the getsTrappedInHoles comment above.
+      [PlayerState.Trapped]: 0,
       [PlayerState.OnStairs]: 0,
       [PlayerState.OnCrossbar]: 0,
       [PlayerState.OnCrossbarMoveLeft]: MOVE_SPEED * runSpeedMultiplier,
@@ -204,6 +224,10 @@ export class StateScript extends Script {
     }
     if (this.tileMap.isDangerous(column, row)) {
       return this.beginDying();
+    }
+    if (this.getsTrappedInHoles && this.tileMap.getTile(column, row) === TileType.BlastedBrick) {
+      this.hesitation = undefined;
+      return PlayerState.Trapped;
     }
 
     const onStairs = this.isOnStairs();
@@ -380,7 +404,13 @@ export class StateScript extends Script {
 
   private isGroundedBelow(): boolean {
     const { column, row } = this.objectPosition;
-    return this.tileMap.isSolid(column, row + 1);
+    if (this.tileMap.isSolid(column, row + 1)) {
+      return true;
+    }
+    // A blasted-open brick isn't solid on its own, but once something is occupying it (an Enemy
+    // trapped there - see getsTrappedInHoles) it forms a floor/bridge over the hole, so this
+    // character stands on top of it instead of falling in too.
+    return this.tileMap.getTile(column, row + 1) === TileType.BlastedBrick && this.tileMap.getObjectsAt(column, row + 1).length > 0;
   }
 
   private isOnStairs(): boolean {
@@ -419,6 +449,7 @@ export class StateScript extends Script {
       case PlayerState.TurnRight:
       case PlayerState.TurnUp:
       case PlayerState.TurnDown:
+      case PlayerState.Trapped:
       case PlayerState.OnStairs:
       case PlayerState.OnCrossbar:
       case PlayerState.Dying:

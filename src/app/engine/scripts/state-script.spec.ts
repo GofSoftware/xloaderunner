@@ -36,6 +36,18 @@ describe('StateScript', () => {
     target.getScript(ObjectPosition)!.teleportTo(column, row);
   }
 
+  // A character whose StateScript is configured to get trapped in a blasted-open brick hole
+  // (getsTrappedInHoles), the way Enemy is wired in engine.ts - unlike the default `player` above.
+  function createTrappingCharacter(position: { x: number; y: number }): GameObject {
+    const { column, row } = MapHelper.screenToMap(position.x, position.y);
+    const gameObject = GameObject.create('Enemy', engineState, position, [
+      (go) => StateScript.create(go, spawnCell, 1, true),
+      (go) => ObjectPosition.create(go, column, row),
+    ]);
+    gameObject.start();
+    return gameObject;
+  }
+
   beforeEach(() => {
     keyboard = Keyboard.create();
     keyboard.attach();
@@ -590,6 +602,58 @@ describe('StateScript', () => {
       player.update();
 
       expect(player.position.x).toBeGreaterThan(16);
+    });
+  });
+
+  describe('blasted brick holes', () => {
+    it('keeps falling straight through a blasted-open brick by default (getsTrappedInHoles is off)', () => {
+      teleportPlayer(player, 12, 2);
+      tileMap.setTile(12, 3, TileType.BlastedBrick);
+      engineState.deltaTime = 0.05;
+
+      player.update();
+      player.update();
+      player.update();
+      expect(player.position.y).toBe(24);
+
+      // Nothing solid below the hole either, so a non-trapping character just keeps falling past it.
+      player.update();
+      expect(player.position.y).toBeGreaterThan(24);
+    });
+
+    it('pins a trapping character in place once it drops onto a blasted-open brick, instead of falling further', () => {
+      const enemy = createTrappingCharacter({ x: 96, y: 16 });
+      tileMap.setTile(12, 3, TileType.BlastedBrick);
+      engineState.deltaTime = 0.05;
+
+      enemy.update();
+      enemy.update();
+      enemy.update();
+      expect(enemy.position.y).toBe(24);
+
+      enemy.update();
+      enemy.update();
+      expect(enemy.position.y).toBe(24);
+    });
+
+    it('lets a trapping character stand on top of a blasted-open brick once something occupies it', () => {
+      const enemy = createTrappingCharacter({ x: 96, y: 8 });
+      tileMap.setTile(12, 2, TileType.BlastedBrick);
+      const occupant = GameObject.create('TrappedEnemy', engineState, { x: 96, y: 16 }, [(go) => ObjectPosition.create(go, 12, 2)]);
+      occupant.start();
+
+      enemy.update();
+
+      expect(enemy.position).toEqual({ x: 96, y: 8 });
+    });
+
+    it('falls into an unoccupied blasted-open brick rather than treating it as solid ground', () => {
+      teleportPlayer(player, 12, 2);
+      tileMap.setTile(12, 3, TileType.BlastedBrick);
+
+      player.update();
+
+      expect(player.position.y).toBeGreaterThan(16);
     });
   });
 });
