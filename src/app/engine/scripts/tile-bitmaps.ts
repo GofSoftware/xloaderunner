@@ -1,6 +1,15 @@
 import {
+  OBJECT_BEAM_ROTATOR,
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
+  OBJECT_EMITTER_BLUE_DOWN,
+  OBJECT_EMITTER_BLUE_LEFT,
+  OBJECT_EMITTER_BLUE_RIGHT,
+  OBJECT_EMITTER_BLUE_UP,
+  OBJECT_EMITTER_RED_DOWN,
+  OBJECT_EMITTER_RED_LEFT,
+  OBJECT_EMITTER_RED_RIGHT,
+  OBJECT_EMITTER_RED_UP,
   OBJECT_GOLD,
   OBJECT_LAVA_1,
   OBJECT_LAVA_2,
@@ -19,6 +28,7 @@ import { ITileBitmapDescription, TileBitmapType } from '../i-tile-bitmap-descrip
 import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER } from '../screen/screen.constants';
 import { BitmapRenderer } from './bitmap-renderer';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './emitter-script';
 import { GoldItem } from './gold-item';
 import { MapHelper } from './map.helper';
 import { ObjectPosition } from './object-position';
@@ -36,6 +46,15 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
       framePerSecond: 4,
     },
   },
+  [TileType.EmitterRedLeft]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_RED_LEFT },
+  [TileType.EmitterRedRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_RED_RIGHT },
+  [TileType.EmitterRedUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_RED_UP },
+  [TileType.EmitterRedDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_RED_DOWN },
+  [TileType.EmitterBlueLeft]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_LEFT },
+  [TileType.EmitterBlueRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_RIGHT },
+  [TileType.EmitterBlueUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_UP },
+  [TileType.EmitterBlueDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_DOWN },
+  [TileType.BeamRotator]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_ROTATOR },
 };
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
@@ -49,6 +68,10 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
   const scriptFactories: ((gameObject: GameObject) => Script)[] = [(gameObject) => ObjectPosition.create(gameObject, column, row)];
   if (type === TileType.Gold) {
     scriptFactories.push((gameObject) => GoldItem.create(gameObject));
+  }
+  const emitterInfo = EMITTER_INFO_BY_TILE_TYPE[type];
+  if (emitterInfo) {
+    scriptFactories.push((gameObject) => EmitterScript.create(gameObject, emitterInfo.color, emitterInfo.direction));
   }
   scriptFactories.push((gameObject) =>
     tileBitmap.bitmapType === TileBitmapType.Static

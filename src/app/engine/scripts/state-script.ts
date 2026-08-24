@@ -2,7 +2,7 @@ import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { TileMap, TileType } from './tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -485,7 +485,7 @@ export class StateScript extends Script {
     if (this.state === PlayerState.Stand && this.currentDirection === Direction.Right) {
       animation = STAND_ANIMATION_LOOK_RIGHT;
     }
-    spriteRenderer.setAnimation(animation.frames, animation.framesPerSecond);
+    spriteRenderer.setAnimation({bitmap: animation.frames, framePerSecond: animation.framesPerSecond});
   }
 
   private showExclamation(): void {

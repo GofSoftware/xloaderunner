@@ -4,6 +4,7 @@ import { BitmapRenderer } from './bitmap-renderer';
 import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
 import { GoldItem } from './gold-item';
 import { TileType } from './tile-map';
+import { EmitterScript, EMITTER_INFO_BY_TILE_TYPE } from './emitter-script';
 import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER, CELL_SIZE, LAYER_COUNT } from '../screen/screen.constants';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { IEngineState } from '../i-engine-state';
@@ -63,5 +64,25 @@ describe('createTileGameObject', () => {
 
     expect(isBlank(region(MIDDLE_TILE_LAYER))).toBe(false);
     expect(isBlank(region(BACKGROUND_LAYER))).toBe(true);
+  });
+
+  describe('emitters', () => {
+    it('tags each emitter tile type with an EmitterScript carrying its color and direction', () => {
+      for (const [type, info] of Object.entries(EMITTER_INFO_BY_TILE_TYPE)) {
+        const gameObject = createTileGameObject(engineState, 1, 1, type as TileType)!;
+        const emitter = gameObject.getScript(EmitterScript)!;
+
+        expect(emitter).toBeDefined();
+        expect(emitter.color).toBe(info!.color);
+        expect(emitter.direction).toBe(info!.direction);
+        expect(gameObject.getScript(BitmapRenderer)).toBeDefined();
+      }
+    });
+
+    it('does not tag non-emitter tiles with EmitterScript', () => {
+      const gameObject = createTileGameObject(engineState, 3, 4, TileType.Brick)!;
+
+      expect(gameObject.getScript(EmitterScript)).toBeUndefined();
+    });
   });
 });

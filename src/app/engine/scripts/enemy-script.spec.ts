@@ -61,6 +61,8 @@ describe('EnemyScript', () => {
       musicPlayer: {} as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
+      timeFromStart: 0,
+      startedAt: 0,
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),

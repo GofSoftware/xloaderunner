@@ -11,6 +11,8 @@ export interface IEngineState {
   musicPlayer: MusicPlayer;
   deltaTime: number;
   fps: number;
+  timeFromStart: number;
+  startedAt: number;
 
   addGameObject(gameObject: GameObject, after?: GameObject): void;
   removeGameObject(gameObject: GameObject): void;

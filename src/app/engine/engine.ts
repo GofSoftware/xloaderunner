@@ -14,6 +14,7 @@ import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { BuilderScript } from './scripts/builder-script';
 import { BlastedBrickScript } from './scripts/blasted-brick-script';
 import { EnemyScript } from './scripts/enemy-script';
+import { EmitterManager } from './scripts/emitter-manager';
 import { GoldScript } from './scripts/gold-script';
 import { ObjectPosition } from './scripts/object-position';
 import { MapHelper } from './scripts/map.helper';
@@ -47,6 +48,8 @@ export class Engine implements IEngineState {
   public readonly musicPlayer: MusicPlayer;
   public deltaTime: number = 0;
   public fps: number = 0;
+  public timeFromStart: number = 0;
+  public startedAt: number = 0;
 
   private fpsFrameCount: number = 0;
   private fpsElapsedTime: number = 0;
@@ -64,6 +67,7 @@ export class Engine implements IEngineState {
 
   public start(): void {
     this.previousFrameTime = Date.now();
+    this.startedAt = Date.now();
     this.started = true;
     this.keyboard.attach();
     this.initLevel();
@@ -129,6 +133,7 @@ export class Engine implements IEngineState {
     const currentFrameTime = Date.now();
     this.deltaTime = (currentFrameTime - this.previousFrameTime) / 1000;
     this.previousFrameTime = currentFrameTime;
+    this.timeFromStart = Date.now() - this.startedAt;
     this.updateFps();
     this.screenBuffer.clear();
 
@@ -188,6 +193,9 @@ export class Engine implements IEngineState {
 
     [
       mapGameObject,
+      // Registers each emitter tile as it starts below, so this must be added - and started - before
+      // ...tileGameObjects.
+      GameObject.create('Emitters', this, { x: 0, y: 0 }, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
       GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
       ...tileGameObjects,
       GameObject.create('Title', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 2 }, [

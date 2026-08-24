@@ -1,4 +1,4 @@
-import { ISpriteBitmapDescription } from './scripts/i-sprite-bitmap-description';
+import { IBitmapAnimationDescription } from './scripts/i-bitmap-animation-description';
 
 export enum TileBitmapType {
   Static = 'Static',
@@ -7,7 +7,7 @@ export enum TileBitmapType {
 
 export interface ITileBitmapDescription {
   bitmapType: TileBitmapType;
-  animatedBitmap?: ISpriteBitmapDescription;
+  animatedBitmap?: IBitmapAnimationDescription;
   staticBitmap?: number[][];
   /** Layer to render this tile on. Defaults to BACKGROUND_LAYER when omitted. */
   layer?: number;

@@ -74,6 +74,8 @@ describe('BlastedBrickScript', () => {
       musicPlayer: {} as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
+      timeFromStart: 0,
+      startedAt: 0,
       addGameObject: (gameObject: GameObject) => {
         gameObjectsByName.set(gameObject.name, gameObject);
         gameObject.start();

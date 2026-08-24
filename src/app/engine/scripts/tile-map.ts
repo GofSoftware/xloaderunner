@@ -17,6 +17,20 @@ export enum TileType {
   Lava = 'Lava',
   PlayerStart = 'PlayerStart',
   Gold = 'Gold',
+  // A fixed beam emitter - color and facing direction are both baked into the tile type so a level
+  // can specify them just by which type it places. Deliberately not special-cased in
+  // isWall/isSolid/isClimbable/isDangerous/isRemovable below - only Brick/Lava/Player/Enemy stop a
+  // beam (see EmitterManager), and emitters are level fixtures, not something BuilderScript can
+  // remove.
+  EmitterRedLeft = 'EmitterRedLeft',
+  EmitterRedRight = 'EmitterRedRight',
+  EmitterRedUp = 'EmitterRedUp',
+  EmitterRedDown = 'EmitterRedDown',
+  EmitterBlueLeft = 'EmitterBlueLeft',
+  EmitterBlueRight = 'EmitterBlueRight',
+  EmitterBlueUp = 'EmitterBlueUp',
+  EmitterBlueDown = 'EmitterBlueDown',
+  BeamRotator = 'BeamRotator',
 }
 
 export interface ITile {

@@ -90,6 +90,8 @@ describe('BuilderScript', () => {
       musicPlayer: {} as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
+      timeFromStart: 0,
+      startedAt: 0,
       addGameObject: (gameObject: GameObject) => {
         gameObjectsByName.set(gameObject.name, gameObject);
         gameObject.start();
@@ -299,10 +301,10 @@ describe('BuilderScript', () => {
 
   describe('HUD', () => {
     const items: { type: TileType; icon: number[][]; x: number; digits: [string, string] }[] = [
-      { type: TileType.Brick, icon: OBJECT_BRICK, x: 0, digits: ['1', '0'] },
-      { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3, digits: ['1', '0'] },
-      { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6, digits: ['1', '0'] },
-      { type: TileType.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 9, digits: ['1', '0'] },
+      { type: TileType.Brick, icon: OBJECT_BRICK, x: 0, digits: ['9', '9'] },
+      { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3, digits: ['9', '9'] },
+      { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6, digits: ['9', '9'] },
+      { type: TileType.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 9, digits: ['9', '9'] },
     ];
 
     it('draws every buildable type, plus remove, at the top-left corner, icon followed by its two-digit supply', () => {
@@ -319,8 +321,8 @@ describe('BuilderScript', () => {
       press('Digit1');
       player.update();
 
-      expect(hudRegionAt(CELL_SIZE)).toEqual(GLYPH_MAP['0']);
-      expect(hudRegionAt(CELL_SIZE * 2)).toEqual(GLYPH_MAP['9']);
+      expect(hudRegionAt(CELL_SIZE)).toEqual(GLYPH_MAP['9']);
+      expect(hudRegionAt(CELL_SIZE * 2)).toEqual(GLYPH_MAP['8']);
     });
 
     it('updates the displayed remove supply after a removal', () => {
@@ -329,8 +331,8 @@ describe('BuilderScript', () => {
       press('Digit0');
       player.update();
 
-      expect(hudRegionAt(CELL_SIZE * 10)).toEqual(GLYPH_MAP['0']);
-      expect(hudRegionAt(CELL_SIZE * 11)).toEqual(GLYPH_MAP['9']);
+      expect(hudRegionAt(CELL_SIZE * 10)).toEqual(GLYPH_MAP['9']);
+      expect(hudRegionAt(CELL_SIZE * 11)).toEqual(GLYPH_MAP['8']);
     });
   });
 });

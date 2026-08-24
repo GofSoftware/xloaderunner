@@ -52,12 +52,12 @@ const MAX_HUD_COUNT = 99;
 const REMOVE_HUD_X = BUILD_ORDER.length * HUD_ITEM_WIDTH;
 
 export const DEFAULT_BUILD_COUNTS: Record<BuildableTileType, number> = {
-  [TileType.Brick]: 10,
-  [TileType.Stairs]: 10,
-  [TileType.Crossbar]: 10,
+  [TileType.Brick]: 99,
+  [TileType.Stairs]: 99,
+  [TileType.Crossbar]: 99,
 };
 
-export const DEFAULT_REMOVE_COUNT = 10;
+export const DEFAULT_REMOVE_COUNT = 99;
 
 /**
  * Lets the player place or clear a tile in the cell they're currently facing: pressing a number key
