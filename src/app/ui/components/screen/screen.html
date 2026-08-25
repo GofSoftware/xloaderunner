@@ -1,5 +1,5 @@
 <div class="screen__layers">
   @for (layerIndex of layerIndices; track layerIndex) {
-    <canvas #layerCanvas [style.width.px]="canvasWidth()" [style.height.px]="canvasHeight()"></canvas>
+    <canvas #layerCanvas [style.width.px]="canvasWidth()" [style.height.px]="canvasHeight()" (mousemove)="onMouseMove($event)"></canvas>
   }
 </div>

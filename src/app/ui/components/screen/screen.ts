@@ -13,7 +13,6 @@ import { ScreenHelper } from '../../../engine/screen/screen.helper';
   },
 })
 export class Screen {
-
   readonly scaleChange = output<number>();
 
   private readonly windowWidth = signal(window.innerWidth);
@@ -22,10 +21,7 @@ export class Screen {
   protected readonly canvasWidth = computed(() => this.windowWidth());
   protected readonly canvasHeight = computed(() => SCREEN_HEIGHT * this.scale());
 
-  protected readonly layerIndices: number[] = Array.from(
-    { length: Engine.instance.screenBuffer.buffers.length },
-    (_, index) => index,
-  );
+  protected readonly layerIndices: number[] = Array.from({ length: Engine.instance.screenBuffer.buffers.length }, (_, index) => index);
 
   private readonly canvasRefs = viewChildren<ElementRef<HTMLCanvasElement>>('layerCanvas');
 
@@ -40,6 +36,12 @@ export class Screen {
       });
     });
   }
+
+  protected onMouseMove(event: MouseEvent): void {
+    const x = Math.floor(event.offsetX / this.scale());
+    const y = Math.floor(event.offsetY / this.scale());
+    Engine.instance.logTiles(x, y);
+  };
 
   protected onResize(): void {
     this.windowWidth.set(window.innerWidth);

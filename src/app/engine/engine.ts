@@ -126,6 +126,19 @@ export class Engine implements IEngineState {
     return this.gameObjectsByName.get(name)?.[0];
   }
 
+  public logTiles(screenX: number, screenY: number): void {
+    const { column, row } = MapHelper.screenToMap(screenX, screenY);
+    const mapGameObject = this.getGameObjectByName('Map')?.getScript(TileMap);
+    if (mapGameObject == null) {
+      return;
+    }
+    const tile = mapGameObject.getTile(column, row);
+    console.log(
+      `Screen coords: x ${screenX} y ${screenY} Map coords: column ${column} row ${row}; Tile: ${tile}`,
+      mapGameObject.getObjectsAt(column, row)
+    );
+  }
+
   private render(): void {
     if (!this.started) {
       return;

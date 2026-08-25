@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Header } from './ui/components/header/header';
 import { Screen } from './ui/components/screen/screen';
 import { Engine } from './engine/engine';
