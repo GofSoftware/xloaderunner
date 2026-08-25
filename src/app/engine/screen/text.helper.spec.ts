@@ -1,7 +1,7 @@
 import { TextHelper } from './text.helper';
 import { ScreenBuffer } from './screen-buffer';
 import { CELL_SIZE } from './screen.constants';
-import { GLYPH_QUESTION_MARK, GLYPH_UPPER_A, GLYPH_UPPER_B } from '../../data/glyphs';
+import { GLYPH_QUESTION_MARK, GLYPH_UPPER_A, GLYPH_UPPER_B } from '../../game-x-loade-runner/data/glyphs';
 import { ITextureEffect } from '../scripts/effects/i-texture-effect';
 
 function createEffect(apply: (texture: number[][]) => number[][], isEnabled = true): ITextureEffect {

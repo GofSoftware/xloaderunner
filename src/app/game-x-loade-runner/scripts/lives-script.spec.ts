@@ -1,6 +1,6 @@
 import { LivesScript, MAX_LIVES } from './lives-script';
-import { GameObject } from '../game-object/game-object';
-import { IEngineState } from '../i-engine-state';
+import { GameObject } from '../../engine/game-object/game-object';
+import { IEngineState } from '../../engine/i-engine-state';
 
 describe('LivesScript', () => {
   function createLives(count?: number): LivesScript {

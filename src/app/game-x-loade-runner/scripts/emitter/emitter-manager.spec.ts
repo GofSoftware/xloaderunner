@@ -1,19 +1,19 @@
 import { EmitterManager } from './emitter-manager';
 import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
-import { Direction, StateScript } from './state-script';
-import { TileMap, TileType } from './tile-map';
-import { ObjectPosition } from './object-position';
-import { GameObject } from '../game-object/game-object';
-import { ScreenBuffer } from '../screen/screen-buffer';
-import { CELL_SIZE, LAYER_COUNT, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
-import { IEngineState } from '../i-engine-state';
+import { Direction, StateScript } from '../state-script';
+import { TileMap, TileType } from '../tile-map';
+import { ObjectPosition } from '../../../engine/scripts/object-position';
+import { GameObject } from '../../../engine/game-object/game-object';
+import { ScreenBuffer } from '../../../engine/screen/screen-buffer';
+import { CELL_SIZE, LAYER_COUNT, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
+import { IEngineState } from '../../../engine/i-engine-state';
 
 const GREEN = 0x00ff00ff;
 const BLUE = 0x0000ffff;
-// Mirrors EmitterManager's own STEPS_PER_SEC (10) - the beam only advances one cell every 100ms of
+// Mirrors EmitterManager's own STEPS_PER_SEC (50) - the beam only advances one cell every 20ms of
 // engineState.timeFromStart, regardless of how many render frames happen in between.
-const STEP_MS = 100;
+const STEP_MS = 20;
 
 describe('EmitterManager', () => {
   let engineState: IEngineState;

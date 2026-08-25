@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import { Engine } from './engine';
 import { GameObject } from './game-object/game-object';
 import { Script } from './game-object/script';
-import { TileMap, TileType } from './scripts/tile-map';
+import { TileMap, TileType } from '../game-x-loade-runner/scripts/tile-map';
 
 class RecordingScript extends Script {
   constructor(

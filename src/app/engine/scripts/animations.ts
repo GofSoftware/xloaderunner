@@ -29,7 +29,7 @@ import {
   MAN_STANDING_LOOK_LEFT_FRAME_2,
   MAN_STANDING_LOOK_RIGHT_FRAME_1,
   MAN_STANDING_LOOK_RIGHT_FRAME_2,
-} from '../../data/sprites';
+} from '../../game-x-loade-runner/data/sprites';
 
 export const STAND_ANIMATION = { frames: [MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2], framesPerSecond: 2 };
 export const STAND_ANIMATION_LOOK_LEFT = { frames: [MAN_STANDING_LOOK_LEFT_FRAME_1, MAN_STANDING_LOOK_LEFT_FRAME_2], framesPerSecond: 2 };

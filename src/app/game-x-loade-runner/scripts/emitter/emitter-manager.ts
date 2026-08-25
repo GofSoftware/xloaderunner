@@ -1,15 +1,15 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { TileMap, TileType } from './tile-map';
-import { Direction, StateScript } from './state-script';
-import { MapHelper } from './map.helper';
+import { Script } from '../../../engine/game-object/script';
+import { GameObject } from '../../../engine/game-object/game-object';
+import { TileMap, TileType } from '../tile-map';
+import { Direction, StateScript } from '../state-script';
+import { MapHelper } from '../../../engine/helpers/map.helper';
 import { EmitterColor } from './emitter-color';
 // Type-only import - EmitterScript imports the real EmitterManager class (to call getScript with
 // it), so importing EmitterScript back here as a value would create a circular module dependency.
 import type { EmitterScript } from './emitter-script';
-import { Mg, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
+import { Mg, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
 import { OBJECT_BEAM_HORIZONTAL_1, OBJECT_BEAM_HORIZONTAL_2, OBJECT_BEAM_VERTICAL_1, OBJECT_BEAM_VERTICAL_2 } from '../../data/sprites';
-import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { BitmapSpriteRenderer } from '../../../engine/scripts/bitmap-sprite-renderer';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Left]: { column: -1, row: 0 },

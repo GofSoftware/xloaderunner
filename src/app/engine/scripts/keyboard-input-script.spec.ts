@@ -1,14 +1,14 @@
 import { vi } from 'vitest';
 import { KeyboardInputScript } from './keyboard-input-script';
-import { StateScript } from './state-script';
-import { TileMap } from './tile-map';
+import { StateScript } from '../../game-x-loade-runner/scripts/state-script';
+import { TileMap } from '../../game-x-loade-runner/scripts/tile-map';
 import { ObjectPosition } from './object-position';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
 import { LAYER_COUNT } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
-import { LivesScript } from './lives-script';
+import { LivesScript } from '../../game-x-loade-runner/scripts/lives-script';
 
 describe('KeyboardInputScript', () => {
   let engineState: IEngineState;

@@ -1,4 +1,4 @@
-import { __, Wt } from '../engine/screen/screen.constants';
+import { __, Wt } from '../../engine/screen/screen.constants';
 
 // 8x8 bitmap font glyphs.
 export const GLYPH_DIGIT_0: number[][] = [

@@ -1,7 +1,7 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
-import { TileMap } from './tile-map';
-import { MapHelper } from './map.helper';
+import { TileMap } from '../../game-x-loade-runner/scripts/tile-map';
+import { MapHelper } from '../helpers/map.helper';
 
 /**
  * The only script allowed to reposition a GameObject that TileMap should track. The map's per-cell

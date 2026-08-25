@@ -1,6 +1,6 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
-import { StateScript } from './state-script';
+import { StateScript } from '../../game-x-loade-runner/scripts/state-script';
 
 export class KeyboardInputScript extends Script {
   public static create(gameObject: GameObject): KeyboardInputScript {

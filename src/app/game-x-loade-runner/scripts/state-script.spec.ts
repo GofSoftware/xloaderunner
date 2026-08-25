@@ -1,15 +1,15 @@
 import { Direction, StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
-import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { KeyboardInputScript } from './keyboard-input-script';
-import { ObjectPosition } from './object-position';
-import { MapHelper } from './map.helper';
-import { GameObject } from '../game-object/game-object';
-import { Keyboard } from '../keyboard/keyboard';
-import { ScreenBuffer } from '../screen/screen-buffer';
-import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { IEngineState } from '../i-engine-state';
-import { MAN_MOVING_LEFT_FRAME_1 } from '../../data/sprites';
+import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
+import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
+import { ObjectPosition } from '../../engine/scripts/object-position';
+import { MapHelper } from '../../engine/helpers/map.helper';
+import { GameObject } from '../../engine/game-object/game-object';
+import { Keyboard } from '../../engine/keyboard/keyboard';
+import { ScreenBuffer } from '../../engine/screen/screen-buffer';
+import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
+import { IEngineState } from '../../engine/i-engine-state';
+import { MAN_MOVING_LEFT_FRAME_1 } from '../data/sprites';
 import { LivesScript } from './lives-script';
 
 describe('StateScript', () => {

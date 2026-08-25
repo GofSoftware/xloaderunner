@@ -1,6 +1,6 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { ObjectPosition } from './object-position';
+import { Script } from '../../engine/game-object/script';
+import { GameObject } from '../../engine/game-object/game-object';
+import { ObjectPosition } from '../../engine/scripts/object-position';
 import { Direction, StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { createTileGameObject } from './tile-bitmaps';

@@ -1,4 +1,4 @@
-import { GLYPH_MAP } from '../../data/glyphs';
+import { GLYPH_MAP } from '../../game-x-loade-runner/data/glyphs';
 import { ScreenBuffer } from './screen-buffer';
 import { CELL_SIZE } from './screen.constants';
 import { ITextureEffect } from '../scripts/effects/i-texture-effect';

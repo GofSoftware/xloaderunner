@@ -1,8 +1,8 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { Script } from '../../engine/game-object/script';
+import { GameObject } from '../../engine/game-object/game-object';
+import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { TileMap, TileType } from './tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../../engine/screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -15,14 +15,14 @@ import {
   STAND_ANIMATION,
   STAND_ANIMATION_LOOK_LEFT,
   STAND_ANIMATION_LOOK_RIGHT,
-} from './animations';
-import { BitmapRenderer } from './bitmap-renderer';
-import { OBJECT_EXCLAMATION } from '../../data/sprites';
-import { DestroyAfterTime } from './destroy-after-time';
-import { TextRenderer } from './text-renderer';
-import { DEATH_JINGLE } from '../audio/music-player';
+} from '../../engine/scripts/animations';
+import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
+import { OBJECT_EXCLAMATION } from '../data/sprites';
+import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
+import { TextRenderer } from '../../engine/scripts/text-renderer';
+import { DEATH_JINGLE } from '../../engine/audio/music-player';
 import { LivesScript } from './lives-script';
-import { ObjectPosition } from './object-position';
+import { ObjectPosition } from '../../engine/scripts/object-position';
 
 export enum PlayerState {
   Stand = 'Stand',

@@ -1,7 +1,7 @@
 import { TileMap, TileType, MAP_COLUMNS, MAP_ROWS } from './tile-map';
-import { GameObject } from '../game-object/game-object';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
-import { IEngineState } from '../i-engine-state';
+import { GameObject } from '../../engine/game-object/game-object';
+import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
+import { IEngineState } from '../../engine/i-engine-state';
 
 describe('TileMap', () => {
   let tileMap: TileMap;

@@ -1,6 +1,6 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { Script } from '../../engine/game-object/script';
+import { GameObject } from '../../engine/game-object/game-object';
+import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 
 export const MAP_COLUMNS = Math.floor(SCREEN_WIDTH / CELL_SIZE);
 export const MAP_ROWS = Math.floor(SCREEN_HEIGHT / CELL_SIZE);

@@ -1,12 +1,12 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { ObjectPosition } from './object-position';
+import { Script } from '../../engine/game-object/script';
+import { GameObject } from '../../engine/game-object/game-object';
+import { ObjectPosition } from '../../engine/scripts/object-position';
 import { Direction, StateScript } from './state-script';
 import { TileMap, TileType } from './tile-map';
 import { createTileGameObject } from './tile-bitmaps';
-import { MapHelper } from './map.helper';
-import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../screen/screen.constants';
-import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { MapHelper } from '../../engine/helpers/map.helper';
+import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../../engine/screen/screen.constants';
+import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import {
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
@@ -16,9 +16,9 @@ import {
   OBJECT_SMOKE_UP_3,
   OBJECT_SMOKE_UP_4,
   OBJECT_STAIRS,
-} from '../../data/sprites';
-import { DestroyAfterTime } from './destroy-after-time';
-import { TextHelper } from '../screen/text.helper';
+} from '../data/sprites';
+import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
+import { TextHelper } from '../../engine/screen/text.helper';
 
 export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar;
 

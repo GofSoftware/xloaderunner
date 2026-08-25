@@ -1,6 +1,6 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../screen/screen.constants';
+import { Script } from '../../engine/game-object/script';
+import { GameObject } from '../../engine/game-object/game-object';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 
 const DEFAULT_STAR_COUNT = 10;
 const STEP_COUNT = 40;

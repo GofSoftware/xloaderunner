@@ -1,4 +1,4 @@
-import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk } from '../engine/screen/screen.constants';
+import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk } from '../../engine/screen/screen.constants';
 
 // 8x8 sprite frames for a standing man tapping one foot: rest -> foot lifts -> foot stamps down.
 export const MAN_MOVING_LEFT_FRAME_1: number[][] = [

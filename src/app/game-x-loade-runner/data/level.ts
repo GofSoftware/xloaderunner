@@ -1,4 +1,4 @@
-import { TileType } from '../engine/scripts/tile-map';
+import { TileType } from '../scripts/tile-map';
 
 const Em = TileType.Empty;
 const Br = TileType.Brick;

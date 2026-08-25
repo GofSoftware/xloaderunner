@@ -1,10 +1,10 @@
 import { HeartsRenderer } from './hearts-renderer';
 import { LivesScript, MAX_LIVES } from './lives-script';
-import { GameObject } from '../game-object/game-object';
-import { ScreenBuffer } from '../screen/screen-buffer';
-import { CELL_SIZE, SCREEN_WIDTH } from '../screen/screen.constants';
-import { OBJECT_HEART } from '../../data/sprites';
-import { IEngineState } from '../i-engine-state';
+import { GameObject } from '../../engine/game-object/game-object';
+import { ScreenBuffer } from '../../engine/screen/screen-buffer';
+import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
+import { OBJECT_HEART } from '../data/sprites';
+import { IEngineState } from '../../engine/i-engine-state';
 
 describe('HeartsRenderer', () => {
   const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE;

@@ -1,13 +1,13 @@
 import { createTileGameObject } from './tile-bitmaps';
-import { ObjectPosition } from './object-position';
-import { BitmapRenderer } from './bitmap-renderer';
-import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
+import { ObjectPosition } from '../../engine/scripts/object-position';
+import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
+import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { GoldItem } from './gold-item';
 import { TileType } from './tile-map';
-import { EmitterScript, EMITTER_INFO_BY_TILE_TYPE } from './emitter-script';
-import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER, CELL_SIZE, LAYER_COUNT } from '../screen/screen.constants';
-import { ScreenBuffer } from '../screen/screen-buffer';
-import { IEngineState } from '../i-engine-state';
+import { EmitterScript, EMITTER_INFO_BY_TILE_TYPE } from './emitter/emitter-script';
+import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER, CELL_SIZE, LAYER_COUNT } from '../../engine/screen/screen.constants';
+import { ScreenBuffer } from '../../engine/screen/screen-buffer';
+import { IEngineState } from '../../engine/i-engine-state';
 
 describe('createTileGameObject', () => {
   const engineState = {

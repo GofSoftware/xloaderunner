@@ -20,18 +20,18 @@ import {
   OBJECT_LAVA_7,
   OBJECT_LAVA_8,
   OBJECT_STAIRS,
-} from '../../data/sprites';
-import { GameObject } from '../game-object/game-object';
-import { Script } from '../game-object/script';
-import { IEngineState } from '../i-engine-state';
-import { ITileBitmapDescription, TileBitmapType } from '../i-tile-bitmap-description';
-import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER } from '../screen/screen.constants';
-import { BitmapRenderer } from './bitmap-renderer';
-import { BitmapSpriteRenderer } from './bitmap-sprite-renderer';
-import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './emitter-script';
+} from '../data/sprites';
+import { GameObject } from '../../engine/game-object/game-object';
+import { Script } from '../../engine/game-object/script';
+import { IEngineState } from '../../engine/i-engine-state';
+import { ITileBitmapDescription, TileBitmapType } from '../../engine/i-tile-bitmap-description';
+import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER } from '../../engine/screen/screen.constants';
+import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
+import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
+import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './emitter/emitter-script';
 import { GoldItem } from './gold-item';
-import { MapHelper } from './map.helper';
-import { ObjectPosition } from './object-position';
+import { MapHelper } from '../../engine/helpers/map.helper';
+import { ObjectPosition } from '../../engine/scripts/object-position';
 import { TileType } from './tile-map';
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {

@@ -1,12 +1,12 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
+import { Script } from '../../engine/game-object/script';
+import { GameObject } from '../../engine/game-object/game-object';
 import { GoldItem } from './gold-item';
 import { TileMap, TileType } from './tile-map';
-import { ObjectPosition } from './object-position';
-import { CELL_SIZE, SCREEN_WIDTH } from '../screen/screen.constants';
+import { ObjectPosition } from '../../engine/scripts/object-position';
+import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 import { MAX_LIVES } from './lives-script';
-import { TextHelper } from '../screen/text.helper';
-import { OBJECT_GOLD, OBJECT_GOLD_HUD } from '../../data/sprites';
+import { TextHelper } from '../../engine/screen/text.helper';
+import { OBJECT_GOLD, OBJECT_GOLD_HUD } from '../data/sprites';
 
 export class GoldScript extends Script {
   public static create(gameObject: GameObject, hudLayer: number): GoldScript {
