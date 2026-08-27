@@ -717,6 +717,17 @@ export const OBJECT_BEAM_VERTICAL_2: number[][] = [
 
 export const OBJECT_BEAM_ROTATOR: number[][] = [
   [__, __, __, __, __, __, __, __],
+  [__, __, __, Wt, Wt, __, __, __],
+  [__, __, __, Wt, __, Wt, __, __],
+  [__, __, Wt, __, Wt, __, Wt, __],
+  [__, __, __, Wt, __, Wt, __, __],
+  [__, __, __, __, Wt, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+];
+
+export const OBJECT_BEAM_ROTATOR1: number[][] = [
+  [__, __, __, __, __, __, __, __],
   [__, Wt, Wt, Wt, Wt, Wt, Wt, __],
   [__, Wt, __, __, __, Wt, __, __],
   [__, Wt, __, __, Wt, __, __, __],

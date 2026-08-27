@@ -75,14 +75,11 @@ export class BackgroundStars extends Script {
         if (star.step < 0) {
           star.step = 0;
           star.direction = 0;
-          screenBuffer.copy([[BackgroundStars.palette[star.step]]], star.x, star.y, this.layer); // Clear previous
           const newStar = BackgroundStars.randomStar();
           star.x = newStar.x;
           star.y = newStar.y;
         }
       }
-
-      screenBuffer.copy([[BackgroundStars.palette[0]]], star.x, star.y, this.layer); // Clear previous
 
       this.moveStar(star);
 
