@@ -24,7 +24,7 @@ export const LEVEL_TILES_ARR: TileType[][] = [
   [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
   [St, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
   [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Rt, Em, Em, Em, Em, Em, Em, EL, Br, St],
+  [St, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Rt, Em, Em, Em, Em, Em, Em, Em, Em, EL, Br, St],
   [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
   [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
   [St, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, St],

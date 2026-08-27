@@ -20,7 +20,14 @@ export class ScreenHelper {
   }
 
   /** Pastes `source` onto `destination` with its top-left corner at (x, y), mutating `destination` in place and clipping any part that falls outside it. */
-  static copy(destination: number[][], source: number[][], x: number, y: number, colorOverrides: ((color: number) => number)[] = []): void {
+  static copy(
+    destination: number[][],
+    source: number[][],
+    x: number,
+    y: number,
+    colorOverrides: ((color: number) => number)[] = [],
+    skipTransparent: boolean = true
+  ): void {
     for (let sy = 0; sy < source.length; sy++) {
       const destY = Math.floor(y) + sy;
       if (destY < 0 || destY >= destination.length) {
@@ -36,6 +43,9 @@ export class ScreenHelper {
         }
         let color = sourceRow[sx];
         colorOverrides.forEach((override) => { color = override(color); });
+        if (skipTransparent && ((color & 0xFF) === 0)) {
+          continue;
+        }
         destRow[destX] = color;
       }
     }
