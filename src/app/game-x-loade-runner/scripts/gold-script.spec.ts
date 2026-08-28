@@ -1,6 +1,7 @@
 import { GoldScript } from './gold-script';
 import { GoldItem } from './gold-item';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
+import { TileType } from './tile-map/tile-map-types';
 import { ObjectPosition } from '../../engine/scripts/object-position';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';

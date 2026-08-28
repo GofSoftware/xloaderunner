@@ -1,45 +1,48 @@
-import { TileType } from '../scripts/tile-map';
+import { TileType } from '../scripts/tile-map/tile-map-types';
 
-const Em = TileType.Empty;
-const Br = TileType.Brick;
-const St = TileType.Stairs;
-const Cr = TileType.Crossbar;
-const Lv = TileType.Lava;
-const Ps = TileType.PlayerStart;
-const Gd = TileType.Gold;
-const EL = TileType.EmitterRedLeft;
-const ER = TileType.EmitterRedRight;
-const EU = TileType.EmitterRedUp;
-const ED = TileType.EmitterRedDown;
-const TL = TileType.EmitterBlueLeft;
-const TR = TileType.EmitterBlueRight;
-const TU = TileType.EmitterBlueUp;
-const TD = TileType.EmitterBlueDown;
-const Rt = TileType.BeamRotator;
+const ___ = TileType.Empty;
+const Brk = TileType.Brick;
+const Str = TileType.Stairs;
+const Crb = TileType.Crossbar;
+const Lav = TileType.Lava;
+const Pls = TileType.PlayerStart;
+const Gld = TileType.Gold;
+const EmL = TileType.EmitterRedLeft;
+const EmR = TileType.EmitterRedRight;
+const EmU = TileType.EmitterRedUp;
+const EmD = TileType.EmitterRedDown;
+const EbL = TileType.EmitterBlueLeft;
+const EbR = TileType.EmitterBlueRight;
+const EbU = TileType.EmitterBlueUp;
+const EbD = TileType.EmitterBlueDown;
+const RRB = TileType.MirrorRB;
+const RLt = TileType.MirrorLB;
+const RRT = TileType.MirrorRT;
+const RLT = TileType.MirrorLT;
 
 export const LEVEL_TILES_ARR: TileType[][] = [
-  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Br, Br, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Rt, Em, Em, Em, Em, Em, Em, Em, Em, EL, Br, St],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
-  [St, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, Cr, St],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
-  [St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
-  [St, Cr, Cr, Cr, Cr, Cr, Cr, St, Br, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, St],
-  [St, Em, Em, Em, Em, Em, Em, St, St, Br, Br, Br, Br, Br, Br, Br, St, Br, ER, Em, Em, Em, Em, Em, Em, Em, Em, Br, Br, Br, Br, Br],
-  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Em, Em, Em, Em, Ps, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, St, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em, Em],
-  [St, Gd, Em, Em, Em, Em, Gd, Em, St, Em, Em, St, Br, St, Em, Em, St, Em, Em, Em, Gd, Em, Em, Em, TU, Em, Em, Gd, Em, Em, Em, Em],
-  [Br, Br, Lv, Lv, Lv, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br, Br],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, Brk, Brk, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Pls, Str, RRB, ___, ___, ___, ___, ___, ___, ___, ___, EmL, Brk, Str],
+  [Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str],
+  [Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str],
+  [Str, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Str, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Crb, Str],
+  [Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str],
+  [Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str],
+  [Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str],
+  [Str, Crb, Crb, Crb, Crb, Crb, Crb, Str, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str],
+  [Str, ___, ___, ___, ___, ___, ___, Str, Str, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Str, Brk, EmR, ___, ___, ___, ___, ___, ___, ___, ___, Brk, Brk, Brk, Brk, Brk],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [Str, Gld, ___, ___, ___, ___, Gld, ___, Str, ___, ___, Str, Brk, Str, ___, ___, Str, ___, ___, ___, Gld, ___, ___, ___, EbU, ___, ___, Gld, ___, ___, ___, ___],
+  [Brk, Brk, Lav, Lav, Lav, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk],
 ];

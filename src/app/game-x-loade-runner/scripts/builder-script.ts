@@ -2,12 +2,13 @@ import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ObjectPosition } from '../../engine/scripts/object-position';
 import { Direction, StateScript } from './state-script';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
 import { createTileGameObject } from './tile-bitmaps';
 import { MapHelper } from '../../engine/helpers/map.helper';
 import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../../engine/screen/screen.constants';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import {
+  OBJECT_MIRROR_RB,
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
   OBJECT_REMOVE,
@@ -19,13 +20,16 @@ import {
 } from '../data/sprites';
 import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { TextHelper } from '../../engine/screen/text.helper';
+import { TileType } from './tile-map/tile-map-types';
+import { MirrorHelper } from './mirror/mirror-helper';
 
-export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar;
+export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar | TileType.MirrorRB;
 
 const BUILD_TYPE_BY_KEY: Record<string, BuildableTileType> = {
   Digit1: TileType.Brick,
   Digit2: TileType.Stairs,
   Digit3: TileType.Crossbar,
+  Digit4: TileType.MirrorRB,
 };
 
 const REMOVE_KEY = 'Digit0';
@@ -37,12 +41,13 @@ const OFFSET_BY_DIRECTION: Record<Direction, { column: number; row: number }> = 
   [Direction.Down]: { column: 0, row: 1 },
 };
 
-const BUILD_ORDER: BuildableTileType[] = [TileType.Brick, TileType.Stairs, TileType.Crossbar];
+const BUILD_ORDER: BuildableTileType[] = [TileType.Brick, TileType.Stairs, TileType.Crossbar, TileType.MirrorRB];
 
 const ICON_BY_TYPE: Record<BuildableTileType, number[][]> = {
   [TileType.Brick]: OBJECT_BRICK,
   [TileType.Stairs]: OBJECT_STAIRS,
   [TileType.Crossbar]: OBJECT_CROSSBAR,
+  [TileType.MirrorRB]: OBJECT_MIRROR_RB,
 };
 
 // Icon (1 cell) + a 2-digit count (2 cells) per HUD item (one per buildable type, plus remove).
@@ -55,6 +60,7 @@ export const DEFAULT_BUILD_COUNTS: Record<BuildableTileType, number> = {
   [TileType.Brick]: 99,
   [TileType.Stairs]: 99,
   [TileType.Crossbar]: 99,
+  [TileType.MirrorRB]: 99,
 };
 
 export const DEFAULT_REMOVE_COUNT = 99;
@@ -198,12 +204,15 @@ export class BuilderScript extends Script {
       return;
     }
 
-    const removedType = this.tileMap.getTile(targetColumn, targetRow) as BuildableTileType;
+    let removedType = this.tileMap.getTile(targetColumn, targetRow) as BuildableTileType;
     const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${targetColumn}-${targetRow}`);
     if (tileGameObject) {
       this.gameObject.engineState.removeGameObject(tileGameObject);
     }
     this.tileMap.setTile(targetColumn, targetRow, TileType.Empty);
+    if (MirrorHelper.isMirror(removedType)) {
+      removedType = TileType.MirrorRB;
+    }
     this.counts[removedType] = Math.min(this.counts[removedType] + 1, MAX_HUD_COUNT);
     this.removeCount--;
   }

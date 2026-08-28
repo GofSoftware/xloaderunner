@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { KeyboardInputScript } from './keyboard-input-script';
 import { StateScript } from '../../game-x-loade-runner/scripts/state-script';
-import { TileMap } from '../../game-x-loade-runner/scripts/tile-map';
+import { TileMap } from '../../game-x-loade-runner/scripts/tile-map/tile-map';
 import { ObjectPosition } from './object-position';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';

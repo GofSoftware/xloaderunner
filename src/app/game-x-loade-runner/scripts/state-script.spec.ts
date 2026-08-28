@@ -1,5 +1,6 @@
 import { Direction, StateScript } from './state-script';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
+import { TileType } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { ObjectPosition } from '../../engine/scripts/object-position';

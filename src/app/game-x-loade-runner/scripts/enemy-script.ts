@@ -2,7 +2,8 @@ import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { StateScript } from './state-script';
 import { ObjectPosition } from '../../engine/scripts/object-position';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
+import { TileType } from './tile-map/tile-map-types';
 
 interface ICell {
   column: number;

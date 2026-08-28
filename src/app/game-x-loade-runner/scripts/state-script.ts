@@ -1,7 +1,7 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
 import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../../engine/screen/screen.constants';
 import {
   CLIMB_ANIMATION,
@@ -23,6 +23,7 @@ import { TextRenderer } from '../../engine/scripts/text-renderer';
 import { DEATH_JINGLE } from '../../engine/audio/music-player';
 import { LivesScript } from './lives-script';
 import { ObjectPosition } from '../../engine/scripts/object-position';
+import { TileType } from './tile-map/tile-map-types';
 
 export enum PlayerState {
   Stand = 'Stand',

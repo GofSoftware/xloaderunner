@@ -1,7 +1,8 @@
 import { BlastedBrickScript } from './blasted-brick-script';
 import { BuilderScript } from './builder-script';
 import { ObjectPosition } from '../../engine/scripts/object-position';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
+import { TileType } from './tile-map/tile-map-types';
 import { StateScript } from './state-script';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { LivesScript } from './lives-script';

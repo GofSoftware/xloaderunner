@@ -10,7 +10,7 @@ export class BitmapRenderer extends Script {
     return new BitmapRenderer(gameObject, bitmap, layer);
   }
 
-  private readonly bitmap: number[][];
+  private bitmap: number[][];
   private readonly layer: number;
 
   private constructor(gameObject: GameObject, bitmap: number[][], layer: number) {
@@ -18,6 +18,10 @@ export class BitmapRenderer extends Script {
 
     this.bitmap = bitmap;
     this.layer = layer;
+  }
+
+  public setBitmap(bitmap: number[][]): void {
+    this.bitmap = bitmap;
   }
 
   public override update(): void {

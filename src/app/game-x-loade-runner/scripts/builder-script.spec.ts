@@ -1,6 +1,7 @@
 import { BuildableTileType, BuilderScript, DEFAULT_BUILD_COUNTS, DEFAULT_REMOVE_COUNT } from './builder-script';
 import { ObjectPosition } from '../../engine/scripts/object-position';
-import { TileMap, TileType } from './tile-map';
+import { TileMap } from './tile-map/tile-map';
+import { TileType } from './tile-map/tile-map-types';
 import { StateScript } from './state-script';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { LivesScript } from './lives-script';
@@ -8,7 +9,7 @@ import { GameObject } from '../../engine/game-object/game-object';
 import { Keyboard } from '../../engine/keyboard/keyboard';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT } from '../../engine/screen/screen.constants';
-import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_REMOVE, OBJECT_STAIRS } from '../data/sprites';
+import { OBJECT_BRICK, OBJECT_CROSSBAR, OBJECT_MIRROR_RB, OBJECT_REMOVE, OBJECT_STAIRS } from '../data/sprites';
 import { GLYPH_MAP } from '../data/glyphs';
 import { IEngineState } from '../../engine/i-engine-state';
 
@@ -260,7 +261,7 @@ describe('BuilderScript', () => {
       limited.update();
       nextFrame();
 
-      expect(hudRegionAt(CELL_SIZE * 10)).toEqual(GLYPH_MAP['0']);
+      expect(hudRegionAt(CELL_SIZE * 13)).toEqual(GLYPH_MAP['0']);
 
       createTrackedTile(6, 5, TileType.Brick);
       press('Digit0');
@@ -304,7 +305,8 @@ describe('BuilderScript', () => {
       { type: TileType.Brick, icon: OBJECT_BRICK, x: 0, digits: ['9', '9'] },
       { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3, digits: ['9', '9'] },
       { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6, digits: ['9', '9'] },
-      { type: TileType.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 9, digits: ['9', '9'] },
+      { type: TileType.MirrorRB, icon: OBJECT_MIRROR_RB, x: CELL_SIZE * 9, digits: ['9', '9'] },
+      { type: TileType.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 12, digits: ['9', '9'] },
     ];
 
     it('draws every buildable type, plus remove, at the top-left corner, icon followed by its two-digit supply', () => {
@@ -331,8 +333,8 @@ describe('BuilderScript', () => {
       press('Digit0');
       player.update();
 
-      expect(hudRegionAt(CELL_SIZE * 10)).toEqual(GLYPH_MAP['9']);
-      expect(hudRegionAt(CELL_SIZE * 11)).toEqual(GLYPH_MAP['8']);
+      expect(hudRegionAt(CELL_SIZE * 13)).toEqual(GLYPH_MAP['9']);
+      expect(hudRegionAt(CELL_SIZE * 14)).toEqual(GLYPH_MAP['8']);
     });
   });
 });

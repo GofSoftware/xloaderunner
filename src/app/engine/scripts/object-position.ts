@@ -1,6 +1,6 @@
 import { Script } from '../game-object/script';
 import { GameObject } from '../game-object/game-object';
-import { TileMap } from '../../game-x-loade-runner/scripts/tile-map';
+import { TileMap } from '../../game-x-loade-runner/scripts/tile-map/tile-map';
 import { MapHelper } from '../helpers/map.helper';
 
 /**

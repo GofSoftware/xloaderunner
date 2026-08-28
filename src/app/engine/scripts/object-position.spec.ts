@@ -1,5 +1,5 @@
 import { ObjectPosition } from './object-position';
-import { TileMap } from '../../game-x-loade-runner/scripts/tile-map';
+import { TileMap } from '../../game-x-loade-runner/scripts/tile-map/tile-map';
 import { MapHelper } from '../helpers/map.helper';
 import { GameObject } from '../game-object/game-object';
 import { IEngineState } from '../i-engine-state';

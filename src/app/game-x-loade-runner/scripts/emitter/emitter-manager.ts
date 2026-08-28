@@ -1,15 +1,15 @@
 import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
-import { TileMap, TileType } from '../tile-map';
+import { TileMap } from '../tile-map/tile-map';
 import { Direction, StateScript } from '../state-script';
 import { MapHelper } from '../../../engine/helpers/map.helper';
 import { EmitterColor } from './emitter-color';
-// Type-only import - EmitterScript imports the real EmitterManager class (to call getScript with
-// it), so importing EmitterScript back here as a value would create a circular module dependency.
 import type { EmitterScript } from './emitter-script';
 import { Mg, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
 import { OBJECT_BEAM_HORIZONTAL_1, OBJECT_BEAM_HORIZONTAL_2, OBJECT_BEAM_VERTICAL_1, OBJECT_BEAM_VERTICAL_2 } from '../../data/sprites';
 import { BitmapSpriteRenderer } from '../../../engine/scripts/bitmap-sprite-renderer';
+import { TileType } from '../tile-map/tile-map-types';
+import { MirrorHelper } from '../mirror/mirror-helper';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Left]: { column: -1, row: 0 },
@@ -142,13 +142,14 @@ export class EmitterManager extends Script {
         !this.isInBounds(segment.column, segment.row) ||
         this.hasCharacterAt(segment.column, segment.row)
       ) {
-        this.beamSegments.delete(segment.id);
-        this.destroyBeamSegment(segment);
+        this.stopSegment(segment, newSegments);
         return;
       }
 
-      if (this.tileMap.getTile(segment.column, segment.row) === TileType.BeamRotator) {
-        segment.direction = Direction.Down;
+      const isBlockedByMirror = this.changeDirectionIfMirrored(segment);
+      if (isBlockedByMirror) {
+        this.stopSegment(segment, newSegments)
+        return;
       }
 
       const key = EmitterManager.key(segment.column, segment.row);
@@ -170,6 +171,52 @@ export class EmitterManager extends Script {
     newSegments.forEach((segment) => {
       segment.gameObject.update();
     })
+  }
+
+  private changeDirectionIfMirrored(segment: IBeamSegmentDescriptor): boolean {
+    const mirrorTile = this.tileMap.getTile(segment.column, segment.row);
+    if (!MirrorHelper.isMirror(mirrorTile)) {
+      return false;
+    }
+
+    if (
+      (segment.direction === Direction.Left && !(mirrorTile === TileType.MirrorRT || mirrorTile === TileType.MirrorRB)) ||
+      (segment.direction === Direction.Right && !(mirrorTile === TileType.MirrorLT || mirrorTile === TileType.MirrorLB)) ||
+      (segment.direction === Direction.Down && !(mirrorTile === TileType.MirrorLT || mirrorTile === TileType.MirrorRT)) ||
+      (segment.direction === Direction.Up && !(mirrorTile === TileType.MirrorLB || mirrorTile === TileType.MirrorRB))
+    ) {
+      return true;
+    }
+
+    if (
+      (segment.direction === Direction.Left && mirrorTile === TileType.MirrorRB) ||
+      (segment.direction === Direction.Right && mirrorTile === TileType.MirrorLB)
+    ) {
+      segment.direction = Direction.Down;
+    }
+
+    if (
+      (segment.direction === Direction.Left && mirrorTile === TileType.MirrorRT) ||
+      (segment.direction === Direction.Right && mirrorTile === TileType.MirrorLT)
+    ) {
+      segment.direction = Direction.Up;
+    }
+
+    if (
+      (segment.direction === Direction.Up && mirrorTile === TileType.MirrorRB) ||
+      (segment.direction === Direction.Down && mirrorTile === TileType.MirrorRT)
+    ) {
+      segment.direction = Direction.Right;
+    }
+
+    if (
+      (segment.direction === Direction.Up && mirrorTile === TileType.MirrorLB) ||
+      (segment.direction === Direction.Down && mirrorTile === TileType.MirrorLT)
+    ) {
+      segment.direction = Direction.Left;
+    }
+
+    return false;
   }
 
   private static step(segment: IBeamSegmentDescriptor): void {
@@ -201,6 +248,15 @@ export class EmitterManager extends Script {
 
   private isHorizontal(direction: Direction): boolean {
     return direction === Direction.Left || direction === Direction.Right;
+  }
+
+  private stopSegment(segment: IBeamSegmentDescriptor, newSegments: IBeamSegmentDescriptor[]): void {
+    this.beamSegments.delete(segment.id);
+    this.destroyBeamSegment(segment);
+    const newIndex = newSegments.findIndex((s) => s.id === segment.id);
+    if (newIndex >= 0) {
+      newSegments.splice(newIndex, 1);
+    }
   }
 }
 

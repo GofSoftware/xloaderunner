@@ -1,7 +1,8 @@
-import { TileMap, TileType, MAP_COLUMNS, MAP_ROWS } from './tile-map';
-import { GameObject } from '../../engine/game-object/game-object';
-import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
-import { IEngineState } from '../../engine/i-engine-state';
+import { TileMap } from './tile-map';
+import { TileType, MAP_COLUMNS, MAP_ROWS } from './tile-map-types';
+import { GameObject } from '../../../engine/game-object/game-object';
+import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
+import { IEngineState } from '../../../engine/i-engine-state';
 
 describe('TileMap', () => {
   let tileMap: TileMap;

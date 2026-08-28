@@ -2,7 +2,8 @@ import { EmitterManager } from './emitter-manager';
 import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
 import { Direction, StateScript } from '../state-script';
-import { TileMap, TileType } from '../tile-map';
+import { TileMap } from '../tile-map/tile-map';
+import { TileType } from '../tile-map/tile-map-types';
 import { ObjectPosition } from '../../../engine/scripts/object-position';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../../engine/screen/screen-buffer';
@@ -202,13 +203,13 @@ describe('EmitterManager', () => {
     expect(isBlank(5, 5)).toBe(true);
   });
 
-  it('bends through a BeamRotator tile instead of continuing straight', () => {
+  it('bends through a mirror tile instead of continuing straight', () => {
     createEmitter(2, 5, EmitterColor.Green, Direction.Right);
-    tileMap.setTile(5, 5, TileType.BeamRotator);
+    tileMap.setTile(5, 5, TileType.MirrorLB);
 
     advanceSteps(8);
 
-    // The horizontal leg up to and including the rotator cell.
+    // The horizontal leg up to and including the mirror cell.
     expect(pixelAt(3, 5)).toBe(GREEN);
     expect(pixelAt(4, 5)).toBe(GREEN);
     expect(pixelAt(5, 5)).toBe(GREEN);

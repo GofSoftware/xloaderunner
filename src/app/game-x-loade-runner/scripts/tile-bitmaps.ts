@@ -1,5 +1,12 @@
 import {
-  OBJECT_BEAM_ROTATOR,
+  OBJECT_MIRROR_B,
+  OBJECT_MIRROR_L,
+  OBJECT_MIRROR_LB,
+  OBJECT_MIRROR_LT,
+  OBJECT_MIRROR_R,
+  OBJECT_MIRROR_RB,
+  OBJECT_MIRROR_RT,
+  OBJECT_MIRROR_T,
   OBJECT_BRICK,
   OBJECT_CROSSBAR,
   OBJECT_EMITTER_BLUE_DOWN,
@@ -25,14 +32,16 @@ import { GameObject } from '../../engine/game-object/game-object';
 import { Script } from '../../engine/game-object/script';
 import { IEngineState } from '../../engine/i-engine-state';
 import { ITileBitmapDescription, TileBitmapType } from '../../engine/i-tile-bitmap-description';
-import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER } from '../../engine/screen/screen.constants';
+import { MIDDLE_TILE_LAYER } from '../../engine/screen/screen.constants';
 import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './emitter/emitter-script';
 import { GoldItem } from './gold-item';
 import { MapHelper } from '../../engine/helpers/map.helper';
 import { ObjectPosition } from '../../engine/scripts/object-position';
-import { TileType } from './tile-map';
+import { MirrorScript } from './mirror/mirror-script';
+import { TileType } from './tile-map/tile-map-types';
+import { MirrorHelper } from './mirror/mirror-helper';
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
@@ -54,7 +63,14 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.EmitterBlueRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_RIGHT },
   [TileType.EmitterBlueUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_UP },
   [TileType.EmitterBlueDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_DOWN },
-  [TileType.BeamRotator]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_ROTATOR },
+  [TileType.MirrorRB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RB },
+  [TileType.MirrorB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_B },
+  [TileType.MirrorLB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LB },
+  [TileType.MirrorL]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_L },
+  [TileType.MirrorLT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LT },
+  [TileType.MirrorT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_T },
+  [TileType.MirrorRT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RT },
+  [TileType.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R }
 };
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
@@ -82,6 +98,10 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
           layer,
         ),
   );
+
+  if (MirrorHelper.isMirror(type)) {
+    scriptFactories.push((gameObject) => MirrorScript.create(gameObject));
+  }
 
   return GameObject.create(`Tile-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
 }

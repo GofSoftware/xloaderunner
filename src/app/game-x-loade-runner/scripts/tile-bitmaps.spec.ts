@@ -3,7 +3,7 @@ import { ObjectPosition } from '../../engine/scripts/object-position';
 import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { GoldItem } from './gold-item';
-import { TileType } from './tile-map';
+import { TileType } from './tile-map/tile-map-types';
 import { EmitterScript, EMITTER_INFO_BY_TILE_TYPE } from './emitter/emitter-script';
 import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER, CELL_SIZE, LAYER_COUNT } from '../../engine/screen/screen.constants';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';

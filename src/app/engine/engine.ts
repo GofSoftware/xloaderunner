@@ -8,7 +8,7 @@ import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
 import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
 import { BackgroundStars } from '../game-x-loade-runner/scripts/background-stars';
-import { TileMap, TileType } from '../game-x-loade-runner/scripts/tile-map';
+import { TileMap } from '../game-x-loade-runner/scripts/tile-map/tile-map';
 import { StateScript } from '../game-x-loade-runner/scripts/state-script';
 import { KeyboardInputScript } from './scripts/keyboard-input-script';
 import { BuilderScript } from '../game-x-loade-runner/scripts/builder-script';
@@ -26,6 +26,7 @@ import { STAND_ANIMATION } from './scripts/animations';
 import { LinearMoveScript } from './scripts/linear-move-script';
 import { DestroyAfterTime } from './scripts/destroy-after-time';
 import { DissolveTextureEffect } from './scripts/effects/dissolve-texture-effect';
+import { TileType } from '../game-x-loade-runner/scripts/tile-map/tile-map-types';
 
 const FRAME_RATE = 0;
 const ENEMY_SPEED_SLOWDOWN = 1.5;
