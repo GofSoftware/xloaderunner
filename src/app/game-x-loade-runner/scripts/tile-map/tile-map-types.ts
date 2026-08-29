@@ -21,10 +21,10 @@ export enum TileType {
   // isWall/isSolid/isClimbable/isDangerous/isRemovable below - only Brick/Lava/Player/Enemy stop a
   // beam (see EmitterManager), and emitters are level fixtures, not something BuilderScript can
   // remove.
-  EmitterRedLeft = 'EmitterRedLeft',
-  EmitterRedRight = 'EmitterRedRight',
-  EmitterRedUp = 'EmitterRedUp',
-  EmitterRedDown = 'EmitterRedDown',
+  EmitterGreenLeft = 'EmitterGreenLeft',
+  EmitterGreenRight = 'EmitterGreenRight',
+  EmitterGreenUp = 'EmitterGreenUp',
+  EmitterGreenDown = 'EmitterGreenDown',
   EmitterBlueLeft = 'EmitterBlueLeft',
   EmitterBlueRight = 'EmitterBlueRight',
   EmitterBlueUp = 'EmitterBlueUp',

@@ -582,75 +582,75 @@ export const OBJECT_REMOVE: number[][] = [
   [__, __, __, __, __, __, __, __],
 ];
 
-export const OBJECT_EMITTER_RED_RIGHT: number[][] = [
+export const OBJECT_EMITTER_GREEN_RIGHT: number[][] = [
   [__, Yl, __, __, __, __, __, __],
   [Yl, Gr, Yl, __, __, __, __, __],
   [Gr, Gr, Gr, Yl, __, __, __, __],
-  [Gr, Gr, Gr, Gr, Yl, __, __, __],
+  [Gr, Gr, Gr, Gr, Yl, __, Gr, Gr],
   [Gr, Gr, Gr, Yl, __, __, __, __],
   [Yl, Gr, Yl, __, __, __, __, __],
   [__, Yl, __, __, __, __, __, __],
   [__, __, __, __, __, __, __, __],
 ];
 
-export const OBJECT_EMITTER_RED_LEFT: number[][] = [
-  [__, __, __, __, __, __, __, __],
-  [__, __, __, Rd, __, __, __, __],
-  [__, __, Rd, Rd, __, __, __, __],
-  [__, Rd, Rd, Rd, Rd, Rd, Rd, Rd],
-  [__, Rd, Rd, Rd, Rd, Rd, Rd, Rd],
-  [__, __, Rd, Rd, __, __, __, __],
-  [__, __, __, Rd, __, __, __, __],
+export const OBJECT_EMITTER_GREEN_LEFT: number[][] = [
+  [__, __, __, __, __, __, Yl, __],
+  [__, __, __, __, __, Yl, Gr, Yl],
+  [__, __, __, __, Yl, Gr, Gr, Gr],
+  [Gr, Gr, __, Yl, Gr, Gr, Gr, Gr],
+  [__, __, __, __, Yl, Gr, Gr, Gr],
+  [__, __, __, __, __, Yl, Gr, Yl],
+  [__, __, __, __, __, __, Yl, __],
   [__, __, __, __, __, __, __, __],
 ];
 
-export const OBJECT_EMITTER_RED_UP: number[][] = [
+export const OBJECT_EMITTER_GREEN_UP: number[][] = [
+  [__, __, __, __, Gr, __, __, __],
+  [__, __, __, __, Gr, __, __, __],
   [__, __, __, __, __, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, Rd, Rd, Rd, Rd, __, __],
-  [__, Rd, Rd, Rd, Rd, Rd, Rd, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
+  [__, __, __, __, Yl, __, __, __],
+  [__, __, __, Yl, Gr, Yl, __, __],
+  [__, __, Yl, Gr, Gr, Gr, Yl, __],
+  [__, Yl, Gr, Gr, Gr, Gr, Gr, Yl],
+  [__, __, Yl, Gr, Gr, Gr, Yl, __],
 ];
 
-export const OBJECT_EMITTER_RED_DOWN: number[][] = [
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
-  [__, Rd, Rd, Rd, Rd, Rd, Rd, __],
-  [__, __, Rd, Rd, Rd, Rd, __, __],
-  [__, __, __, Rd, Rd, __, __, __],
+export const OBJECT_EMITTER_GREEN_DOWN: number[][] = [
+  [__, __, Yl, Gr, Gr, Gr, Yl, __],
+  [__, Yl, Gr, Gr, Gr, Gr, Gr, Yl],
+  [__, __, Yl, Gr, Gr, Gr, Yl, __],
+  [__, __, __, Yl, Gr, Yl, __, __],
+  [__, __, __, __, Yl, __, __, __],
   [__, __, __, __, __, __, __, __],
+  [__, __, __, __, Gr, __, __, __],
+  [__, __, __, __, Gr, __, __, __],
 ];
 
 export const OBJECT_EMITTER_BLUE_RIGHT: number[][] = [
-  [__, __, __, __, __, __, __, __],
-  [__, __, __, __, Bl, __, __, __],
-  [Yl, __, __, __, Bl, Bl, __, __],
-  [Gr, Bl, Bl, Bl, Bl, Bl, Bl, __],
-  [Gr, Bl, Bl, Bl, Bl, Bl, Bl, __],
-  [Gr, __, __, __, Bl, Bl, __, __],
-  [Yl, __, __, __, Bl, __, __, __],
+  [__, Yl, __, __, __, __, __, __],
+  [Yl, Bl, Yl, __, __, __, __, __],
+  [Bl, Bl, Bl, Yl, __, __, __, __],
+  [Bl, Bl, Bl, Bl, Yl, __, Bl, Bl],
+  [Bl, Bl, Bl, Yl, __, __, __, __],
+  [Yl, Bl, Yl, __, __, __, __, __],
+  [__, Yl, __, __, __, __, __, __],
   [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_EMITTER_BLUE_LEFT: number[][] = [
-  [__, __, __, __, __, __, __, __],
-  [__, __, __, Bl, __, __, __, __],
-  [__, __, Bl, Bl, __, __, __, __],
-  [__, Bl, Bl, Bl, Bl, Bl, Bl, Bl],
-  [__, Bl, Bl, Bl, Bl, Bl, Bl, Bl],
-  [__, __, Bl, Bl, __, __, __, __],
-  [__, __, __, Bl, __, __, __, __],
+  [__, __, __, __, __, __, Yl, __],
+  [__, __, __, __, __, Yl, Bl, Yl],
+  [__, __, __, __, Yl, Bl, Bl, Bl],
+  [Bl, Bl, __, Yl, Bl, Bl, Bl, Bl],
+  [__, __, __, __, Yl, Bl, Bl, Bl],
+  [__, __, __, __, __, Yl, Bl, Yl],
+  [__, __, __, __, __, __, Yl, __],
   [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_EMITTER_BLUE_UP: number[][] = [
-  [__, __, __, __, __, __, __, __],
-  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, Bl, __, __, __],
+  [__, __, __, __, Bl, __, __, __],
   [__, __, __, __, __, __, __, __],
   [__, __, __, __, Yl, __, __, __],
   [__, __, __, Yl, Bl, Yl, __, __],
@@ -660,14 +660,14 @@ export const OBJECT_EMITTER_BLUE_UP: number[][] = [
 ];
 
 export const OBJECT_EMITTER_BLUE_DOWN: number[][] = [
-  [__, __, __, Bl, Bl, __, __, __],
-  [__, __, __, Bl, Bl, __, __, __],
-  [__, __, __, Bl, Bl, __, __, __],
-  [__, __, __, Bl, Bl, __, __, __],
-  [__, Bl, Bl, Bl, Bl, Bl, Bl, __],
-  [__, __, Bl, Bl, Bl, Bl, __, __],
-  [__, __, __, Bl, Bl, __, __, __],
+  [__, __, Yl, Bl, Bl, Bl, Yl, __],
+  [__, Yl, Bl, Bl, Bl, Bl, Bl, Yl],
+  [__, __, Yl, Bl, Bl, Bl, Yl, __],
+  [__, __, __, Yl, Bl, Yl, __, __],
+  [__, __, __, __, Yl, __, __, __],
   [__, __, __, __, __, __, __, __],
+  [__, __, __, __, Bl, __, __, __],
+  [__, __, __, __, Bl, __, __, __],
 ];
 
 // The Red emitter's beam is drawn green, not red - keeps the beam visually distinct from the

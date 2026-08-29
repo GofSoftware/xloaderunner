@@ -7,10 +7,10 @@ import { EmitterManager } from './emitter-manager';
 import { TileType } from '../tile-map/tile-map-types';
 
 export const EMITTER_INFO_BY_TILE_TYPE: Partial<Record<TileType, { color: EmitterColor; direction: Direction }>> = {
-  [TileType.EmitterRedLeft]: { color: EmitterColor.Green, direction: Direction.Left },
-  [TileType.EmitterRedRight]: { color: EmitterColor.Green, direction: Direction.Right },
-  [TileType.EmitterRedUp]: { color: EmitterColor.Green, direction: Direction.Up },
-  [TileType.EmitterRedDown]: { color: EmitterColor.Green, direction: Direction.Down },
+  [TileType.EmitterGreenLeft]: { color: EmitterColor.Green, direction: Direction.Left },
+  [TileType.EmitterGreenRight]: { color: EmitterColor.Green, direction: Direction.Right },
+  [TileType.EmitterGreenUp]: { color: EmitterColor.Green, direction: Direction.Up },
+  [TileType.EmitterGreenDown]: { color: EmitterColor.Green, direction: Direction.Down },
   [TileType.EmitterBlueLeft]: { color: EmitterColor.Blue, direction: Direction.Left },
   [TileType.EmitterBlueRight]: { color: EmitterColor.Blue, direction: Direction.Right },
   [TileType.EmitterBlueUp]: { color: EmitterColor.Blue, direction: Direction.Up },
