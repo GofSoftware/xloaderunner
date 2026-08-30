@@ -4,7 +4,7 @@ import { EmitterColor } from './emitter-color';
 import { Direction, StateScript } from '../state-script';
 import { TileMap } from '../tile-map/tile-map';
 import { TileType } from '../tile-map/tile-map-types';
-import { ObjectPosition } from '../../../engine/scripts/object-position';
+import { ObjectPosition } from '../object-position';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../../engine/screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';

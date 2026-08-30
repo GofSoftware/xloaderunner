@@ -1,5 +1,5 @@
 import { createTileGameObject } from './tile-bitmaps';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { GoldItem } from './gold-item';

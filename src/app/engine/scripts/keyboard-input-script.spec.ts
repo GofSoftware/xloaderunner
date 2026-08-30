@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import { KeyboardInputScript } from './keyboard-input-script';
 import { StateScript } from '../../game-x-loade-runner/scripts/state-script';
 import { TileMap } from '../../game-x-loade-runner/scripts/tile-map/tile-map';
-import { ObjectPosition } from './object-position';
+import { ObjectPosition } from '../../game-x-loade-runner/scripts/object-position';
 import { GameObject } from '../game-object/game-object';
 import { Keyboard } from '../keyboard/keyboard';
 import { ScreenBuffer } from '../screen/screen-buffer';
@@ -29,6 +29,7 @@ describe('KeyboardInputScript', () => {
       fps: 0,
       timeFromStart: 0,
       startedAt: 0,
+      level: {} as IEngineState['level'],
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),

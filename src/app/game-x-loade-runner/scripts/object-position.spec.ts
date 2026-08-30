@@ -1,8 +1,8 @@
 import { ObjectPosition } from './object-position';
-import { TileMap } from '../../game-x-loade-runner/scripts/tile-map/tile-map';
+import { TileMap } from './tile-map/tile-map';
 import { MapHelper } from '../helpers/map.helper';
-import { GameObject } from '../game-object/game-object';
-import { IEngineState } from '../i-engine-state';
+import { GameObject } from '../../engine/game-object/game-object';
+import { IEngineState } from '../../engine/i-engine-state';
 
 describe('ObjectPosition', () => {
   let engineState: IEngineState;

@@ -3,8 +3,8 @@ import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
-import { ObjectPosition } from '../../engine/scripts/object-position';
-import { MapHelper } from '../../engine/helpers/map.helper';
+import { ObjectPosition } from './object-position';
+import { MapHelper } from '../helpers/map.helper';
 import { GameObject } from '../../engine/game-object/game-object';
 import { Keyboard } from '../../engine/keyboard/keyboard';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
@@ -62,6 +62,7 @@ describe('StateScript', () => {
       fps: 0,
       timeFromStart: 0,
       startedAt: 0,
+      level: {} as IEngineState['level'],
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),

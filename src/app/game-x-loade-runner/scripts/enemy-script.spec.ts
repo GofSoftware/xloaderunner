@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { EnemyScript } from './enemy-script';
 import { StateScript } from './state-script';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 import { GameObject } from '../../engine/game-object/game-object';
@@ -64,6 +64,7 @@ describe('EnemyScript', () => {
       fps: 0,
       timeFromStart: 0,
       startedAt: 0,
+      level: {} as IEngineState['level'],
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),

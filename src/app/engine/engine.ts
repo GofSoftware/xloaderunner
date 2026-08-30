@@ -1,35 +1,13 @@
-import { LivesScript } from '../game-x-loade-runner/scripts/lives-script';
-import { HeartsRenderer } from '../game-x-loade-runner/scripts/hearts-renderer';
-import { LEVEL_TILES_ARR } from '../game-x-loade-runner/data/level';
 import { ScreenBuffer } from './screen/screen-buffer';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER, HUD_LAYER, LAYER_COUNT } from './screen/screen.constants';
+import { LAYER_COUNT } from './screen/screen.constants';
 import { Keyboard } from './keyboard/keyboard';
 import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
-import { BitmapSpriteRenderer } from './scripts/bitmap-sprite-renderer';
-import { BackgroundStars } from '../game-x-loade-runner/scripts/background-stars';
-import { TileMap } from '../game-x-loade-runner/scripts/tile-map/tile-map';
-import { StateScript } from '../game-x-loade-runner/scripts/state-script';
-import { KeyboardInputScript } from './scripts/keyboard-input-script';
-import { BuilderScript } from '../game-x-loade-runner/scripts/builder-script';
-import { BlastedBrickScript } from '../game-x-loade-runner/scripts/blasted-brick-script';
-import { EnemyScript } from '../game-x-loade-runner/scripts/enemy-script';
-import { EmitterManager } from '../game-x-loade-runner/scripts/emitter/emitter-manager';
-import { GoldScript } from '../game-x-loade-runner/scripts/gold-script';
-import { ObjectPosition } from './scripts/object-position';
-import { MapHelper } from './helpers/map.helper';
-import { createTileGameObject } from '../game-x-loade-runner/scripts/tile-bitmaps';
-import { TextRenderer } from './scripts/text-renderer';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
-import { STAND_ANIMATION } from './scripts/animations';
-import { LinearMoveScript } from './scripts/linear-move-script';
-import { DestroyAfterTime } from './scripts/destroy-after-time';
-import { DissolveTextureEffect } from './scripts/effects/dissolve-texture-effect';
-import { TileType } from '../game-x-loade-runner/scripts/tile-map/tile-map-types';
+import { ILevel } from './i-level';
 
 const FRAME_RATE = 0;
-const ENEMY_SPEED_SLOWDOWN = 1.5;
 
 export class Engine implements IEngineState {
   private static engineInstance: Engine;
@@ -51,9 +29,11 @@ export class Engine implements IEngineState {
   public fps: number = 0;
   public timeFromStart: number = 0;
   public startedAt: number = 0;
+  public get level(): ILevel { if (this.levelInstance == null) throw new Error('Level not set'); return this.levelInstance!;}
 
   private fpsFrameCount: number = 0;
   private fpsElapsedTime: number = 0;
+  private levelInstance: ILevel | null  = null;
 
   private constructor() {
     this.screenBuffer = ScreenBuffer.create(LAYER_COUNT);
@@ -66,12 +46,15 @@ export class Engine implements IEngineState {
     this.uiRender = uiRender;
   }
 
-  public start(): void {
+  public async start(level: ILevel): Promise<void> {
     this.previousFrameTime = Date.now();
     this.startedAt = Date.now();
     this.started = true;
     this.keyboard.attach();
-    this.initLevel();
+    this.gameObjects = [];
+    this.gameObjectsByName.clear();
+    this.levelInstance = level;
+    await this.level.initialize(this);
     this.render();
   }
 
@@ -127,19 +110,6 @@ export class Engine implements IEngineState {
     return this.gameObjectsByName.get(name)?.[0];
   }
 
-  public logTiles(screenX: number, screenY: number): void {
-    const { column, row } = MapHelper.screenToMap(screenX, screenY);
-    const mapGameObject = this.getGameObjectByName('Map')?.getScript(TileMap);
-    if (mapGameObject == null) {
-      return;
-    }
-    const tile = mapGameObject.getTile(column, row);
-    console.log(
-      `Screen coords: x ${screenX} y ${screenY} Map coords: column ${column} row ${row}; Tile: ${tile}`,
-      mapGameObject.getObjectsAt(column, row)
-    );
-  }
-
   private render(): void {
     if (!this.started) {
       return;
@@ -180,79 +150,4 @@ export class Engine implements IEngineState {
     }
   }
 
-  private initLevel(): void {
-    this.gameObjects = [];
-    this.gameObjectsByName.clear();
-
-    const mapGameObject = GameObject.create('Map', this, { x: 0, y: 0 }, [(gameObject: GameObject) => TileMap.create(gameObject)]);
-    const tileMap = mapGameObject.getScript(TileMap)!;
-
-    LEVEL_TILES_ARR.forEach((value, y) => {
-      value.forEach((type, x) => {
-        tileMap.setTile(x, y, type);
-      });
-    });
-
-    const tileGameObjects = tileMap
-      .getTiles()
-      .map(({ column, row, type }) => createTileGameObject(this, column, row, type))
-      .filter((gameObject): gameObject is GameObject => gameObject !== undefined);
-
-    const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
-    const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : { column: 20, row: 5 };
-    const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
-    // PlayerStart has no bitmap and never renders anything, but the tile grid still remembers it as
-    // non-Empty - clear it so BuilderScript can build on the spawn cell once the player has moved off it.
-    tileMap.setTile(spawnCell.column, spawnCell.row, TileType.Empty);
-
-    [
-      mapGameObject,
-      // Registers each emitter tile as it starts below, so this must be added - and started - before
-      // ...tileGameObjects.
-      GameObject.create('Emitters', this, { x: 0, y: 0 }, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
-      GameObject.create('Stars', this, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
-      ...tileGameObjects,
-      GameObject.create('Title', this, { x: CELL_SIZE * 10, y: CELL_SIZE * 2 }, [
-        (gameObject: GameObject) => LinearMoveScript.create(gameObject, { x: 0, y: -1 }, 5),
-        (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 5000),
-        (gameObject: GameObject) =>
-          TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [DissolveTextureEffect.create(this, 0.5, (v) => v * v)]),
-      ]),
-      GameObject.create('Lives', this, { x: 0, y: 0 }, [
-        (gameObject: GameObject) => LivesScript.create(gameObject),
-        (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),
-      ]),
-
-      GameObject.create('Player', this, spawnPosition, [
-        (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
-        // Reads the player's cell before StateScript/ObjectPosition can move it this same frame - otherwise,
-        // when the same arrow key both moves the player and specifies a build direction, the build target
-        // would be computed from the cell the player is moving into rather than the cell it started this frame in.
-        (gameObject: GameObject) => BuilderScript.create(gameObject, HUD_LAYER),
-        (gameObject: GameObject) => BlastedBrickScript.create(gameObject),
-        (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
-        (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
-        (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
-        (gameObject: GameObject) =>
-          BitmapSpriteRenderer.create(
-            gameObject,
-            { bitmap: STAND_ANIMATION.frames, framePerSecond: STAND_ANIMATION.framesPerSecond },
-            HUD_LAYER,
-          ),
-      ]),
-
-      GameObject.create('Enemy', this, MapHelper.mapToScreen(20, 1), [
-        (gameObject: GameObject) => EnemyScript.create(gameObject),
-        (gameObject: GameObject) => StateScript.create(gameObject, { column: 20, row: 1 }, 1 / ENEMY_SPEED_SLOWDOWN, true),
-        (gameObject: GameObject) => ObjectPosition.create(gameObject, 20, 1),
-        (gameObject: GameObject) =>
-          BitmapSpriteRenderer.create(
-            gameObject,
-            { bitmap: STAND_ANIMATION.frames, framePerSecond: STAND_ANIMATION.framesPerSecond },
-            HUD_LAYER,
-            [(color: number) => color & 0xff5a5aff],
-          ),
-      ]),
-    ].forEach((gameObject) => this.addGameObject(gameObject));
-  }
 }

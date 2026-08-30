@@ -36,5 +36,7 @@ export enum TileType {
   MirrorB = 'MirrorB',
   MirrorL = 'MirrorL',
   MirrorT = 'MirrorT',
-  MirrorR = 'MirrorR'
+  MirrorR = 'MirrorR',
+  BeamSwitchBlue = 'BeamSwitchBlue',
+  BeamSwitchGreen = 'BeamSwitchGreen',
 }

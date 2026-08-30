@@ -1,8 +1,8 @@
 import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { TileMap } from '../tile-map/tile-map';
-import { MapHelper } from '../../../engine/helpers/map.helper';
-import { ObjectPosition } from '../../../engine/scripts/object-position';
+import { MapHelper } from '../../helpers/map.helper';
+import { ObjectPosition } from '../object-position';
 import { Direction, StateScript } from '../state-script';
 import { BitmapRenderer } from '../../../engine/scripts/bitmap-renderer';
 import { TILE_BITMAPS } from '../tile-bitmaps';

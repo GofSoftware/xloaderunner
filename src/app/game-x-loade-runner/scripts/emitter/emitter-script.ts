@@ -1,6 +1,6 @@
 import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
-import { ObjectPosition } from '../../../engine/scripts/object-position';
+import { ObjectPosition } from '../object-position';
 import { Direction } from '../state-script';
 import { EmitterColor } from './emitter-color';
 import { EmitterManager } from './emitter-manager';

@@ -1,7 +1,7 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { StateScript } from './state-script';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 
@@ -9,6 +9,8 @@ interface ICell {
   column: number;
   row: number;
 }
+
+export const ENEMY_SPEED_SLOWDOWN = 1.5;
 
 /**
  * Chases the Player by pathfinding to its current cell every frame and forcing the direction of

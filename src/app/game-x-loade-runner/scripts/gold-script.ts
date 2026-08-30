@@ -2,7 +2,7 @@ import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { GoldItem } from './gold-item';
 import { TileMap } from './tile-map/tile-map';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 import { MAX_LIVES } from './lives-script';
 import { TextHelper } from '../../engine/screen/text.helper';

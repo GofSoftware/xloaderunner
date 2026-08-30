@@ -2,7 +2,7 @@ import { GoldScript } from './gold-script';
 import { GoldItem } from './gold-item';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';

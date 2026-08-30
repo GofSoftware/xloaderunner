@@ -2,7 +2,7 @@ import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
 import { EmitterManager } from './emitter-manager';
 import { Direction } from '../state-script';
-import { ObjectPosition } from '../../../engine/scripts/object-position';
+import { ObjectPosition } from '../object-position';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { IEngineState } from '../../../engine/i-engine-state';
 

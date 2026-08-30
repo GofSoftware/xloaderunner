@@ -1,6 +1,6 @@
 import { BlastedBrickScript } from './blasted-brick-script';
 import { BuilderScript } from './builder-script';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 import { StateScript } from './state-script';
@@ -77,6 +77,7 @@ describe('BlastedBrickScript', () => {
       fps: 0,
       timeFromStart: 0,
       startedAt: 0,
+      level: {} as IEngineState['level'],
       addGameObject: (gameObject: GameObject) => {
         gameObjectsByName.set(gameObject.name, gameObject);
         gameObject.start();

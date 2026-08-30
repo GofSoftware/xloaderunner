@@ -1,5 +1,5 @@
 import { MapHelper } from './map.helper';
-import { CELL_SIZE } from '../screen/screen.constants';
+import { CELL_SIZE } from '../../engine/screen/screen.constants';
 
 describe('MapHelper', () => {
   describe('screenToMap', () => {

@@ -1,4 +1,4 @@
-import { CELL_SIZE } from '../screen/screen.constants';
+import { CELL_SIZE } from '../../engine/screen/screen.constants';
 
 export class MapHelper {
   static screenToMap(x: number, y: number): { column: number; row: number } {

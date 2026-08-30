@@ -22,7 +22,7 @@ import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { TextRenderer } from '../../engine/scripts/text-renderer';
 import { DEATH_JINGLE } from '../../engine/audio/music-player';
 import { LivesScript } from './lives-script';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { ObjectPosition } from './object-position';
 import { TileType } from './tile-map/tile-map-types';
 
 export enum PlayerState {

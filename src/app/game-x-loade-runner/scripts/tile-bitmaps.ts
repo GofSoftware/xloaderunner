@@ -27,6 +27,7 @@ import {
   OBJECT_LAVA_7,
   OBJECT_LAVA_8,
   OBJECT_STAIRS,
+  OBJECT_BEAM_SWITCH_BLUE,
 } from '../data/sprites';
 import { GameObject } from '../../engine/game-object/game-object';
 import { Script } from '../../engine/game-object/script';
@@ -37,11 +38,12 @@ import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
 import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './emitter/emitter-script';
 import { GoldItem } from './gold-item';
-import { MapHelper } from '../../engine/helpers/map.helper';
-import { ObjectPosition } from '../../engine/scripts/object-position';
+import { MapHelper } from '../helpers/map.helper';
+import { ObjectPosition } from './object-position';
 import { MirrorScript } from './mirror/mirror-script';
 import { TileType } from './tile-map/tile-map-types';
 import { MirrorHelper } from './mirror/mirror-helper';
+import { SwitchScript } from './switch-script';
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
@@ -70,7 +72,8 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.MirrorLT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LT },
   [TileType.MirrorT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_T },
   [TileType.MirrorRT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RT },
-  [TileType.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R }
+  [TileType.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R },
+  [TileType.BeamSwitchBlue]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_BLUE }
 };
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
@@ -101,6 +104,10 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
 
   if (MirrorHelper.isMirror(type)) {
     scriptFactories.push((gameObject) => MirrorScript.create(gameObject));
+  }
+
+  if (type === TileType.BeamSwitchBlue) {
+    scriptFactories.push((gameObject) => SwitchScript.create(gameObject));
   }
 
   return GameObject.create(`Tile-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
