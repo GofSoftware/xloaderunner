@@ -27,6 +27,8 @@ interface IBeamSegmentDescriptor {
   id: number;
   column: number;
   row: number;
+  prevColumn: number;
+  prevRow: number;
   color: EmitterColor;
   direction: Direction;
   afterCollision: boolean;
@@ -73,12 +75,12 @@ export class EmitterManager extends Script {
       return;
     }
 
-    const stepsToCalculate = stepNumber - this.stepsPassed;
+    let stepsToCalculate = stepNumber - this.stepsPassed;
     if (stepsToCalculate <= 0) {
       return;
     }
 
-    for (let i = 0; i < stepsToCalculate; i++) {
+    for (let i = 0; i < Math.min(stepsToCalculate, STEPS_PER_SEC); i++) {
       this.processStep();
     }
 
@@ -94,7 +96,7 @@ export class EmitterManager extends Script {
       (gameObject) => BitmapSpriteRenderer.create(gameObject, { bitmap: HORIZONTAL_BEAM, framePerSecond: 2 }, this.layer),
     ]);
     this.gameObject.engineState.addGameObject(beamGameObject);
-
+    this.tileMap.moveObject(beamGameObject, column, row, column, row);
     return beamGameObject;
   }
 
@@ -110,9 +112,13 @@ export class EmitterManager extends Script {
     gameObject.setPosition(x, y);
     gameObject.getScript(BitmapSpriteRenderer)!.setAnimation({bitmap});
     gameObject.getScript(BitmapSpriteRenderer)!.setColorOverrides([colorOverride]);
+
+    this.tileMap.moveObject(gameObject, descriptor.prevColumn, descriptor.prevRow, descriptor.column, descriptor.row);
   }
 
   private destroyBeamSegment(descriptor: IBeamSegmentDescriptor): void {
+    this.tileMap.removeObject(descriptor.gameObject, descriptor.column, descriptor.row);
+    this.tileMap.removeObject(descriptor.gameObject, descriptor.prevColumn, descriptor.prevRow);
     this.gameObject.engineState.removeGameObject(descriptor.gameObject);
   }
 
@@ -125,6 +131,8 @@ export class EmitterManager extends Script {
         id: newId,
         row: emitter.row,
         column: emitter.column,
+        prevRow: emitter.row,
+        prevColumn: emitter.column,
         color: emitter.color,
         direction: emitter.direction,
         afterCollision: false,
@@ -220,6 +228,8 @@ export class EmitterManager extends Script {
   }
 
   private static step(segment: IBeamSegmentDescriptor): void {
+    segment.prevColumn = segment.column;
+    segment.prevRow = segment.row;
     const { column, row } = STEP_BY_DIRECTION[segment.direction];
     segment.column = segment.column + column;
     segment.row = segment.row + row;

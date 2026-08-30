@@ -31,7 +31,11 @@ export class SwitchScript extends Script {
     if (!SwitchScript.isBeamSwitch(this.tile)) {
       return;
     }
-    // this.gameObject.engineState.
+    this.tileMap.getObjectsAt(this.gameObject.position.x, this.gameObject.position.y).forEach((gameObject) => {
+      if (gameObject.getScript(SwitchScript) === this) {
+        this.beamIsOver = true;
+      }
+    });
   }
 
   public isOn(): boolean {
