@@ -144,6 +144,12 @@ export class EmitterManager extends Script {
     });
 
     Array.from(this.beamSegments.values()).forEach((segment) => {
+
+      if (this.isOverSwitch(segment.column, segment.row)) {
+        this.stopSegment(segment, newSegments);
+        return;
+      }
+
       EmitterManager.step(segment);
 
       if (this.isBlocked(segment.column, segment.row) ||
@@ -250,6 +256,11 @@ export class EmitterManager extends Script {
 
   private hasCharacterAt(column: number, row: number): boolean {
     return this.tileMap.getObjectsAt(column, row).some((gameObject) => gameObject.getScript(StateScript) !== undefined);
+  }
+
+  private isOverSwitch(column: number, row: number): boolean {
+    return this.tileMap.getTile(column, row) === TileType.BeamSwitchBlue ||
+          this.tileMap.getTile(column, row) === TileType.BeamSwitchGreen;
   }
 
   private static key(column: number, row: number): string {
