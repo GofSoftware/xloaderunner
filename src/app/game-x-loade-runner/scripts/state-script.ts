@@ -24,33 +24,7 @@ import { DEATH_JINGLE } from '../../engine/audio/music-player';
 import { LivesScript } from './lives-script';
 import { ObjectPosition } from './object-position';
 import { TileType } from './tile-map/tile-map-types';
-
-export enum PlayerState {
-  Stand = 'Stand',
-  TurnLeft = 'TurnLeft',
-  TurnRight = 'TurnRight',
-  TurnUp = 'TurnUp',
-  TurnDown = 'TurnDown',
-  MoveLeft = 'MoveLeft',
-  MoveRight = 'MoveRight',
-  MoveUp = 'MoveUp',
-  MoveDown = 'MoveDown',
-  Fall = 'Fall',
-  Trapped = 'Trapped',
-  OnStairs = 'OnStairs',
-  OnCrossbar = 'OnCrossbar',
-  OnCrossbarMoveLeft = 'OnCrossbarMoveLeft',
-  OnCrossbarMoveRight = 'OnCrossbarMoveRight',
-  Dying = 'Dying',
-  GameOver = 'GameOver',
-}
-
-export enum Direction {
-  Left = 'Left',
-  Right = 'Right',
-  Up = 'Up',
-  Down = 'Down',
-}
+import { Direction, PlayerState } from './state/state-types';
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
@@ -486,7 +460,7 @@ export class StateScript extends Script {
     if (this.state === PlayerState.Stand && this.currentDirection === Direction.Right) {
       animation = STAND_ANIMATION_LOOK_RIGHT;
     }
-    spriteRenderer.setAnimation({bitmap: animation.frames, framePerSecond: animation.framesPerSecond});
+    spriteRenderer.setAnimation({ bitmap: animation.frames, framePerSecond: animation.framesPerSecond });
   }
 
   private showExclamation(): void {

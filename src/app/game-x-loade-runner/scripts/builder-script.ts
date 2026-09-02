@@ -1,9 +1,9 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ObjectPosition } from './object-position';
-import { Direction, StateScript } from './state-script';
+import { StateScript } from './state-script';
 import { TileMap } from './tile-map/tile-map';
-import { createTileGameObject } from './tile-bitmaps';
+import { createTileGameObject } from '../tile-bitmap-factory';
 import { MapHelper } from '../helpers/map.helper';
 import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../../engine/screen/screen.constants';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
@@ -22,6 +22,7 @@ import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { TextHelper } from '../../engine/screen/text.helper';
 import { TileType } from './tile-map/tile-map-types';
 import { MirrorHelper } from './mirror/mirror-helper';
+import { Direction } from './state/state-types';
 
 export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar | TileType.MirrorRB;
 
@@ -205,7 +206,7 @@ export class BuilderScript extends Script {
     }
 
     let removedType = this.tileMap.getTile(targetColumn, targetRow) as BuildableTileType;
-    const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${targetColumn}-${targetRow}`);
+    const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${removedType}-${targetColumn}-${targetRow}`);
     if (tileGameObject) {
       this.gameObject.engineState.removeGameObject(tileGameObject);
     }

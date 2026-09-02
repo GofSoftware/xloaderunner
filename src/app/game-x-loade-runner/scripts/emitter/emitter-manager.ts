@@ -1,7 +1,7 @@
 import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { TileMap } from '../tile-map/tile-map';
-import { Direction, StateScript } from '../state-script';
+import { StateScript } from '../state-script';
 import { MapHelper } from '../../helpers/map.helper';
 import { EmitterColor } from './emitter-color';
 import type { EmitterScript } from './emitter-script';
@@ -10,6 +10,9 @@ import { OBJECT_BEAM_HORIZONTAL_1, OBJECT_BEAM_HORIZONTAL_2, OBJECT_BEAM_VERTICA
 import { BitmapSpriteRenderer } from '../../../engine/scripts/bitmap-sprite-renderer';
 import { TileType } from '../tile-map/tile-map-types';
 import { MirrorHelper } from '../mirror/mirror-helper';
+import { BeamScript } from '../beam-script';
+import { IBeamSegmentDescriptor } from './i-beam-segment-descriptor';
+import { Direction } from '../state/state-types';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Left]: { column: -1, row: 0 },
@@ -18,23 +21,10 @@ const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Down]: { column: 0, row: 1 },
 };
 
-const HORIZONTAL_BEAM: number[][][] = [OBJECT_BEAM_HORIZONTAL_1/*, OBJECT_BEAM_HORIZONTAL_2*/];
-const VERTICAL_BEAM: number[][][] = [OBJECT_BEAM_VERTICAL_1/*, OBJECT_BEAM_VERTICAL_2*/];
+const HORIZONTAL_BEAM: number[][][] = [OBJECT_BEAM_HORIZONTAL_1 /*, OBJECT_BEAM_HORIZONTAL_2*/];
+const VERTICAL_BEAM: number[][][] = [OBJECT_BEAM_VERTICAL_1 /*, OBJECT_BEAM_VERTICAL_2*/];
 
 const STEPS_PER_SEC = 50;
-
-interface IBeamSegmentDescriptor {
-  id: number;
-  column: number;
-  row: number;
-  prevColumn: number;
-  prevRow: number;
-  color: EmitterColor;
-  direction: Direction;
-  afterCollision: boolean;
-  overDirectionChanger: boolean;
-  gameObject: GameObject;
-}
 
 export class EmitterManager extends Script {
   public static create(gameObject: GameObject, layer: number = UPPER_EFFECT_LAYER): EmitterManager {
@@ -44,6 +34,7 @@ export class EmitterManager extends Script {
   private readonly layer: number;
   private readonly emitters = new Set<EmitterScript>();
   private readonly beamSegments = new Map<number, IBeamSegmentDescriptor>();
+  private readonly beamGameObjects = new Map<number, GameObject>();
   private startedAt = 0;
   private stepsPassed = 0;
   private _id = 0;
@@ -89,14 +80,21 @@ export class EmitterManager extends Script {
 
   public override destroy(): void {}
 
-  private createBeamSegment(id: number, column: number, row: number): GameObject {
-    const { x, y } = MapHelper.mapToScreen(column, row);
+  private createBeamSegment(segments: IBeamSegmentDescriptor): GameObject {
+    const { x, y } = MapHelper.mapToScreen(segments.column, segments.row);
 
-    const beamGameObject = GameObject.create(`Beam-${id}-${EmitterManager.key(column, row)}`, this.gameObject.engineState, { x, y }, [
-      (gameObject) => BitmapSpriteRenderer.create(gameObject, { bitmap: HORIZONTAL_BEAM, framePerSecond: 2 }, this.layer),
-    ]);
+    const beamGameObject = GameObject.create(
+      `Beam-${segments.id}-${EmitterManager.key(segments.column, segments.row)}`,
+      this.gameObject.engineState,
+      { x, y },
+      [
+        (gameObject) => BitmapSpriteRenderer.create(gameObject, { bitmap: HORIZONTAL_BEAM, framePerSecond: 2 }, this.layer),
+        (gameObject) => BeamScript.create(gameObject, segments),
+      ],
+    );
+
     this.gameObject.engineState.addGameObject(beamGameObject);
-    this.tileMap.moveObject(beamGameObject, column, row, column, row);
+    this.tileMap.moveObject(beamGameObject, segments.column, segments.row, segments.column, segments.row);
     return beamGameObject;
   }
 
@@ -104,22 +102,24 @@ export class EmitterManager extends Script {
     const bitmap = this.isHorizontal(descriptor.direction) ? HORIZONTAL_BEAM : VERTICAL_BEAM;
     const { x, y } = MapHelper.mapToScreen(descriptor.column, descriptor.row);
     const colorOverride = descriptor.afterCollision
-      ? (c: number) => (0x00000000/*c === Mg ? 0x00000000 : c*/)
+      ? (c: number) => 0x00000000 /*c === Mg ? 0x00000000 : c*/
       : (c: number) => c & (descriptor.color === EmitterColor.Green ? 0x00ff00ff : 0x0000ffff);
 
-    const gameObject = descriptor.gameObject;
+    const gameObject = this.beamGameObjects.get(descriptor.id)!;
 
     gameObject.setPosition(x, y);
-    gameObject.getScript(BitmapSpriteRenderer)!.setAnimation({bitmap});
+    gameObject.getScript(BitmapSpriteRenderer)!.setAnimation({ bitmap });
     gameObject.getScript(BitmapSpriteRenderer)!.setColorOverrides([colorOverride]);
 
     this.tileMap.moveObject(gameObject, descriptor.prevColumn, descriptor.prevRow, descriptor.column, descriptor.row);
   }
 
   private destroyBeamSegment(descriptor: IBeamSegmentDescriptor): void {
-    this.tileMap.removeObject(descriptor.gameObject, descriptor.column, descriptor.row);
-    this.tileMap.removeObject(descriptor.gameObject, descriptor.prevColumn, descriptor.prevRow);
-    this.gameObject.engineState.removeGameObject(descriptor.gameObject);
+    const gameObject = this.beamGameObjects.get(descriptor.id)!;
+    this.beamGameObjects.delete(descriptor.id);
+    this.tileMap.removeObject(gameObject, descriptor.column, descriptor.row);
+    this.tileMap.removeObject(gameObject, descriptor.prevColumn, descriptor.prevRow);
+    this.gameObject.engineState.removeGameObject(gameObject);
   }
 
   private processStep(): void {
@@ -137,14 +137,13 @@ export class EmitterManager extends Script {
         direction: emitter.direction,
         afterCollision: false,
         overDirectionChanger: false,
-        gameObject: this.createBeamSegment(newId, emitter.column, emitter.row),
       };
+      this.beamGameObjects.set(newSegment.id, this.createBeamSegment(newSegment));
       this.beamSegments.set(newSegment.id, newSegment);
       return newSegment;
     });
 
     Array.from(this.beamSegments.values()).forEach((segment) => {
-
       if (this.isOverSwitch(segment.column, segment.row)) {
         this.stopSegment(segment, newSegments);
         return;
@@ -152,7 +151,8 @@ export class EmitterManager extends Script {
 
       EmitterManager.step(segment);
 
-      if (this.isBlocked(segment.column, segment.row) ||
+      if (
+        this.isBlocked(segment.column, segment.row) ||
         !this.isInBounds(segment.column, segment.row) ||
         this.hasCharacterAt(segment.column, segment.row)
       ) {
@@ -162,7 +162,7 @@ export class EmitterManager extends Script {
 
       const isBlockedByMirror = this.changeDirectionIfMirrored(segment);
       if (isBlockedByMirror) {
-        this.stopSegment(segment, newSegments)
+        this.stopSegment(segment, newSegments);
         return;
       }
 
@@ -175,7 +175,9 @@ export class EmitterManager extends Script {
 
     beamSegmentsMap.forEach((segments) => {
       if (segments.length > 1 && segments.filter((segment) => !segment.afterCollision).length > 1) {
-        segments.forEach((segment) => {segment.afterCollision = true;});
+        segments.forEach((segment) => {
+          segment.afterCollision = true;
+        });
       }
       segments.forEach((segment) => {
         this.updateSegmentGameObject(segment);
@@ -183,8 +185,8 @@ export class EmitterManager extends Script {
     });
 
     newSegments.forEach((segment) => {
-      segment.gameObject.update();
-    })
+      this.beamGameObjects.get(segment.id)?.update();
+    });
   }
 
   private changeDirectionIfMirrored(segment: IBeamSegmentDescriptor): boolean {
@@ -259,8 +261,7 @@ export class EmitterManager extends Script {
   }
 
   private isOverSwitch(column: number, row: number): boolean {
-    return this.tileMap.getTile(column, row) === TileType.BeamSwitchBlue ||
-          this.tileMap.getTile(column, row) === TileType.BeamSwitchGreen;
+    return this.tileMap.getTile(column, row) === TileType.BeamSwitchBlue || this.tileMap.getTile(column, row) === TileType.BeamSwitchGreen;
   }
 
   private static key(column: number, row: number): string {
@@ -280,5 +281,3 @@ export class EmitterManager extends Script {
     }
   }
 }
-
-

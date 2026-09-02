@@ -1,7 +1,8 @@
 import { EmitterManager } from './emitter-manager';
 import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
-import { Direction, StateScript } from '../state-script';
+import { StateScript } from '../state-script';
+import { Direction } from '../state/state-types';
 import { TileMap } from '../tile-map/tile-map';
 import { TileType } from '../tile-map/tile-map-types';
 import { ObjectPosition } from '../object-position';

@@ -40,7 +40,7 @@ describe('BuilderScript', () => {
 
   function createTrackedTile(column: number, row: number, type: TileType): GameObject {
     tileMap.setTile(column, row, type);
-    const tileGameObject = GameObject.create(`Tile-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
+    const tileGameObject = GameObject.create(`Tile-${type}-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
     ]);
     engineState.addGameObject(tileGameObject);
@@ -125,7 +125,7 @@ describe('BuilderScript', () => {
     player.update();
 
     expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-    expect(gameObjectsByName.has('Tile-6-5')).toBe(true);
+    expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(true);
   });
 
   it('builds stairs immediately when Digit2 is pressed', () => {
@@ -221,7 +221,7 @@ describe('BuilderScript', () => {
       player.update();
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
-      expect(gameObjectsByName.has('Tile-6-5')).toBe(false);
+      expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(false);
     });
 
     it('removes stairs and a crossbar the same way, on separate presses', () => {
@@ -251,7 +251,7 @@ describe('BuilderScript', () => {
       removeless.update();
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-      expect(gameObjectsByName.has('Tile-6-5')).toBe(true);
+      expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(true);
     });
 
     it('decrements the remove supply on every successful removal, and is never restocked', () => {
@@ -269,7 +269,7 @@ describe('BuilderScript', () => {
       limited.update();
 
       expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-      expect(gameObjectsByName.has('Tile-6-5')).toBe(true);
+      expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(true);
     });
   });
 

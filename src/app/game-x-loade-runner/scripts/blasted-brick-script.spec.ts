@@ -100,7 +100,7 @@ describe('BlastedBrickScript', () => {
 
   function createTrackedTile(column: number, row: number, type: TileType): GameObject {
     tileMap.setTile(column, row, type);
-    const tileGameObject = GameObject.create(`Tile-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
+    const tileGameObject = GameObject.create(`Tile-${type}-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
     ]);
     engineState.addGameObject(tileGameObject);
@@ -129,7 +129,7 @@ describe('BlastedBrickScript', () => {
     player.update();
 
     expect(tileMap.getTile(6, 6)).toBe(TileType.BlastedBrick);
-    expect(gameObjectsByName.has('Tile-6-6')).toBe(false);
+    expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-6`)).toBe(false);
   });
 
   it('does not let the player build over a blasted cell', () => {
@@ -153,7 +153,7 @@ describe('BlastedBrickScript', () => {
     vi.advanceTimersByTime(5000);
 
     expect(tileMap.getTile(6, 6)).toBe(TileType.Brick);
-    expect(gameObjectsByName.has('Tile-6-6')).toBe(true);
+    expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-6`)).toBe(true);
   });
 
   it('does not revert before the 5 seconds have elapsed', () => {

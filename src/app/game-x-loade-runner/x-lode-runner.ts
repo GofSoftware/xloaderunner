@@ -23,21 +23,22 @@ import { GoldScript } from './scripts/gold-script';
 import { BitmapSpriteRenderer } from '../engine/scripts/bitmap-sprite-renderer';
 import { STAND_ANIMATION } from '../engine/scripts/animations';
 import { ENEMY_SPEED_SLOWDOWN, EnemyScript } from './scripts/enemy-script';
-import { createTileGameObject } from './scripts/tile-bitmaps';
+import { createTileGameObject } from './tile-bitmap-factory';
 
 export class XLodeRunner implements ILevel {
-
   public static create(): XLodeRunner {
     return new XLodeRunner();
   }
 
   private eState: IEngineState | null = null;
   private get engineState(): IEngineState {
-    if (this.eState == null) { throw new Error('EngineState not initialized'); }
+    if (this.eState == null) {
+      throw new Error('EngineState not initialized');
+    }
     return this.eState!;
-  };
+  }
 
-  private constructor() { }
+  private constructor() {}
 
   public async initialize(engineState: IEngineState): Promise<void> {
     this.eState = engineState;
@@ -68,7 +69,9 @@ export class XLodeRunner implements ILevel {
       // Registers each emitter tile as it starts below, so this must be added - and started - before
       // ...tileGameObjects.
       GameObject.create('Emitters', engineState, { x: 0, y: 0 }, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
-      GameObject.create('Stars', engineState, { x: 0, y: 0 }, [(gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER)]),
+      GameObject.create('Stars', engineState, { x: 0, y: 0 }, [
+        (gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER),
+      ]),
       ...tileGameObjects,
       GameObject.create('Title', engineState, { x: CELL_SIZE * 10, y: CELL_SIZE * 2 }, [
         (gameObject: GameObject) => LinearMoveScript.create(gameObject, { x: 0, y: -1 }, 5),
@@ -127,7 +130,7 @@ export class XLodeRunner implements ILevel {
     const tile = mapGameObject.getTile(column, row);
     console.log(
       `Screen coords: x ${screenX} y ${screenY} Map coords: column ${column} row ${row}; Tile: ${tile}`,
-      mapGameObject.getObjectsAt(column, row)
+      mapGameObject.getObjectsAt(column, row),
     );
   }
 }

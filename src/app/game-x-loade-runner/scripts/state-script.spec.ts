@@ -1,4 +1,5 @@
-import { Direction, StateScript } from './state-script';
+import { StateScript } from './state-script';
+import { Direction } from './state/state-types';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';

@@ -63,7 +63,7 @@ export class GameObject implements IGameObject {
 
   public update(): void {
     if (this.enabled) {
-      this.scriptInstances.forEach((script) => script.update());
+      this.scriptInstances.forEach((script) => script.enabled && script.update());
     }
   }
 

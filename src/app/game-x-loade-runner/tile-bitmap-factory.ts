@@ -28,23 +28,23 @@ import {
   OBJECT_LAVA_8,
   OBJECT_STAIRS,
   OBJECT_BEAM_SWITCH_BLUE,
-} from '../data/sprites';
-import { GameObject } from '../../engine/game-object/game-object';
-import { Script } from '../../engine/game-object/script';
-import { IEngineState } from '../../engine/i-engine-state';
-import { ITileBitmapDescription, TileBitmapType } from '../../engine/i-tile-bitmap-description';
-import { MIDDLE_TILE_LAYER, UPPER_EFFECT_LAYER, Yl } from '../../engine/screen/screen.constants';
-import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
-import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
-import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './emitter/emitter-script';
-import { GoldItem } from './gold-item';
-import { MapHelper } from '../helpers/map.helper';
-import { ObjectPosition } from './object-position';
-import { MirrorScript } from './mirror/mirror-script';
-import { TileType } from './tile-map/tile-map-types';
-import { MirrorHelper } from './mirror/mirror-helper';
-import { SwitchScript } from './switch-script';
-import { ParticleScript } from '../../engine/scripts/particle-script';
+} from './data/sprites';
+import { GameObject } from '../engine/game-object/game-object';
+import { Script } from '../engine/game-object/script';
+import { IEngineState } from '../engine/i-engine-state';
+import { ITileBitmapDescription, TileBitmapType } from '../engine/i-tile-bitmap-description';
+import { MIDDLE_TILE_LAYER, UPPER_EFFECT_LAYER, Yl } from '../engine/screen/screen.constants';
+import { BitmapRenderer } from '../engine/scripts/bitmap-renderer';
+import { BitmapSpriteRenderer } from '../engine/scripts/bitmap-sprite-renderer';
+import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './scripts/emitter/emitter-script';
+import { GoldItem } from './scripts/gold-item';
+import { MapHelper } from './helpers/map.helper';
+import { ObjectPosition } from './scripts/object-position';
+import { MirrorScript } from './scripts/mirror/mirror-script';
+import { TileType } from './scripts/tile-map/tile-map-types';
+import { MirrorHelper } from './scripts/mirror/mirror-helper';
+import { SwitchScript } from './scripts/switch-script';
+import { ParticleScript } from '../engine/scripts/particle-script';
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
@@ -126,9 +126,12 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
             return { x: Math.cos(angle), y: -1 * Math.abs(Math.sin(angle)) };
           }, // or (i) => ({ x: Math.cos(i / 12 * Math.PI * 2), y: Math.sin(...) })
           color: Yl,
-          colorOverrides: [(color, particle) => {
-            const x = (particle.remainingLife * 255 / ttlMax); return x << 8 | 0x000000FF;
-          }],
+          colorOverrides: [
+            (color, particle) => {
+              const x = (particle.remainingLife * 255) / ttlMax;
+              return (x << 8) | 0x000000ff;
+            },
+          ],
           timeToLive: { min: ttlMin, max: ttlMax },
         },
         UPPER_EFFECT_LAYER,
@@ -136,5 +139,5 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
     );
   }
 
-  return GameObject.create(`Tile-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
+  return GameObject.create(`Tile-${type}-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
 }

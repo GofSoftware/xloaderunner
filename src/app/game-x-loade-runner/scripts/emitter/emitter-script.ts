@@ -1,10 +1,10 @@
 import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { ObjectPosition } from '../object-position';
-import { Direction } from '../state-script';
 import { EmitterColor } from './emitter-color';
 import { EmitterManager } from './emitter-manager';
 import { TileType } from '../tile-map/tile-map-types';
+import { Direction } from '../state/state-types';
 
 export const EMITTER_INFO_BY_TILE_TYPE: Partial<Record<TileType, { color: EmitterColor; direction: Direction }>> = {
   [TileType.EmitterGreenLeft]: { color: EmitterColor.Green, direction: Direction.Left },

@@ -3,12 +3,18 @@ import { GameObject } from '../../../engine/game-object/game-object';
 import { TileMap } from '../tile-map/tile-map';
 import { MapHelper } from '../../helpers/map.helper';
 import { ObjectPosition } from '../object-position';
-import { Direction, StateScript } from '../state-script';
+import { StateScript } from '../state-script';
 import { BitmapRenderer } from '../../../engine/scripts/bitmap-renderer';
-import { TILE_BITMAPS } from '../tile-bitmaps';
+import { TILE_BITMAPS } from '../../tile-bitmap-factory';
 import { MirrorDirection, ORDERED_MIRROR_TILES } from './mirror-types';
+import { Direction } from '../state/state-types';
 
-const PLAYER_NEARBY_DISTANCE = [{x: 0, y: 1}, {x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}];
+const PLAYER_NEARBY_DISTANCE = [
+  { x: 0, y: 1 },
+  { x: 1, y: 0 },
+  { x: 0, y: -1 },
+  { x: -1, y: 0 },
+];
 
 export class MirrorScript extends Script {
   public static create(gameObject: GameObject): MirrorScript {
@@ -35,7 +41,6 @@ export class MirrorScript extends Script {
   public override update(): void {
     super.update();
     if (this.gameObject.engineState.keyboard.wasPressedThisFrame('Space')) {
-
       if (!this.hasPlayerNearby()) {
         return;
       }
@@ -66,14 +71,18 @@ export class MirrorScript extends Script {
       return false;
     }
 
-    const shift = PLAYER_NEARBY_DISTANCE.find((offset) => (column + offset.x === playerPosition.column && row + offset.y === playerPosition.row));
+    const shift = PLAYER_NEARBY_DISTANCE.find(
+      (offset) => column + offset.x === playerPosition.column && row + offset.y === playerPosition.row,
+    );
     if (shift == null) {
       return false;
     }
 
-    return (shift.x === 0 && shift.y === 1 && playerState.direction === Direction.Up)  ||
-      (shift.x === 0 && shift.y === -1 && playerState.direction === Direction.Down)  ||
-      (shift.x === 1 && shift.y === 0 && playerState.direction === Direction.Left)  ||
-      (shift.x === -1 && shift.y === 0 && playerState.direction === Direction.Right);
+    return (
+      (shift.x === 0 && shift.y === 1 && playerState.direction === Direction.Up) ||
+      (shift.x === 0 && shift.y === -1 && playerState.direction === Direction.Down) ||
+      (shift.x === 1 && shift.y === 0 && playerState.direction === Direction.Left) ||
+      (shift.x === -1 && shift.y === 0 && playerState.direction === Direction.Right)
+    );
   }
 }
