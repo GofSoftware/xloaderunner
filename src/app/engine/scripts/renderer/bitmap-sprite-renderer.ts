@@ -1,13 +1,14 @@
-import { Script } from '../game-object/script';
-import { GameObject } from '../game-object/game-object';
-import { IBitmapAnimationDescription } from './i-bitmap-animation-description';
+import { Script } from '../../game-object/script';
+import { GameObject } from '../../game-object/game-object';
+import { IBitmapAnimationDescription } from '../i-bitmap-animation-description';
+import { ColorOverride } from './color-override';
 
 export class BitmapSpriteRenderer extends Script {
   public static create(
     gameObject: GameObject,
     bitmapAnimationDescription: IBitmapAnimationDescription,
     layer: number,
-    colorOverrides: ((color: number) => number)[] = [],
+    colorOverrides: ColorOverride[] = [],
   ): BitmapSpriteRenderer {
     return new BitmapSpriteRenderer(gameObject, bitmapAnimationDescription, layer, colorOverrides);
   }
@@ -15,7 +16,7 @@ export class BitmapSpriteRenderer extends Script {
   private bitmaps: number[][][] = [];
   private framePerSecond: number = 1;
   private spriteIndexTime: number = 0;
-  private colorOverrides: ((color: number) => number)[] = [];
+  private colorOverrides: ColorOverride[] = [];
 
   private readonly layer: number;
 
@@ -23,7 +24,7 @@ export class BitmapSpriteRenderer extends Script {
     gameObject: GameObject,
     bitmapAnimationDescription: IBitmapAnimationDescription,
     layer: number,
-    colorOverrides: ((color: number) => number)[],
+    colorOverrides: ColorOverride[],
   ) {
     super(gameObject);
 
@@ -38,7 +39,7 @@ export class BitmapSpriteRenderer extends Script {
     this.spriteIndexTime = bitmapAnimationDescription.spriteIndexTime ?? this.spriteIndexTime;
   }
 
-  public setColorOverrides(colorOverrides: ((color: number) => number)[]): void {
+  public setColorOverrides(colorOverrides: ColorOverride[]): void {
     this.colorOverrides = colorOverrides;
   }
 

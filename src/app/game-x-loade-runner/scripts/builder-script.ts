@@ -6,7 +6,7 @@ import { TileMap } from './tile-map/tile-map';
 import { createTileGameObject } from '../tile-bitmap-factory';
 import { MapHelper } from '../helpers/map.helper';
 import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../../engine/screen/screen.constants';
-import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
+import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
 import {
   OBJECT_MIRROR_RB,
   OBJECT_BRICK,

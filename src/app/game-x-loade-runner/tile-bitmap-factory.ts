@@ -34,8 +34,8 @@ import { Script } from '../engine/game-object/script';
 import { IEngineState } from '../engine/i-engine-state';
 import { ITileBitmapDescription, TileBitmapType } from '../engine/i-tile-bitmap-description';
 import { MIDDLE_TILE_LAYER, UPPER_EFFECT_LAYER, Yl } from '../engine/screen/screen.constants';
-import { BitmapRenderer } from '../engine/scripts/bitmap-renderer';
-import { BitmapSpriteRenderer } from '../engine/scripts/bitmap-sprite-renderer';
+import { BitmapRenderer } from '../engine/scripts/renderer/bitmap-renderer';
+import { BitmapSpriteRenderer } from '../engine/scripts/renderer/bitmap-sprite-renderer';
 import { EMITTER_INFO_BY_TILE_TYPE, EmitterScript } from './scripts/emitter/emitter-script';
 import { GoldItem } from './scripts/gold-item';
 import { MapHelper } from './helpers/map.helper';
@@ -86,22 +86,15 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
 
   const layer = tileBitmap.layer ?? MIDDLE_TILE_LAYER;
   const scriptFactories: ((gameObject: GameObject) => Script)[] = [(gameObject) => ObjectPosition.create(gameObject, column, row)];
+
   if (type === TileType.Gold) {
     scriptFactories.push((gameObject) => GoldItem.create(gameObject));
   }
+
   const emitterInfo = EMITTER_INFO_BY_TILE_TYPE[type];
   if (emitterInfo) {
     scriptFactories.push((gameObject) => EmitterScript.create(gameObject, emitterInfo.color, emitterInfo.direction));
   }
-  scriptFactories.push((gameObject) =>
-    tileBitmap.bitmapType === TileBitmapType.Static
-      ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, layer)
-      : BitmapSpriteRenderer.create(
-          gameObject,
-          { bitmap: tileBitmap.animatedBitmap!.bitmap, framePerSecond: tileBitmap.animatedBitmap!.framePerSecond },
-          layer,
-        ),
-  );
 
   if (MirrorHelper.isMirror(type)) {
     scriptFactories.push((gameObject) => MirrorScript.create(gameObject));
@@ -138,6 +131,16 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
       ),
     );
   }
+
+  scriptFactories.push((gameObject) =>
+    tileBitmap.bitmapType === TileBitmapType.Static
+      ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, layer)
+      : BitmapSpriteRenderer.create(
+          gameObject,
+          { bitmap: tileBitmap.animatedBitmap!.bitmap, framePerSecond: tileBitmap.animatedBitmap!.framePerSecond },
+          layer,
+        ),
+  );
 
   return GameObject.create(`Tile-${type}-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
 }

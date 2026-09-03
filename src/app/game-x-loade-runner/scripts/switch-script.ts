@@ -5,6 +5,8 @@ import { MapHelper } from '../helpers/map.helper';
 import { BeamScript } from './beam-script';
 import { EmitterColor } from './emitter/emitter-color';
 import { ParticleScript } from '../../engine/scripts/particle-script';
+import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
+import { Bl, Gr, Wt } from '../../engine/screen/screen.constants';
 
 export class SwitchScript extends Script {
   public static create(gameObject: any): SwitchScript {
@@ -48,6 +50,13 @@ export class SwitchScript extends Script {
     const particleScript = this.gameObject.getScript(ParticleScript);
     if (particleScript != null) {
       particleScript.enabled = this.isOn();
+    }
+
+    const bitmapRendererScript = this.gameObject.getScript(BitmapRenderer);
+    if (bitmapRendererScript != null) {
+      bitmapRendererScript.colorOverrides = this.isOn()
+        ? [(c) => (c === Wt ? (this.tile === TileType.BeamSwitchBlue ? Bl : Gr) : c)]
+        : [(c) => (c === Wt ? c & 0xffffff55 : c)];
     }
   }
 

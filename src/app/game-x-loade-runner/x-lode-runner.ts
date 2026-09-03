@@ -20,7 +20,7 @@ import { BlastedBrickScript } from './scripts/blasted-brick-script';
 import { StateScript } from './scripts/state-script';
 import { ObjectPosition } from './scripts/object-position';
 import { GoldScript } from './scripts/gold-script';
-import { BitmapSpriteRenderer } from '../engine/scripts/bitmap-sprite-renderer';
+import { BitmapSpriteRenderer } from '../engine/scripts/renderer/bitmap-sprite-renderer';
 import { STAND_ANIMATION } from '../engine/scripts/animations';
 import { ENEMY_SPEED_SLOWDOWN, EnemyScript } from './scripts/enemy-script';
 import { createTileGameObject } from './tile-bitmap-factory';

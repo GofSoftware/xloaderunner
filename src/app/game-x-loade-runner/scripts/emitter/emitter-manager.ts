@@ -7,7 +7,7 @@ import { EmitterColor } from './emitter-color';
 import type { EmitterScript } from './emitter-script';
 import { Mg, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
 import { OBJECT_BEAM_HORIZONTAL_1, OBJECT_BEAM_HORIZONTAL_2, OBJECT_BEAM_VERTICAL_1, OBJECT_BEAM_VERTICAL_2 } from '../../data/sprites';
-import { BitmapSpriteRenderer } from '../../../engine/scripts/bitmap-sprite-renderer';
+import { BitmapSpriteRenderer } from '../../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { TileType } from '../tile-map/tile-map-types';
 import { MirrorHelper } from '../mirror/mirror-helper';
 import { BeamScript } from '../beam-script';

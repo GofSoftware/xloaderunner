@@ -804,12 +804,12 @@ export const OBJECT_MIRROR_R: number[][] = [
 ];
 
 export const OBJECT_BEAM_SWITCH_BLUE: number[][] = [
-  [__, __, Yl, __, __, Yl, __, __],
+  [__, __, Yl, Wt, Wt, Yl, __, __],
   [__, __, __, Yl, Yl, __, __, __],
   [Yl, __, Yl, Bl, Bl, Yl, __, Yl],
-  [__, Yl, Bl, Bl, Bl, Bl, Yl, __],
-  [__, Yl, Bl, Bl, Bl, Bl, Yl, __],
+  [Wt, Yl, Bl, Bl, Bl, Bl, Yl, Wt],
+  [Wt, Yl, Bl, Bl, Bl, Bl, Yl, Wt],
   [Yl, __, Yl, Bl, Bl, Yl, __, Yl],
   [__, __, __, Yl, Yl, __, __, __],
-  [__, __, Yl, __, __, Yl, __, __],
+  [__, __, Yl, Wt, Wt, Yl, __, __],
 ];

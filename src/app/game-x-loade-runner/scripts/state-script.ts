@@ -1,6 +1,6 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
-import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
+import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { TileMap } from './tile-map/tile-map';
 import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../../engine/screen/screen.constants';
 import {
@@ -16,7 +16,7 @@ import {
   STAND_ANIMATION_LOOK_LEFT,
   STAND_ANIMATION_LOOK_RIGHT,
 } from '../../engine/scripts/animations';
-import { BitmapRenderer } from '../../engine/scripts/bitmap-renderer';
+import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
 import { OBJECT_EXCLAMATION } from '../data/sprites';
 import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { TextRenderer } from '../../engine/scripts/text-renderer';

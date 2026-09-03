@@ -1,4 +1,5 @@
 import { ScreenHelper } from './screen.helper';
+import { ColorOverride } from '../scripts/renderer/color-override';
 
 export class ScreenBuffer {
   public static create(layerCount: number): ScreenBuffer {
@@ -15,7 +16,7 @@ export class ScreenBuffer {
     return this.layers;
   }
 
-  copy(source: number[][], x: number, y: number, layer: number, colorOverrides: ((color: number) => number)[] = []): void {
+  copy(source: number[][], x: number, y: number, layer: number, colorOverrides: ColorOverride[] = []): void {
     ScreenHelper.copy(this.layers[layer], source, x, y, colorOverrides);
   }
 

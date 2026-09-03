@@ -4,7 +4,7 @@ import { TileMap } from '../tile-map/tile-map';
 import { MapHelper } from '../../helpers/map.helper';
 import { ObjectPosition } from '../object-position';
 import { StateScript } from '../state-script';
-import { BitmapRenderer } from '../../../engine/scripts/bitmap-renderer';
+import { BitmapRenderer } from '../../../engine/scripts/renderer/bitmap-renderer';
 import { TILE_BITMAPS } from '../../tile-bitmap-factory';
 import { MirrorDirection, ORDERED_MIRROR_TILES } from './mirror-types';
 import { Direction } from '../state/state-types';

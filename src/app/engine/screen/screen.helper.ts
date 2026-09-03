@@ -1,4 +1,5 @@
 import { __, SCREEN_HEIGHT, SCREEN_WIDTH } from './screen.constants';
+import { ColorOverride } from '../scripts/renderer/color-override';
 
 export class ScreenHelper {
   static unpackRgba(value: number): [number, number, number, number] {
@@ -25,8 +26,8 @@ export class ScreenHelper {
     source: number[][],
     x: number,
     y: number,
-    colorOverrides: ((color: number) => number)[] = [],
-    skipTransparent: boolean = true
+    colorOverrides: ColorOverride[] = [],
+    skipTransparent: boolean = true,
   ): void {
     for (let sy = 0; sy < source.length; sy++) {
       const destY = Math.floor(y) + sy;
@@ -37,13 +38,15 @@ export class ScreenHelper {
       const sourceRow = source[sy];
       const destRow = destination[destY];
       for (let sx = 0; sx < sourceRow.length; sx++) {
-        const destX =  Math.floor(x) + sx;
+        const destX = Math.floor(x) + sx;
         if (destX < 0 || destX >= destRow.length) {
           continue;
         }
         let color = sourceRow[sx];
-        colorOverrides.forEach((override) => { color = override(color); });
-        if (skipTransparent && ((color & 0xFF) === 0)) {
+        colorOverrides.forEach((override) => {
+          color = override(color);
+        });
+        if (skipTransparent && (color & 0xff) === 0) {
           continue;
         }
         destRow[destX] = color;

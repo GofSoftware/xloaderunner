@@ -17,6 +17,7 @@ export const Gr = 0x00ff00ff;
 export const Bl = 0x0000ffff;
 export const Lg = 0xeeeeeeff;
 export const Mg = 0xccccccff;
+export const Dg = 0x888888ff;
 export const Or = 0xf8ab4aff;
 export const Ol = 0xf6c77bff;
 export const Yl = 0xffd700ff;

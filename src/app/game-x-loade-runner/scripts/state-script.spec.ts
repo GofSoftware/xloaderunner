@@ -2,7 +2,7 @@ import { StateScript } from './state-script';
 import { Direction } from './state/state-types';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
-import { BitmapSpriteRenderer } from '../../engine/scripts/bitmap-sprite-renderer';
+import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { ObjectPosition } from './object-position';
 import { MapHelper } from '../helpers/map.helper';

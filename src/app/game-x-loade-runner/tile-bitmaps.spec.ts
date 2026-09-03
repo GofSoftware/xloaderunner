@@ -1,7 +1,7 @@
 import { createTileGameObject } from './tile-bitmap-factory';
 import { ObjectPosition } from './scripts/object-position';
-import { BitmapRenderer } from '../engine/scripts/bitmap-renderer';
-import { BitmapSpriteRenderer } from '../engine/scripts/bitmap-sprite-renderer';
+import { BitmapRenderer } from '../engine/scripts/renderer/bitmap-renderer';
+import { BitmapSpriteRenderer } from '../engine/scripts/renderer/bitmap-sprite-renderer';
 import { GoldItem } from './scripts/gold-item';
 import { TileType } from './scripts/tile-map/tile-map-types';
 import { EmitterScript, EMITTER_INFO_BY_TILE_TYPE } from './scripts/emitter/emitter-script';
