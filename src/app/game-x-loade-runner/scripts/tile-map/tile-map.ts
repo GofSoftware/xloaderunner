@@ -37,11 +37,15 @@ export class TileMap extends Script {
   }
 
   public isSolid(column: number, row: number): boolean {
-    return this.getTile(column, row) === TileType.Brick || this.getTile(column, row) === TileType.Stairs;
+    return (
+      this.getTile(column, row) === TileType.Brick ||
+      this.getTile(column, row) === TileType.Stairs ||
+      this.getTile(column, row) === TileType.GoldenGates
+    );
   }
 
   public isWall(column: number, row: number): boolean {
-    return this.getTile(column, row) === TileType.Brick;
+    return this.getTile(column, row) === TileType.Brick || this.getTile(column, row) === TileType.GoldenGates;
   }
 
   public isDangerous(column: number, row: number): boolean {

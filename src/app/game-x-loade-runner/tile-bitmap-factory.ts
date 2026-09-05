@@ -28,6 +28,14 @@ import {
   OBJECT_LAVA_8,
   OBJECT_STAIRS,
   OBJECT_BEAM_SWITCH_BLUE,
+  OBJECT_GOLDEN_GATES_01,
+  OBJECT_GOLDEN_GATES_03,
+  OBJECT_GOLDEN_GATES_02,
+  OBJECT_GOLDEN_GATES_04,
+  OBJECT_GOLDEN_GATES_06,
+  OBJECT_GOLDEN_GATES_05,
+  OBJECT_GOLDEN_GATES_07,
+  OBJECT_GOLDEN_GATES_08,
 } from './data/sprites';
 import { GameObject } from '../engine/game-object/game-object';
 import { Script } from '../engine/game-object/script';
@@ -45,6 +53,8 @@ import { TileType } from './scripts/tile-map/tile-map-types';
 import { MirrorHelper } from './scripts/mirror/mirror-helper';
 import { SwitchScript } from './scripts/switch-script';
 import { ParticleScript } from '../engine/scripts/particle-script';
+import { GoldenGateLock } from './scripts/golden-gate-lock';
+import { OnOffScript } from './scripts/on-off-script';
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
@@ -75,6 +85,23 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.MirrorRT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RT },
   [TileType.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R },
   [TileType.BeamSwitchBlue]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_BLUE },
+  [TileType.GoldenGates]: {
+    bitmapType: TileBitmapType.Animated,
+    animatedBitmap: {
+      bitmap: [
+        OBJECT_GOLDEN_GATES_01,
+        OBJECT_GOLDEN_GATES_02,
+        OBJECT_GOLDEN_GATES_03,
+        OBJECT_GOLDEN_GATES_04,
+        OBJECT_GOLDEN_GATES_05,
+        OBJECT_GOLDEN_GATES_06,
+        OBJECT_GOLDEN_GATES_07,
+        OBJECT_GOLDEN_GATES_08,
+      ],
+      framePerSecond: 10,
+      oneTime: true,
+    },
+  },
 };
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
@@ -86,6 +113,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
 
   const layer = tileBitmap.layer ?? MIDDLE_TILE_LAYER;
   const scriptFactories: ((gameObject: GameObject) => Script)[] = [(gameObject) => ObjectPosition.create(gameObject, column, row)];
+  const name = `Tile-${type}-${column}-${row}`;
 
   if (type === TileType.Gold) {
     scriptFactories.push((gameObject) => GoldItem.create(gameObject));
@@ -102,6 +130,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
 
   if (type === TileType.BeamSwitchBlue) {
     scriptFactories.push((gameObject) => SwitchScript.create(gameObject));
+    scriptFactories.push((gameObject) => OnOffScript.create(gameObject, false));
 
     const ttlMin = 1;
     const ttlMax = 1.5;
@@ -132,15 +161,23 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
     );
   }
 
+  if (type === TileType.GoldenGates) {
+    scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, 5, 12));
+  }
+
   scriptFactories.push((gameObject) =>
     tileBitmap.bitmapType === TileBitmapType.Static
       ? BitmapRenderer.create(gameObject, tileBitmap.staticBitmap!, layer)
       : BitmapSpriteRenderer.create(
           gameObject,
-          { bitmap: tileBitmap.animatedBitmap!.bitmap, framePerSecond: tileBitmap.animatedBitmap!.framePerSecond },
+          {
+            bitmap: tileBitmap.animatedBitmap!.bitmap,
+            framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
+            oneTime: tileBitmap.animatedBitmap!.oneTime,
+          },
           layer,
         ),
   );
 
-  return GameObject.create(`Tile-${type}-${column}-${row}`, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
+  return GameObject.create(name, engineState, MapHelper.mapToScreen(column, row), scriptFactories);
 }

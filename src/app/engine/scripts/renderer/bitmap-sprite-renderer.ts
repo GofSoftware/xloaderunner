@@ -17,6 +17,7 @@ export class BitmapSpriteRenderer extends Script {
   private framePerSecond: number = 1;
   private spriteIndexTime: number = 0;
   private colorOverrides: ColorOverride[] = [];
+  private oneTime: boolean = false;
 
   private readonly layer: number;
 
@@ -37,6 +38,7 @@ export class BitmapSpriteRenderer extends Script {
     this.bitmaps = bitmapAnimationDescription.bitmap ?? this.bitmaps;
     this.framePerSecond = bitmapAnimationDescription.framePerSecond ?? this.framePerSecond;
     this.spriteIndexTime = bitmapAnimationDescription.spriteIndexTime ?? this.spriteIndexTime;
+    this.oneTime = bitmapAnimationDescription.oneTime ?? this.oneTime;
   }
 
   public setColorOverrides(colorOverrides: ColorOverride[]): void {
@@ -45,12 +47,16 @@ export class BitmapSpriteRenderer extends Script {
 
   public override update(): void {
     this.spriteIndexTime += this.framePerSecond * this.gameObject.engineState.deltaTime;
-    if (this.spriteIndexTime >= this.bitmaps.length) {
-      this.spriteIndexTime = this.spriteIndexTime % this.bitmaps.length;
+    let currentIndex = Math.floor(this.spriteIndexTime);
+    if (currentIndex >= this.bitmaps.length) {
+      currentIndex = this.oneTime ? this.bitmaps.length - 1 : 0;
+      this.spriteIndexTime = this.oneTime
+        ? this.bitmaps.length - 1
+        : this.spriteIndexTime - Math.floor(this.spriteIndexTime / this.bitmaps.length) * this.bitmaps.length;
     }
 
     this.gameObject.engineState.screenBuffer.copy(
-      this.bitmaps[Math.floor(this.spriteIndexTime)],
+      this.bitmaps[currentIndex],
       this.gameObject.position.x,
       this.gameObject.position.y,
       this.layer,

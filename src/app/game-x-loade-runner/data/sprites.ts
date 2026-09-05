@@ -813,3 +813,91 @@ export const OBJECT_BEAM_SWITCH_BLUE: number[][] = [
   [__, __, __, Yl, Yl, __, __, __],
   [__, __, Yl, Wt, Wt, Yl, __, __],
 ];
+
+export const OBJECT_GOLDEN_GATES_01: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, Yl, Wt, __, Wt, __],
+  [__, Wt, Yl, Wt, Yl, Wt, Yl, __],
+  [__, Yl, Wt, Yl, Wt, Yl, Wt, __],
+  [__, Wt, Yl, Wt, Yl, Wt, Yl, __],
+  [__, Yl, Wt, Yl, Wt, Yl, Wt, __],
+  [__, Wt, Yl, Wt, Yl, Wt, Yl, __],
+  [__, Yl, Wt, Yl, Wt, Yl, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_02: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, Wt, Wt, __, Yl, __],
+  [__, Yl, Wt, Wt, Yl, Wt, Wt, __],
+  [__, Wt, Wt, Yl, Wt, Yl, Yl, __],
+  [__, Yl, Yl, Wt, Yl, Wt, Wt, __],
+  [__, Wt, Wt, Yl, Wt, Yl, Yl, __],
+  [__, Yl, Yl, Wt, Yl, Wt, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_03: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, Wt, Wt, __, Wt, __],
+  [__, Wt, Wt, Wt, Yl, Wt, Yl, __],
+  [__, Yl, Wt, Yl, Wt, Yl, Wt, __],
+  [__, Wt, Yl, Wt, Yl, Wt, Yl, __],
+  [__, Yl, Wt, Yl, Wt, Yl, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_04: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, Wt, Wt, __, Yl, __],
+  [__, Yl, Wt, Wt, Yl, Wt, Wt, __],
+  [__, Wt, Wt, Yl, Wt, Yl, Yl, __],
+  [__, Yl, Yl, Wt, Yl, Wt, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_05: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, Wt, Wt, __, Wt, __],
+  [__, Wt, Wt, Wt, Yl, Wt, Yl, __],
+  [__, Yl, Wt, Yl, Wt, Yl, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_06: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, Wt, Wt, __, Yl, __],
+  [__, Yl, Wt, Wt, Yl, Wt, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_07: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, Wt, Wt, __, Wt, __],
+];
+
+export const OBJECT_GOLDEN_GATES_08: number[][] = [
+  [__, __, Wt, Yl, Wt, Yl, __, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+  [__, Wt, __, __, __, __, Yl, __],
+  [__, Yl, __, __, __, __, Wt, __],
+];

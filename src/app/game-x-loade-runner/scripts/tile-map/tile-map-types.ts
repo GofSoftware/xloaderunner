@@ -1,6 +1,5 @@
 import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
 
-
 export const MAP_COLUMNS = Math.floor(SCREEN_WIDTH / CELL_SIZE);
 export const MAP_ROWS = Math.floor(SCREEN_HEIGHT / CELL_SIZE);
 
@@ -39,4 +38,5 @@ export enum TileType {
   MirrorR = 'MirrorR',
   BeamSwitchBlue = 'BeamSwitchBlue',
   BeamSwitchGreen = 'BeamSwitchGreen',
+  GoldenGates = 'GoldenGates',
 }
