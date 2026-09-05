@@ -1,6 +1,6 @@
 import { Script } from '../../game-object/script';
 import { GameObject } from '../../game-object/game-object';
-import { IBitmapAnimationDescription } from '../i-bitmap-animation-description';
+import { BitmapAnimationDirection, IBitmapAnimationDescription } from '../i-bitmap-animation-description';
 import { ColorOverride } from './color-override';
 
 export class BitmapSpriteRenderer extends Script {
@@ -18,6 +18,7 @@ export class BitmapSpriteRenderer extends Script {
   private spriteIndexTime: number = 0;
   private colorOverrides: ColorOverride[] = [];
   private oneTime: boolean = false;
+  private direction: BitmapAnimationDirection = BitmapAnimationDirection.Forward;
 
   private readonly layer: number;
 
@@ -39,6 +40,8 @@ export class BitmapSpriteRenderer extends Script {
     this.framePerSecond = bitmapAnimationDescription.framePerSecond ?? this.framePerSecond;
     this.spriteIndexTime = bitmapAnimationDescription.spriteIndexTime ?? this.spriteIndexTime;
     this.oneTime = bitmapAnimationDescription.oneTime ?? this.oneTime;
+    this.oneTime = bitmapAnimationDescription.oneTime ?? this.oneTime;
+    this.direction = bitmapAnimationDescription.direction ?? this.direction;
   }
 
   public setColorOverrides(colorOverrides: ColorOverride[]): void {
@@ -46,17 +49,21 @@ export class BitmapSpriteRenderer extends Script {
   }
 
   public override update(): void {
-    this.spriteIndexTime += this.framePerSecond * this.gameObject.engineState.deltaTime;
-    let currentIndex = Math.floor(this.spriteIndexTime);
-    if (currentIndex >= this.bitmaps.length) {
-      currentIndex = this.oneTime ? this.bitmaps.length - 1 : 0;
+    this.spriteIndexTime += (this.direction === BitmapAnimationDirection.Forward ? 1 : -1) *
+      this.framePerSecond * this.gameObject.engineState.deltaTime;
+
+    if (this.spriteIndexTime < 0) {
+      this.spriteIndexTime = this.oneTime
+        ? 0
+        : this.spriteIndexTime - Math.floor(Math.abs(this.spriteIndexTime) / this.bitmaps.length) * this.bitmaps.length;
+    } else if (this.spriteIndexTime >= this.bitmaps.length) {
       this.spriteIndexTime = this.oneTime
         ? this.bitmaps.length - 1
         : this.spriteIndexTime - Math.floor(this.spriteIndexTime / this.bitmaps.length) * this.bitmaps.length;
     }
 
     this.gameObject.engineState.screenBuffer.copy(
-      this.bitmaps[currentIndex],
+      this.bitmaps[Math.floor(this.spriteIndexTime)],
       this.gameObject.position.x,
       this.gameObject.position.y,
       this.layer,

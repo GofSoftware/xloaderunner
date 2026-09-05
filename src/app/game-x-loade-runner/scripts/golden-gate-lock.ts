@@ -5,6 +5,8 @@ import { TileMap } from './tile-map/tile-map';
 import { MapHelper } from '../helpers/map.helper';
 import { TileType } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
+import { TILE_BITMAPS } from '../tile-bitmap-factory';
+import { BitmapAnimationDirection } from '../../engine/scripts/i-bitmap-animation-description';
 
 export class GoldenGateLock extends Script {
   public static create(gameObject: GameObject, column: number, row: number): GoldenGateLock {
@@ -31,10 +33,14 @@ export class GoldenGateLock extends Script {
       if (this.prevState !== onOf.on) {
         if (onOf.on) {
           this.tileMap.setTile(column, row, TileType.Empty);
-          this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({ spriteIndexTime: 0 });
+          this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({
+            direction: BitmapAnimationDirection.Forward,
+          });
         } else {
           this.tileMap.setTile(column, row, TileType.GoldenGates);
-          this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({ spriteIndexTime: 0 });
+          this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({
+            direction: BitmapAnimationDirection.Backward,
+          });
         }
       }
       this.prevState = onOf.on;
