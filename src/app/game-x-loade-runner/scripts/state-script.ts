@@ -31,7 +31,7 @@ const FALL_SPEED = 60;
 const LEDGE_HESITATION_SECONDS = 0.3;
 // Kept tiny on purpose: long enough to swallow a direction key tap as a pure look-around,
 // short enough that holding the key to actually run never reads as a pause.
-const TURN_DELAY_SECONDS = 0.08;
+const TURN_DELAY_SECONDS = 0.1;
 const DYING_DURATION_SECONDS = 1;
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
