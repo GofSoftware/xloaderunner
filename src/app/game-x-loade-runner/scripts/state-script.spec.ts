@@ -1,5 +1,4 @@
 import { StateScript } from './state-script';
-import { Direction } from './state/state-types';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
@@ -13,6 +12,7 @@ import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH }
 import { IEngineState } from '../../engine/i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../data/sprites';
 import { LivesScript } from './lives-script';
+import { Direction } from './direction';
 
 describe('StateScript', () => {
   let engineState: IEngineState;

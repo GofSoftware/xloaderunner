@@ -7,7 +7,8 @@ import { StateScript } from '../state-script';
 import { BitmapRenderer } from '../../../engine/scripts/renderer/bitmap-renderer';
 import { TILE_BITMAPS } from '../../tile-bitmap-factory';
 import { MirrorDirection, ORDERED_MIRROR_TILES } from './mirror-types';
-import { Direction } from '../state/state-types';
+
+import { Direction } from '../direction';
 
 const PLAYER_NEARBY_DISTANCE = [
   { x: 0, y: 1 },

@@ -22,7 +22,8 @@ import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { TextHelper } from '../../engine/screen/text.helper';
 import { TileType } from './tile-map/tile-map-types';
 import { MirrorHelper } from './mirror/mirror-helper';
-import { Direction } from './state/state-types';
+
+import { Direction } from './direction';
 
 export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar | TileType.MirrorRB;
 

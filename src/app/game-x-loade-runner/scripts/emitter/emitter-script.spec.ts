@@ -1,10 +1,10 @@
 import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
 import { EmitterManager } from './emitter-manager';
-import { Direction } from '../state/state-types';
 import { ObjectPosition } from '../object-position';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { IEngineState } from '../../../engine/i-engine-state';
+import { Direction } from '../direction';
 
 describe('EmitterScript', () => {
   function createEngineState(manager?: EmitterManager): IEngineState {

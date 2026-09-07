@@ -2,7 +2,6 @@ import { EmitterManager } from './emitter-manager';
 import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
 import { StateScript } from '../state-script';
-import { Direction } from '../state/state-types';
 import { TileMap } from '../tile-map/tile-map';
 import { TileType } from '../tile-map/tile-map-types';
 import { ObjectPosition } from '../object-position';
@@ -10,6 +9,7 @@ import { GameObject } from '../../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../../engine/screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
 import { IEngineState } from '../../../engine/i-engine-state';
+import { Direction } from '../direction';
 
 const GREEN = 0x00ff00ff;
 const BLUE = 0x0000ffff;

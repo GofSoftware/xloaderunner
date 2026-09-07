@@ -12,7 +12,8 @@ import { TileType } from '../tile-map/tile-map-types';
 import { MirrorHelper } from '../mirror/mirror-helper';
 import { BeamScript } from '../beam-script';
 import { IBeamSegmentDescriptor } from './i-beam-segment-descriptor';
-import { Direction } from '../state/state-types';
+
+import { Direction } from '../direction';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Left]: { column: -1, row: 0 },

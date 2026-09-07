@@ -5,7 +5,8 @@ import { StateScript } from './state-script';
 import { TileMap } from './tile-map/tile-map';
 import { createTileGameObject } from '../tile-bitmap-factory';
 import { TileType } from './tile-map/tile-map-types';
-import { Direction } from './state/state-types';
+
+import { Direction } from './direction';
 
 const BLAST_KEY = 'Space';
 const RESTORE_DELAY_MS = 5000;

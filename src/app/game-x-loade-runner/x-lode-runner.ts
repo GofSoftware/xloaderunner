@@ -24,6 +24,7 @@ import { BitmapSpriteRenderer } from '../engine/scripts/renderer/bitmap-sprite-r
 import { STAND_ANIMATION } from '../engine/scripts/animations';
 import { ENEMY_SPEED_SLOWDOWN, EnemyScript } from './scripts/enemy-script';
 import { createTileGameObject } from './tile-bitmap-factory';
+import { PortalManagerScript } from './scripts/portal-manager-script';
 
 export class XLodeRunner implements ILevel {
   public static create(): XLodeRunner {
@@ -114,6 +115,7 @@ export class XLodeRunner implements ILevel {
             [(color: number) => color & 0xff5a5aff],
           ),
       ]),
+      GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [(gameObject: GameObject) => PortalManagerScript.create(gameObject)]),
     ].forEach((gameObject) => engineState.addGameObject(gameObject));
   }
 

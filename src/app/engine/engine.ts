@@ -85,6 +85,10 @@ export class Engine implements IEngineState {
   }
 
   public removeGameObject(gameObject: GameObject): void {
+    if(gameObject == null) {
+      return;
+    }
+
     const index = this.gameObjects.indexOf(gameObject);
     if (index >= 0) {
       this.gameObjects.splice(index, 1);

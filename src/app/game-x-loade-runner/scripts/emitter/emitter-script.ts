@@ -4,7 +4,8 @@ import { ObjectPosition } from '../object-position';
 import { EmitterColor } from './emitter-color';
 import { EmitterManager } from './emitter-manager';
 import { TileType } from '../tile-map/tile-map-types';
-import { Direction } from '../state/state-types';
+
+import { Direction } from '../direction';
 
 export const EMITTER_INFO_BY_TILE_TYPE: Partial<Record<TileType, { color: EmitterColor; direction: Direction }>> = {
   [TileType.EmitterGreenLeft]: { color: EmitterColor.Green, direction: Direction.Left },

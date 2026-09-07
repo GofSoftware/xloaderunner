@@ -17,10 +17,3 @@ export enum PlayerState {
   Dying = 'Dying',
   GameOver = 'GameOver',
 }
-
-export enum Direction {
-  Left = 'Left',
-  Right = 'Right',
-  Up = 'Up',
-  Down = 'Down',
-}

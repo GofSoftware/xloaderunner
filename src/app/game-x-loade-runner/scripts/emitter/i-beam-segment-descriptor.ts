@@ -1,5 +1,6 @@
 import { EmitterColor } from './emitter-color';
-import { Direction } from '../state/state-types';
+
+import { Direction } from '../direction';
 
 export interface IBeamSegmentDescriptor {
   id: number;

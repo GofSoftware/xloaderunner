@@ -24,7 +24,8 @@ import { DEATH_JINGLE } from '../../engine/audio/music-player';
 import { LivesScript } from './lives-script';
 import { ObjectPosition } from './object-position';
 import { TileType } from './tile-map/tile-map-types';
-import { Direction, PlayerState } from './state/state-types';
+import { PlayerState } from './state/state-types';
+import { Direction } from './direction';
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;

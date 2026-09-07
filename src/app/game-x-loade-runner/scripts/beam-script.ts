@@ -1,8 +1,8 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { IBeamSegmentDescriptor } from './emitter/i-beam-segment-descriptor';
-import { Direction } from './state/state-types';
 import { EmitterColor } from './emitter/emitter-color';
+import { Direction } from './direction';
 
 export class BeamScript extends Script {
   public static create(gameObject: GameObject, segments: IBeamSegmentDescriptor): BeamScript {
