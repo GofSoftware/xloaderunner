@@ -5,46 +5,45 @@ import { TileMap } from './tile-map/tile-map';
 import { MapHelper } from '../helpers/map.helper';
 import { TileType } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
-import { TILE_BITMAPS } from '../tile-bitmap-factory';
 import { BitmapAnimationDirection } from '../../engine/scripts/i-bitmap-animation-description';
+import { IMapPosition } from './tile-map/i-map-position';
 
 export class GoldenGateLock extends Script {
-  public static create(gameObject: GameObject, column: number, row: number): GoldenGateLock {
-    return new GoldenGateLock(gameObject, column, row);
+  public static create(gameObject: GameObject, onOfLocation: IMapPosition): GoldenGateLock {
+    return new GoldenGateLock(gameObject, onOfLocation);
   }
 
-  private readonly column: number;
-  private readonly row: number;
+  private readonly onOfLocation: IMapPosition;
   private prevState: boolean | null = null;
 
-  private constructor(gameObject: GameObject, column: number, row: number) {
+  private constructor(gameObject: GameObject, onOfLocation: IMapPosition) {
     super(gameObject);
-    this.column = column;
-    this.row = row;
+    this.onOfLocation = onOfLocation;
   }
 
   public override update(): void {
+    const { column, row } = MapHelper.screenToMap(this.gameObject.position.x, this.gameObject.position.y);
     const onOf = this.tileMap
-      .getObjectsAt(this.column, this.row)
+      .getObjectsAt(this.onOfLocation.column, this.onOfLocation.row)
       .find((o) => o.getScript(OnOffScript) != null)
       ?.getScript(OnOffScript);
-    if (onOf) {
-      const { column, row } = MapHelper.screenToMap(this.gameObject.position.x, this.gameObject.position.y);
-      if (this.prevState !== onOf.on) {
-        if (onOf.on) {
-          this.tileMap.setTile(column, row, TileType.Empty);
-          this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({
-            direction: BitmapAnimationDirection.Forward,
-          });
-        } else {
-          this.tileMap.setTile(column, row, TileType.GoldenGates);
-          this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({
-            direction: BitmapAnimationDirection.Backward,
-          });
-        }
+
+    const state = onOf?.on ?? false;
+
+    if (this.prevState !== state) {
+      if (state) {
+        this.tileMap.setTile(column, row, TileType.Empty);
+        this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({
+          direction: BitmapAnimationDirection.Forward,
+        });
+      } else {
+        this.tileMap.setTile(column, row, TileType.GoldenGates);
+        this.gameObject.getScript(BitmapSpriteRenderer)?.setAnimation({
+          direction: BitmapAnimationDirection.Backward,
+        });
       }
-      this.prevState = onOf.on;
     }
+    this.prevState = state;
   }
 
   private get tileMap(): TileMap {

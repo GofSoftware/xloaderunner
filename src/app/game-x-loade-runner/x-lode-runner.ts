@@ -25,6 +25,8 @@ import { STAND_ANIMATION } from '../engine/scripts/animations';
 import { ENEMY_SPEED_SLOWDOWN, EnemyScript } from './scripts/enemy-script';
 import { createTileGameObject } from './tile-bitmap-factory';
 import { PortalManagerScript } from './scripts/portal-manager-script';
+import { IMapPosition } from './scripts/tile-map/i-map-position';
+import { IVector2 } from '../engine/math/i-vector-2';
 
 export class XLodeRunner implements ILevel {
   public static create(): XLodeRunner {
@@ -58,12 +60,8 @@ export class XLodeRunner implements ILevel {
       .map(({ column, row, type }) => createTileGameObject(engineState, column, row, type))
       .filter((gameObject): gameObject is GameObject => gameObject !== undefined);
 
-    const startTile = tileMap.getTiles().find((tile) => tile.type === TileType.PlayerStart);
-    const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : { column: 20, row: 5 };
-    const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
-    // PlayerStart has no bitmap and never renders anything, but the tile grid still remembers it as
-    // non-Empty - clear it so BuilderScript can build on the spawn cell once the player has moved off it.
-    tileMap.setTile(spawnCell.column, spawnCell.row, TileType.Empty);
+    const playerPosition = this.getPositionAndClear(tileMap, TileType.PlayerStart);
+    const enemyPosition = this.getPositionAndClear(tileMap, TileType.EnemyStart);
 
     [
       mapGameObject,
@@ -85,15 +83,15 @@ export class XLodeRunner implements ILevel {
         (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),
       ]),
 
-      GameObject.create('Player', engineState, spawnPosition, [
+      GameObject.create('Player', engineState, playerPosition.screenPosition, [
         (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
         // Reads the player's cell before StateScript/ObjectPosition can move it this same frame - otherwise,
         // when the same arrow key both moves the player and specifies a build direction, the build target
         // would be computed from the cell the player is moving into rather than the cell it started this frame in.
         (gameObject: GameObject) => BuilderScript.create(gameObject, HUD_LAYER),
         (gameObject: GameObject) => BlastedBrickScript.create(gameObject),
-        (gameObject: GameObject) => StateScript.create(gameObject, spawnCell),
-        (gameObject: GameObject) => ObjectPosition.create(gameObject, spawnCell.column, spawnCell.row),
+        (gameObject: GameObject) => StateScript.create(gameObject, playerPosition.mapPosition),
+        (gameObject: GameObject) => ObjectPosition.create(gameObject, playerPosition.mapPosition.column, playerPosition.mapPosition.row),
         (gameObject: GameObject) => GoldScript.create(gameObject, FOREGROUND_LAYER),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
@@ -103,10 +101,10 @@ export class XLodeRunner implements ILevel {
           ),
       ]),
 
-      GameObject.create('Enemy', engineState, MapHelper.mapToScreen(20, 1), [
+      GameObject.create('Enemy', engineState, enemyPosition.screenPosition, [
         (gameObject: GameObject) => EnemyScript.create(gameObject),
-        (gameObject: GameObject) => StateScript.create(gameObject, { column: 20, row: 1 }, 1 / ENEMY_SPEED_SLOWDOWN, true),
-        (gameObject: GameObject) => ObjectPosition.create(gameObject, 20, 1),
+        (gameObject: GameObject) => StateScript.create(gameObject, enemyPosition.mapPosition, 1 / ENEMY_SPEED_SLOWDOWN, true),
+        (gameObject: GameObject) => ObjectPosition.create(gameObject, enemyPosition.mapPosition.column, enemyPosition.mapPosition.row),
         (gameObject: GameObject) =>
           BitmapSpriteRenderer.create(
             gameObject,
@@ -134,5 +132,19 @@ export class XLodeRunner implements ILevel {
       `Screen coords: x ${screenX} y ${screenY} Map coords: column ${column} row ${row}; Tile: ${tile}`,
       mapGameObject.getObjectsAt(column, row),
     );
+  }
+
+  private getPositionAndClear(
+    tileMap: TileMap,
+    type: TileType,
+    defaultPosition: IMapPosition = { column: 0, row: 0 },
+  ): { mapPosition: IMapPosition; screenPosition: IVector2 } {
+    const startTile = tileMap.getTiles().find((tile) => tile.type === type);
+    const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : defaultPosition;
+    const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
+    // PlayerStart/EnemyStart have no bitmap and never renders anything, but the tile grid still remembers it as
+    // non-Empty - clear it, so BuilderScript can build on the spawn cell once the player has moved off it.
+    tileMap.setTile(spawnCell.column, spawnCell.row, TileType.Empty);
+    return { mapPosition: spawnCell, screenPosition: spawnPosition };
   }
 }

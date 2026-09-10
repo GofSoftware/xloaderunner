@@ -9,6 +9,8 @@ import { PortalScript } from './portal/portal-script';
 import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
 import { OBJECT_PORTAL_01, OBJECT_PORTAL_PROJECTILE } from '../data/sprites';
 import { BACKGROUND_LAYER, Bk } from '../../engine/screen/screen.constants';
+import { StateScript } from './state-script';
+import { BeamScript } from './beam-script';
 
 export const BLUE_PORTAL_GAME_OBJECT_NAME = 'BluePortal';
 export const ORANGE_PORTAL_GAME_OBJECT_NAME = 'OrangePortal';
@@ -51,17 +53,14 @@ export class PortalManagerScript extends BaseScript {
   }
 
   private fireProjectile(portalType: PortalType) {
-
     const projectileGameObject = this.spawnProjectile(this.playerPosition.column, this.playerPosition.row, portalType);
 
-    this.projectiles.push(
-      {
-        portalType,
-        objectPosition: projectileGameObject.getScript(ObjectPosition)!,
-        direction: this.playerState.direction,
-        gameObject: projectileGameObject
-      }
-    );
+    this.projectiles.push({
+      portalType,
+      objectPosition: projectileGameObject.getScript(ObjectPosition)!,
+      direction: this.playerState.direction,
+      gameObject: projectileGameObject,
+    });
   }
 
   private processProjectiles() {
@@ -73,12 +72,17 @@ export class PortalManagerScript extends BaseScript {
       const { column, row } = shiftByDirection(projectile.objectPosition.column, projectile.objectPosition.row, projectile.direction);
       const tile = this.tileMap.getTile(column, row);
 
-      if (tile === TileType.Empty) {
-        projectile.objectPosition.moveTo(column, row, PORTAL_SPEED);
+      if (this.isBlocker(tile, column, row)) {
+        this.removeProjectile(projectile);
         return;
       }
 
       if (tile === TileType.Brick) {
+        if (!this.isEmpty(projectile.objectPosition.column, projectile.objectPosition.row)) {
+          this.removeProjectile(projectile);
+          return;
+        }
+
         if (projectile.portalType === PortalType.Blue) {
           this.gameObject.engineState.removeGameObject(this.bluePortal!);
           this.bluePortal = this.spawnPortal(projectile.objectPosition.column, projectile.objectPosition.row, PortalType.Blue);
@@ -86,9 +90,10 @@ export class PortalManagerScript extends BaseScript {
           this.gameObject.engineState.removeGameObject(this.orangePortal!);
           this.orangePortal = this.spawnPortal(projectile.objectPosition.column, projectile.objectPosition.row, PortalType.Orange);
         }
-      }
 
-      this.removeProjectile(projectile);
+        this.removeProjectile(projectile);
+      }
+      projectile.objectPosition.moveTo(column, row, PORTAL_SPEED);
     }
   }
 
@@ -100,6 +105,9 @@ export class PortalManagerScript extends BaseScript {
       [
         (gameObject: GameObject) => {
           return PortalScript.create(gameObject, portalType);
+        },
+        (gameObject: GameObject) => {
+          return ObjectPosition.create(gameObject, column, row);
         },
         (gameObject: GameObject) => {
           return BitmapRenderer.create(gameObject, OBJECT_PORTAL_01, BACKGROUND_LAYER, [
@@ -124,7 +132,7 @@ export class PortalManagerScript extends BaseScript {
             (color) => (color !== Bk ? color : portalType === PortalType.Blue ? 0x0000ffff : 0xff0000ff),
           ]);
         },
-      ]
+      ],
     );
     this.gameObject.engineState.addGameObject(gameObject);
     return gameObject;
@@ -136,5 +144,41 @@ export class PortalManagerScript extends BaseScript {
     if (pIndex > -1) {
       this.projectiles.splice(pIndex, 1);
     }
+  }
+
+  private isBlocker(tile: TileType, column: number, row: number): boolean {
+    const gameObjects = this.tileMap.getObjectsAt(column, row);
+    return (
+      !this.tileMap.isInBounds(column, row) ||
+      tile === TileType.GoldenGates ||
+      gameObjects.some((gameObject) => gameObject.getScript(StateScript) != null)
+    );
+  }
+
+  private isEmpty(column: number, row: number): boolean {
+    const gameObjects = this.tileMap.getObjectsAt(column, row).filter((gameObject) => {
+      return (
+        gameObject.name !== ORANGE_PORTAL_PROJECTILE_GAME_OBJECT_NAME &&
+        gameObject.name !== BLUE_PORTAL_PROJECTILE_GAME_OBJECT_NAME &&
+        gameObject.getScript(BeamScript) == null
+      );
+    });
+    return this.tileMap.getTile(column, row) === TileType.Empty && gameObjects.length === 0 && !this.isSamePortalPlace(column, row);
+  }
+
+  private isSamePortalPlace(column: number, row: number): boolean {
+    if (this.bluePortal != null) {
+      const pos = this.bluePortal.getScript(ObjectPosition);
+      if (pos?.column === column && pos?.row === row) {
+        return true;
+      }
+    }
+    if (this.orangePortal != null) {
+      const pos = this.orangePortal.getScript(ObjectPosition);
+      if (pos?.column === column && pos?.row === row) {
+        return true;
+      }
+    }
+    return false;
   }
 }

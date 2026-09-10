@@ -162,7 +162,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
   }
 
   if (type === TileType.GoldenGates) {
-    scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, 5, 12));
+    scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, { column: 22, row: 15 }));
   }
 
   scriptFactories.push((gameObject) =>

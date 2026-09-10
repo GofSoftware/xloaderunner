@@ -26,6 +26,7 @@ import { ObjectPosition } from './object-position';
 import { TileType } from './tile-map/tile-map-types';
 import { PlayerState } from './state/state-types';
 import { Direction } from './direction';
+import { IMapPosition } from './tile-map/i-map-position';
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
@@ -67,7 +68,7 @@ const TURN_STATE_BY_DIRECTION: Record<Direction, PlayerState> = {
 export class StateScript extends Script {
   public static create(
     gameObject: GameObject,
-    spawnCell: { column: number; row: number },
+    spawnCell: IMapPosition,
     runSpeedMultiplier: number = 1,
     getsTrappedInHoles: boolean = false,
   ): StateScript {
@@ -75,7 +76,7 @@ export class StateScript extends Script {
   }
 
   private readonly stepSpeed: Record<PlayerState, number>;
-  private readonly spawnCell: { column: number; row: number };
+  private readonly spawnCell: IMapPosition;
   // Whether landing on a blasted-open brick pins this character in place (Trapped) instead of
   // falling straight through it - used to trap Enemy in a dug hole, but not the Player.
   private readonly getsTrappedInHoles: boolean;

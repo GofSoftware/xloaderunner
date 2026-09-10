@@ -96,7 +96,7 @@ export class TileMap extends Script {
     return tiles;
   }
 
-  private isInBounds(column: number, row: number): boolean {
+  public isInBounds(column: number, row: number): boolean {
     return column >= 0 && column < this.columns && row >= 0 && row < this.rows;
   }
 }

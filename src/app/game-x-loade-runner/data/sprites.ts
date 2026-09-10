@@ -60,9 +60,9 @@ export const MAN_STANDING_LOOK_LEFT_FRAME_1: number[][] = [
   [__, __, __, Wt, Wt, __, __, __],
   [__, __, __, Bl, Wt, __, __, __],
   [__, __, __, Wt, Wt, __, __, __],
-  [__, __, Wt, Lg, Lg, Wt, __, __],
-  [__, Wt, __, Lg, Lg, __, Wt, __],
-  [__, __, __, Lg, Lg, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Wt, __, Wt, Wt, __, Wt, __],
+  [__, __, __, Wt, Wt, __, __, __],
   [__, __, Wt, __, __, Wt, __, __],
   [__, __, Wt, __, __, Wt, __, __],
 ];
@@ -82,9 +82,9 @@ export const MAN_STANDING_LOOK_RIGHT_FRAME_1: number[][] = [
   [__, __, __, Wt, Wt, __, __, __],
   [__, __, __, Wt, Bl, __, __, __],
   [__, __, __, Wt, Wt, __, __, __],
-  [__, __, Wt, Lg, Lg, Wt, __, __],
-  [__, Wt, __, Lg, Lg, __, Wt, __],
-  [__, __, __, Lg, Lg, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Wt, __, Wt, Wt, __, Wt, __],
+  [__, __, __, Wt, Wt, __, __, __],
   [__, __, Wt, __, __, Wt, __, __],
   [__, __, Wt, __, __, Wt, __, __],
 ];
@@ -912,7 +912,6 @@ export const OBJECT_PORTAL_PROJECTILE: number[][] = [
   [__, __, __, __, __, __, __, __],
   [__, __, __, __, __, __, __, __],
 ];
-
 
 export const OBJECT_PORTAL_01: number[][] = [
   [__, __, __, Yl, Yl, __, __, __],

@@ -35,7 +35,7 @@ export class SwitchScript extends Script {
 
   public override update(): void {
     if (!SwitchScript.isBeamSwitch(this.tile)) {
-      this.beamIsOver = true;
+      this.beamIsOver = false;
       return;
     }
     const { column, row } = MapHelper.screenToMap(this.gameObject.position.x, this.gameObject.position.y);
