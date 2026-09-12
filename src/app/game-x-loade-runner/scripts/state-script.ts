@@ -27,6 +27,7 @@ import { TileType } from './tile-map/tile-map-types';
 import { PlayerState } from './state/state-types';
 import { Direction } from './direction';
 import { IMapPosition } from './tile-map/i-map-position';
+import { PortalManagerScript } from './portal-manager-script';
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
@@ -139,6 +140,9 @@ export class StateScript extends Script {
   private get tileMap(): TileMap {
     return this.gameObject.engineState.getGameObjectByName('Map')!.getScript(TileMap)!;
   }
+  private get portalManager(): PortalManagerScript {
+    return this.gameObject.engineState.getGameObjectByName('PortalManager')!.getScript(PortalManagerScript)!;
+  }
 
   private get lives(): LivesScript {
     return this.gameObject.engineState.getGameObjectByName('Lives')!.getScript(LivesScript)!;
@@ -209,6 +213,14 @@ export class StateScript extends Script {
 
     const onStairs = this.isOnStairs();
     const onCrossbar = this.isOnCrossbar();
+    const onPortal = this.portalManager.isOnPortal(column, row);
+
+    if (onPortal) {
+      const state = this.calcPortalState();
+      if (state != null) {
+        return state;
+      }
+    }
 
     if (!onStairs && !onCrossbar && !this.isGroundedBelow()) {
       this.hesitation = undefined;
@@ -476,5 +488,25 @@ export class StateScript extends Script {
       ],
     );
     this.gameObject.engineState.addGameObject(exclamation);
+  }
+
+  private calcPortalState(): PlayerState | null {
+    const calculatedPos = this.portalManager.calcTeleportation(this.direction, this.objectPosition);
+    if (calculatedPos == null) {
+      return null;
+    }
+    this.objectPosition.teleportTo(calculatedPos.position.column, calculatedPos.position.row);
+    switch (calculatedPos.direction) {
+      case Direction.Up:
+        return PlayerState.MoveUp;
+      case Direction.Down:
+        return PlayerState.MoveDown;
+      case Direction.Left:
+        return PlayerState.MoveLeft;
+      case Direction.Right:
+        return PlayerState.MoveRight;
+      default:
+        throw new Error(`calcPortalState: unknown Direction: ${calculatedPos.direction}`);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { GameObject } from '../../engine/game-object/game-object';
 import { PortalType } from './portal/portal-type';
 import { ObjectPosition } from './object-position';
-import { Direction, shiftByDirection } from './direction';
+import { Direction, DIRECTION_SHIFT, shiftByDirection } from './direction';
 import { BaseScript } from './base-script';
 import { TileType } from './tile-map/tile-map-types';
 import { MapHelper } from '../helpers/map.helper';
@@ -9,8 +9,9 @@ import { PortalScript } from './portal/portal-script';
 import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
 import { OBJECT_PORTAL_01, OBJECT_PORTAL_PROJECTILE } from '../data/sprites';
 import { BACKGROUND_LAYER, Bk } from '../../engine/screen/screen.constants';
-import { StateScript } from './state-script';
 import { BeamScript } from './beam-script';
+import { RunnerScript } from './runner-script';
+import { IMapPosition } from './tile-map/i-map-position';
 
 export const BLUE_PORTAL_GAME_OBJECT_NAME = 'BluePortal';
 export const ORANGE_PORTAL_GAME_OBJECT_NAME = 'OrangePortal';
@@ -52,6 +53,45 @@ export class PortalManagerScript extends BaseScript {
     this.processProjectiles();
   }
 
+  public isOnPortal(column: number, row: number): boolean {
+    if (this.bluePortal != null) {
+      const pos = this.bluePortal.getScript(ObjectPosition);
+      if (pos?.column === column && pos?.row === row) {
+        return true;
+      }
+    }
+    if (this.orangePortal != null) {
+      const pos = this.orangePortal.getScript(ObjectPosition);
+      if (pos?.column === column && pos?.row === row) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public calcTeleportation(direction: Direction, position: IMapPosition): { direction: Direction, position: IMapPosition } | null {
+    const { column, row } = position;
+    if (!this.isOnPortal(column, row)) {
+      return null;
+    }
+    const destinationPosition = this.getDestinationPortalPosition(column, row);
+    if (destinationPosition == null) {
+      return null;
+    }
+
+    const directions = [direction, Direction.Left, Direction.Right, Direction.Up, Direction.Down];
+    for (const direction of directions) {
+      const shift = DIRECTION_SHIFT.get(direction)!;
+      const shiftedPosition = { column: destinationPosition.column + shift.shiftColumn, row: destinationPosition.row + shift.shiftRow };
+      const destTile = this.tileMap.getTile(shiftedPosition.column, shiftedPosition.row);
+      if (destTile !== TileType.Brick && destTile !== TileType.Lava) {
+        return { direction, position: destinationPosition };
+      }
+    }
+
+    return null;
+  }
+
   private fireProjectile(portalType: PortalType) {
     const projectileGameObject = this.spawnProjectile(this.playerPosition.column, this.playerPosition.row, portalType);
 
@@ -77,7 +117,7 @@ export class PortalManagerScript extends BaseScript {
         return;
       }
 
-      if (tile === TileType.Brick) {
+      if (this.isPortableSurface(tile)) {
         if (!this.isEmpty(projectile.objectPosition.column, projectile.objectPosition.row)) {
           this.removeProjectile(projectile);
           return;
@@ -151,8 +191,27 @@ export class PortalManagerScript extends BaseScript {
     return (
       !this.tileMap.isInBounds(column, row) ||
       tile === TileType.GoldenGates ||
-      gameObjects.some((gameObject) => gameObject.getScript(StateScript) != null)
+      gameObjects.some((gameObject) => gameObject.getScript(RunnerScript) != null)
     );
+  }
+
+  private getDestinationPortalPosition(currentColumn: number, currentRow: number): IMapPosition | null {
+    const {column: blueColumn, row: blueRow} = this.bluePortal?.getScript(ObjectPosition) ?? {column: -1, row: -1};
+    const {column: orangeColumn, row: orangeRow} = this.orangePortal?.getScript(ObjectPosition) ?? {column: -1, row: -1};
+
+    let destinationPosition: IMapPosition = {column: -1, row: -1};
+
+    if (currentColumn === blueColumn && currentRow === blueRow) {
+      destinationPosition = {column: orangeColumn, row: orangeRow};
+    } else if (currentColumn === orangeColumn && orangeRow === orangeRow){
+      destinationPosition = {column: blueColumn, row: blueRow};
+    }
+
+    if (destinationPosition.column !== -1) {
+      return destinationPosition;
+    }
+
+    return null;
   }
 
   private isEmpty(column: number, row: number): boolean {
@@ -163,22 +222,10 @@ export class PortalManagerScript extends BaseScript {
         gameObject.getScript(BeamScript) == null
       );
     });
-    return this.tileMap.getTile(column, row) === TileType.Empty && gameObjects.length === 0 && !this.isSamePortalPlace(column, row);
+    return this.tileMap.getTile(column, row) === TileType.Empty && gameObjects.length === 0 && !this.isOnPortal(column, row);
   }
 
-  private isSamePortalPlace(column: number, row: number): boolean {
-    if (this.bluePortal != null) {
-      const pos = this.bluePortal.getScript(ObjectPosition);
-      if (pos?.column === column && pos?.row === row) {
-        return true;
-      }
-    }
-    if (this.orangePortal != null) {
-      const pos = this.orangePortal.getScript(ObjectPosition);
-      if (pos?.column === column && pos?.row === row) {
-        return true;
-      }
-    }
-    return false;
+  private isPortableSurface(tile: TileType): boolean {
+    return tile === TileType.Brick || tile === TileType.Stairs;
   }
 }

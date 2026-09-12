@@ -27,6 +27,7 @@ import { createTileGameObject } from './tile-bitmap-factory';
 import { PortalManagerScript } from './scripts/portal-manager-script';
 import { IMapPosition } from './scripts/tile-map/i-map-position';
 import { IVector2 } from '../engine/math/i-vector-2';
+import { RunnerScript } from './scripts/runner-script';
 
 export class XLodeRunner implements ILevel {
   public static create(): XLodeRunner {
@@ -85,6 +86,7 @@ export class XLodeRunner implements ILevel {
 
       GameObject.create('Player', engineState, playerPosition.screenPosition, [
         (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
+        (gameObject: GameObject) => RunnerScript.create(gameObject),
         // Reads the player's cell before StateScript/ObjectPosition can move it this same frame - otherwise,
         // when the same arrow key both moves the player and specifies a build direction, the build target
         // would be computed from the cell the player is moving into rather than the cell it started this frame in.
@@ -103,6 +105,7 @@ export class XLodeRunner implements ILevel {
 
       GameObject.create('Enemy', engineState, enemyPosition.screenPosition, [
         (gameObject: GameObject) => EnemyScript.create(gameObject),
+        (gameObject: GameObject) => RunnerScript.create(gameObject),
         (gameObject: GameObject) => StateScript.create(gameObject, enemyPosition.mapPosition, 1 / ENEMY_SPEED_SLOWDOWN, true),
         (gameObject: GameObject) => ObjectPosition.create(gameObject, enemyPosition.mapPosition.column, enemyPosition.mapPosition.row),
         (gameObject: GameObject) =>

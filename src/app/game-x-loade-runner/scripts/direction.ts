@@ -5,7 +5,7 @@ export enum Direction {
   Down = 'Down',
 }
 
-const DIRECTION_SHIFT = new Map([
+export const DIRECTION_SHIFT: Readonly<Map<Direction, { shiftColumn: number, shiftRow: number }>> = new Map([
   [Direction.Left, { shiftColumn: -1, shiftRow: 0 }],
   [Direction.Right, { shiftColumn: 1, shiftRow: 0 }],
   [Direction.Up, { shiftColumn: 0, shiftRow: -1 }],
