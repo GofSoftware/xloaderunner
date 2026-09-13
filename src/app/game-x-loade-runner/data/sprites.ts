@@ -383,7 +383,7 @@ export const OBJECT_LAVA_1: number[][] = [
   [Ol, Ol, Ol, Or, Ol, Or, Or, Ol],
   [Ol, Ol, Or, Or, Ol, Or, Ol, Or],
   [Ol, Or, Ol, Ol, Or, Ol, Ol, Ol],
-  [Ol, Or, Ol, Ol, Ol, Or, Ol, Ol],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_2: number[][] = [
@@ -394,7 +394,7 @@ export const OBJECT_LAVA_2: number[][] = [
   [Ol, Ol, Or, Ol, Or, Or, Ol, Ol],
   [Ol, Or, Or, Ol, Or, Ol, Or, Ol],
   [Or, Ol, Ol, Or, Ol, Ol, Ol, Ol],
-  [Or, Ol, Ol, Ol, Or, Ol, Ol, Ol],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_3: number[][] = [
@@ -405,7 +405,7 @@ export const OBJECT_LAVA_3: number[][] = [
   [Ol, Or, Ol, Or, Or, Ol, Ol, Ol],
   [Or, Or, Ol, Or, Ol, Or, Ol, Ol],
   [Ol, Ol, Or, Ol, Ol, Ol, Ol, Or],
-  [Ol, Ol, Ol, Or, Ol, Ol, Ol, Or],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_4: number[][] = [
@@ -416,7 +416,7 @@ export const OBJECT_LAVA_4: number[][] = [
   [Or, Ol, Or, Or, Ol, Ol, Ol, Ol],
   [Or, Ol, Or, Ol, Or, Ol, Ol, Or],
   [Ol, Or, Ol, Ol, Ol, Ol, Or, Ol],
-  [Ol, Ol, Or, Ol, Ol, Ol, Or, Ol],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_5: number[][] = [
@@ -427,7 +427,7 @@ export const OBJECT_LAVA_5: number[][] = [
   [Ol, Or, Or, Ol, Ol, Ol, Ol, Or],
   [Ol, Or, Ol, Or, Ol, Ol, Or, Or],
   [Or, Ol, Ol, Ol, Ol, Or, Ol, Ol],
-  [Ol, Or, Ol, Ol, Ol, Or, Ol, Ol],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_6: number[][] = [
@@ -438,7 +438,7 @@ export const OBJECT_LAVA_6: number[][] = [
   [Or, Or, Ol, Ol, Ol, Ol, Or, Ol],
   [Or, Ol, Or, Ol, Ol, Or, Or, Ol],
   [Ol, Ol, Ol, Ol, Or, Ol, Ol, Or],
-  [Or, Ol, Ol, Ol, Or, Ol, Ol, Ol],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_7: number[][] = [
@@ -449,7 +449,7 @@ export const OBJECT_LAVA_7: number[][] = [
   [Or, Ol, Ol, Ol, Ol, Or, Ol, Or],
   [Ol, Or, Ol, Ol, Or, Or, Ol, Or],
   [Ol, Ol, Ol, Or, Ol, Ol, Or, Ol],
-  [Ol, Ol, Ol, Or, Ol, Ol, Ol, Or],
+  [__, __, __, __, __, __, __, __],
 ];
 
 export const OBJECT_LAVA_8: number[][] = [
@@ -460,7 +460,7 @@ export const OBJECT_LAVA_8: number[][] = [
   [Ol, Ol, Ol, Ol, Or, Ol, Or, Or],
   [Or, Ol, Ol, Or, Or, Ol, Or, Ol],
   [Ol, Ol, Or, Ol, Ol, Or, Ol, Ol],
-  [Ol, Ol, Or, Ol, Ol, Ol, Or, Ol],
+  [__, __, __, __, __, __, __, __],
 ];
 export const OBJECT_QUESTION: number[][] = [
   [__, __, Ol, __, Ol, __, __, __],

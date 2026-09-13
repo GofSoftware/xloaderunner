@@ -14,6 +14,7 @@ import { BeamScript } from '../beam-script';
 import { IBeamSegmentDescriptor } from './i-beam-segment-descriptor';
 
 import { Direction } from '../direction';
+import { PortalManagerScript } from '../portal-manager-script';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Left]: { column: -1, row: 0 },
@@ -39,6 +40,7 @@ export class EmitterManager extends Script {
   private startedAt = 0;
   private stepsPassed = 0;
   private _id = 0;
+  private _portalManager: PortalManagerScript | null = null;
 
   private constructor(gameObject: GameObject, layer: number) {
     super(gameObject);
@@ -47,6 +49,11 @@ export class EmitterManager extends Script {
 
   private get tileMap(): TileMap {
     return this.gameObject.engineState.getGameObjectByName('Map')!.getScript(TileMap)!;
+  }
+
+  private get portalManager(): PortalManagerScript {
+    return this._portalManager ??
+      (this._portalManager = this.gameObject.engineState.getGameObjectByName('PortalManager')!.getScript(PortalManagerScript)!);
   }
 
   public register(emitter: EmitterScript): void {
@@ -151,6 +158,8 @@ export class EmitterManager extends Script {
       }
 
       EmitterManager.step(segment);
+
+      this.processPortal(segment);
 
       if (
         this.isBlocked(segment.column, segment.row) ||
@@ -280,5 +289,17 @@ export class EmitterManager extends Script {
     if (newIndex >= 0) {
       newSegments.splice(newIndex, 1);
     }
+  }
+
+  private processPortal(segment: IBeamSegmentDescriptor): void {
+    if (!this.portalManager.isOnPortal(segment.column, segment.row)) {
+      return;
+    }
+    const calculatedPos = this.portalManager.calcTeleportation(segment.direction, { column: segment.column, row: segment.row });
+    if (calculatedPos == null) {
+      return;
+    }
+    segment.column = calculatedPos.position.column;
+    segment.row = calculatedPos.position.row;
   }
 }
