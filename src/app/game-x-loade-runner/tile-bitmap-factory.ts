@@ -36,6 +36,14 @@ import {
   OBJECT_GOLDEN_GATES_05,
   OBJECT_GOLDEN_GATES_07,
   OBJECT_GOLDEN_GATES_08,
+  PLAYER_SPAWN_GATE_01,
+  PLAYER_SPAWN_GATE_02,
+  PLAYER_SPAWN_GATE_03,
+  PLAYER_SPAWN_GATE_04,
+  PLAYER_SPAWN_GATE_06,
+  PLAYER_SPAWN_GATE_07,
+  PLAYER_SPAWN_GATE_05,
+  PLAYER_SPAWN_GATE_08,
 } from './data/sprites';
 import { GameObject } from '../engine/game-object/game-object';
 import { Script } from '../engine/game-object/script';
@@ -55,6 +63,7 @@ import { SwitchScript } from './scripts/switch-script';
 import { ParticleScript } from '../engine/scripts/particle-script';
 import { GoldenGateLock } from './scripts/golden-gate-lock';
 import { OnOffScript } from './scripts/on-off-script';
+import { BitmapAnimationDirection } from '../engine/scripts/i-bitmap-animation-description';
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
@@ -100,8 +109,41 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
       ],
       framePerSecond: 10,
       oneTime: true,
-    },
+    }
   },
+  [TileType.PlayerStart]: {
+    bitmapType: TileBitmapType.Animated,
+    animatedBitmap: {
+      bitmap: [
+        PLAYER_SPAWN_GATE_01,
+        PLAYER_SPAWN_GATE_02,
+        PLAYER_SPAWN_GATE_03,
+        PLAYER_SPAWN_GATE_04,
+        PLAYER_SPAWN_GATE_05,
+        PLAYER_SPAWN_GATE_06,
+        PLAYER_SPAWN_GATE_07,
+        PLAYER_SPAWN_GATE_08,
+      ],
+      framePerSecond: 10
+    }
+  },
+  [TileType.PlayerFinish]: {
+    bitmapType: TileBitmapType.Animated,
+    animatedBitmap: {
+      bitmap: [
+        PLAYER_SPAWN_GATE_01,
+        PLAYER_SPAWN_GATE_02,
+        PLAYER_SPAWN_GATE_03,
+        PLAYER_SPAWN_GATE_04,
+        PLAYER_SPAWN_GATE_05,
+        PLAYER_SPAWN_GATE_06,
+        PLAYER_SPAWN_GATE_07,
+        PLAYER_SPAWN_GATE_08,
+      ],
+      framePerSecond: 10,
+      direction: BitmapAnimationDirection.Backward
+    }
+  }
 };
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
@@ -174,6 +216,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
             bitmap: tileBitmap.animatedBitmap!.bitmap,
             framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
             oneTime: tileBitmap.animatedBitmap!.oneTime,
+            direction:  tileBitmap.animatedBitmap!.direction
           },
           layer,
         ),

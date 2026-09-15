@@ -1,6 +1,93 @@
-import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk } from '../../engine/screen/screen.constants';
+import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk, Dg, Sg } from '../../engine/screen/screen.constants';
 
-// 8x8 sprite frames for a standing man tapping one foot: rest -> foot lifts -> foot stamps down.
+export const PLAYER_SPAWN_GATE_01: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_02: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_03: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_04: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_05: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_06: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, Wt, Wt, Wt, Wt, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_07: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
+export const PLAYER_SPAWN_GATE_08: number[][] = [
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, __, __, __, __, __, __, __],
+  [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
+];
+
 export const MAN_MOVING_LEFT_FRAME_1: number[][] = [
   [__, __, Wt, Wt, __, __, __, __],
   [__, __, Bl, Wt, __, __, __, __],

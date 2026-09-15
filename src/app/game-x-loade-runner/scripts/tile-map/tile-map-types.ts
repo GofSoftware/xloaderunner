@@ -14,6 +14,7 @@ export enum TileType {
   Crossbar = 'Crossbar',
   Lava = 'Lava',
   PlayerStart = 'PlayerStart',
+  PlayerFinish = 'PlayerFinish',
   EnemyStart = 'EnemyStart',
   Gold = 'Gold',
   // A fixed beam emitter - color and facing direction are both baked into the tile type so a level

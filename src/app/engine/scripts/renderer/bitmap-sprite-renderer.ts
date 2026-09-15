@@ -52,14 +52,15 @@ export class BitmapSpriteRenderer extends Script {
     this.spriteIndexTime += (this.direction === BitmapAnimationDirection.Forward ? 1 : -1) *
       this.framePerSecond * this.gameObject.engineState.deltaTime;
 
+    const fraction = Math.abs(this.spriteIndexTime) - Math.floor(Math.abs(this.spriteIndexTime) / this.bitmaps.length) * this.bitmaps.length;
     if (this.spriteIndexTime < 0) {
       this.spriteIndexTime = this.oneTime
         ? 0
-        : this.spriteIndexTime - Math.floor(Math.abs(this.spriteIndexTime) / this.bitmaps.length) * this.bitmaps.length;
+        : this.bitmaps.length - fraction;
     } else if (this.spriteIndexTime >= this.bitmaps.length) {
       this.spriteIndexTime = this.oneTime
         ? this.bitmaps.length - 1
-        : this.spriteIndexTime - Math.floor(this.spriteIndexTime / this.bitmaps.length) * this.bitmaps.length;
+        : fraction;
     }
 
     this.gameObject.engineState.screenBuffer.copy(
