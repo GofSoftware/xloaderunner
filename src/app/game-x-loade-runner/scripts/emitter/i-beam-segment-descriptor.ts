@@ -10,6 +10,7 @@ export interface IBeamSegmentDescriptor {
   prevRow: number;
   color: EmitterColor;
   direction: Direction;
+  prevDirection: Direction | null;
   afterCollision: boolean;
   overDirectionChanger: boolean;
 }

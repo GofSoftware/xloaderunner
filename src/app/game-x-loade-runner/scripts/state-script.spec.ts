@@ -13,6 +13,7 @@ import { IEngineState } from '../../engine/i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../data/sprites';
 import { LivesScript } from './lives-script';
 import { Direction } from './direction';
+import { PortalManagerScript } from './portal-manager-script';
 
 describe('StateScript', () => {
   let engineState: IEngineState;
@@ -67,6 +68,7 @@ describe('StateScript', () => {
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      renameGameObject: () => {},
     };
 
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
@@ -77,6 +79,12 @@ describe('StateScript', () => {
     const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
     livesScript = livesGameObject.getScript(LivesScript)!;
     gameObjectsByName.set('Lives', livesGameObject);
+
+    const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [
+      (go) => PortalManagerScript.create(go),
+    ]);
+    portalManagerGameObject.start();
+    gameObjectsByName.set('PortalManager', portalManagerGameObject);
 
     spawnCell = { column: 1, row: 2 };
     player = createPlayer({ x: 8, y: 16 });

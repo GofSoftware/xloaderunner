@@ -109,7 +109,7 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
       ],
       framePerSecond: 10,
       oneTime: true,
-    }
+    },
   },
   [TileType.PlayerStart]: {
     bitmapType: TileBitmapType.Animated,
@@ -124,8 +124,8 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
         PLAYER_SPAWN_GATE_07,
         PLAYER_SPAWN_GATE_08,
       ],
-      framePerSecond: 10
-    }
+      framePerSecond: 10,
+    },
   },
   [TileType.PlayerFinish]: {
     bitmapType: TileBitmapType.Animated,
@@ -141,10 +141,14 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
         PLAYER_SPAWN_GATE_08,
       ],
       framePerSecond: 10,
-      direction: BitmapAnimationDirection.Backward
-    }
-  }
+      direction: BitmapAnimationDirection.Backward,
+    },
+  },
 };
+
+export function creatTileGameObjectName(type: TileType, column: number, row: number): string {
+  return `Tile-${type}-${column}-${row}`;
+}
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
 export function createTileGameObject(engineState: IEngineState, column: number, row: number, type: TileType): GameObject | undefined {
@@ -155,7 +159,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
 
   const layer = tileBitmap.layer ?? MIDDLE_TILE_LAYER;
   const scriptFactories: ((gameObject: GameObject) => Script)[] = [(gameObject) => ObjectPosition.create(gameObject, column, row)];
-  const name = `Tile-${type}-${column}-${row}`;
+  const name = creatTileGameObjectName(type, column, row);
 
   if (type === TileType.Gold) {
     scriptFactories.push((gameObject) => GoldItem.create(gameObject));
@@ -216,7 +220,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
             bitmap: tileBitmap.animatedBitmap!.bitmap,
             framePerSecond: tileBitmap.animatedBitmap!.framePerSecond,
             oneTime: tileBitmap.animatedBitmap!.oneTime,
-            direction:  tileBitmap.animatedBitmap!.direction
+            direction: tileBitmap.animatedBitmap!.direction,
           },
           layer,
         ),

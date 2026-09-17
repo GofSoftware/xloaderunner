@@ -5,7 +5,7 @@ import { MapHelper } from '../../helpers/map.helper';
 import { ObjectPosition } from '../object-position';
 import { StateScript } from '../state-script';
 import { BitmapRenderer } from '../../../engine/scripts/renderer/bitmap-renderer';
-import { TILE_BITMAPS } from '../../tile-bitmap-factory';
+import { creatTileGameObjectName, TILE_BITMAPS } from '../../tile-bitmap-factory';
 import { MirrorDirection, ORDERED_MIRROR_TILES } from './mirror-types';
 
 import { Direction } from '../direction';
@@ -51,16 +51,15 @@ export class MirrorScript extends Script {
       if (ORDERED_MIRROR_TILES.includes(tile as MirrorDirection)) {
         tile = ORDERED_MIRROR_TILES[(ORDERED_MIRROR_TILES.indexOf(tile as MirrorDirection) + 1) % ORDERED_MIRROR_TILES.length];
         this.tileMap.setTile(column, row, tile);
+        this.gameObject.engineState.renameGameObject(this.gameObject, creatTileGameObjectName(tile, column, row));
       }
-      const mirrorObject = this.tileMap.getObjectsAt(column, row).find((gameObject) => gameObject.getScript(MirrorScript) != null);
-      if (mirrorObject == null) {
-        return;
-      }
+
       const bitmap = TILE_BITMAPS[tile]?.staticBitmap;
       if (bitmap == null) {
         return;
       }
-      mirrorObject.getScript(BitmapRenderer)?.setBitmap(bitmap);
+
+      this.gameObject.getScript(BitmapRenderer)?.setBitmap(bitmap);
     }
   }
 

@@ -3,7 +3,7 @@ import { GameObject } from '../../engine/game-object/game-object';
 import { ObjectPosition } from './object-position';
 import { StateScript } from './state-script';
 import { TileMap } from './tile-map/tile-map';
-import { createTileGameObject } from '../tile-bitmap-factory';
+import { createTileGameObject, creatTileGameObjectName } from '../tile-bitmap-factory';
 import { TileType } from './tile-map/tile-map-types';
 
 import { Direction } from './direction';
@@ -66,7 +66,7 @@ export class BlastedBrickScript extends Script {
   private blast(column: number, row: number): void {
     const { engineState } = this.gameObject;
 
-    const brickGameObject = engineState.getGameObjectByName(`Tile-${TileType.Brick}-${column}-${row}`);
+    const brickGameObject = engineState.getGameObjectByName(creatTileGameObjectName(TileType.Brick, column, row));
     if (brickGameObject) {
       engineState.removeGameObject(brickGameObject);
     }

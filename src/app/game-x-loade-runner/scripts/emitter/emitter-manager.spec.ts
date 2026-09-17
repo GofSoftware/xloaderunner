@@ -10,6 +10,7 @@ import { ScreenBuffer } from '../../../engine/screen/screen-buffer';
 import { CELL_SIZE, LAYER_COUNT, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
 import { IEngineState } from '../../../engine/i-engine-state';
 import { Direction } from '../direction';
+import { PortalManagerScript } from '../portal-manager-script';
 
 const GREEN = 0x00ff00ff;
 const BLUE = 0x0000ffff;
@@ -114,6 +115,12 @@ describe('EmitterManager', () => {
     const mapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
     tileMap = mapGameObject.getScript(TileMap)!;
     gameObjectsByName.set('Map', mapGameObject);
+
+    const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [
+      (go) => PortalManagerScript.create(go),
+    ]);
+    portalManagerGameObject.start();
+    gameObjectsByName.set('PortalManager', portalManagerGameObject);
 
     emittersGameObject = GameObject.create('Emitters', engineState, { x: 0, y: 0 }, [(go) => EmitterManager.create(go)]);
     engineState.addGameObject(emittersGameObject);

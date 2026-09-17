@@ -3,7 +3,7 @@ import { GameObject } from '../../engine/game-object/game-object';
 import { ObjectPosition } from './object-position';
 import { StateScript } from './state-script';
 import { TileMap } from './tile-map/tile-map';
-import { createTileGameObject } from '../tile-bitmap-factory';
+import { createTileGameObject, creatTileGameObjectName } from '../tile-bitmap-factory';
 import { MapHelper } from '../helpers/map.helper';
 import { CELL_SIZE, UPPER_EFFECT_LAYER } from '../../engine/screen/screen.constants';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
@@ -207,7 +207,7 @@ export class BuilderScript extends Script {
     }
 
     let removedType = this.tileMap.getTile(targetColumn, targetRow) as BuildableTileType;
-    const tileGameObject = this.gameObject.engineState.getGameObjectByName(`Tile-${removedType}-${targetColumn}-${targetRow}`);
+    const tileGameObject = this.gameObject.engineState.getGameObjectByName(creatTileGameObjectName(removedType, targetColumn, targetRow));
     if (tileGameObject) {
       this.gameObject.engineState.removeGameObject(tileGameObject);
     }

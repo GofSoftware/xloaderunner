@@ -19,4 +19,5 @@ export interface IEngineState {
   addGameObject(gameObject: GameObject, after?: GameObject): void;
   removeGameObject(gameObject: GameObject): void;
   getGameObjectByName(name: string): GameObject | undefined;
+  renameGameObject(gameObject: GameObject, name: string): void;
 }

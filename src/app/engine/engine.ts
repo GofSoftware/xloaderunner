@@ -29,11 +29,14 @@ export class Engine implements IEngineState {
   public fps: number = 0;
   public timeFromStart: number = 0;
   public startedAt: number = 0;
-  public get level(): ILevel { if (this.levelInstance == null) throw new Error('Level not set'); return this.levelInstance!;}
+  public get level(): ILevel {
+    if (this.levelInstance == null) throw new Error('Level not set');
+    return this.levelInstance!;
+  }
 
   private fpsFrameCount: number = 0;
   private fpsElapsedTime: number = 0;
-  private levelInstance: ILevel | null  = null;
+  private levelInstance: ILevel | null = null;
 
   private constructor() {
     this.screenBuffer = ScreenBuffer.create(LAYER_COUNT);
@@ -67,6 +70,11 @@ export class Engine implements IEngineState {
   }
 
   public addGameObject(gameObject: GameObject, after?: GameObject): void {
+    const currentIndex = this.gameObjects.indexOf(gameObject);
+    if (currentIndex !== -1) {
+      throw new Error(`GameObject already added: ${gameObject.name}`);
+    }
+
     const index = after ? this.gameObjects.indexOf(after) : -1;
     if (index >= 0) {
       this.gameObjects.splice(index + 1, 0, gameObject);
@@ -74,18 +82,13 @@ export class Engine implements IEngineState {
       this.gameObjects.push(gameObject);
     }
 
-    const named = this.gameObjectsByName.get(gameObject.name);
-    if (named) {
-      named.push(gameObject);
-    } else {
-      this.gameObjectsByName.set(gameObject.name, [gameObject]);
-    }
+    this.setNamed(gameObject);
 
     gameObject.start();
   }
 
   public removeGameObject(gameObject: GameObject): void {
-    if(gameObject == null) {
+    if (gameObject == null) {
       return;
     }
 
@@ -112,6 +115,10 @@ export class Engine implements IEngineState {
 
   public getGameObjectByName(name: string): GameObject | undefined {
     return this.gameObjectsByName.get(name)?.[0];
+  }
+
+  public renameGameObject(gameObject: GameObject, name: string): void {
+    this.setNamed(gameObject, name);
   }
 
   private render(): void {
@@ -154,4 +161,25 @@ export class Engine implements IEngineState {
     }
   }
 
+  private setNamed(gameObject: GameObject, newName?: string): void {
+    const gameObjects = this.gameObjectsByName.get(gameObject.name);
+    if (Array.isArray(gameObjects) && gameObjects.length > 0) {
+      const index = this.gameObjects.indexOf(gameObject);
+      if (index === -1) {
+        return;
+      }
+      gameObjects.splice(index, 1);
+    }
+
+    if (newName != null) {
+      gameObject.name = newName;
+    }
+
+    const named = this.gameObjectsByName.get(gameObject.name);
+    if (named) {
+      named.push(gameObject);
+    } else {
+      this.gameObjectsByName.set(gameObject.name, [gameObject]);
+    }
+  }
 }

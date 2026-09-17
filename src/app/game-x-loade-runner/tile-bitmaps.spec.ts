@@ -18,7 +18,7 @@ describe('createTileGameObject', () => {
 
   it('returns undefined for tile types with no visual representation', () => {
     expect(createTileGameObject(engineState, 1, 1, TileType.Empty)).toBeUndefined();
-    expect(createTileGameObject(engineState, 1, 1, TileType.PlayerStart)).toBeUndefined();
+    expect(createTileGameObject(engineState, 1, 1, TileType.EnemyStart)).toBeUndefined();
   });
 
   it('positions a static tile at the given cell and gives it a bitmap renderer', () => {

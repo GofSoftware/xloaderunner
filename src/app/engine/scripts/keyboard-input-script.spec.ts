@@ -9,6 +9,7 @@ import { ScreenBuffer } from '../screen/screen-buffer';
 import { LAYER_COUNT } from '../screen/screen.constants';
 import { IEngineState } from '../i-engine-state';
 import { LivesScript } from '../../game-x-loade-runner/scripts/lives-script';
+import { PortalManagerScript } from '../../game-x-loade-runner/scripts/portal-manager-script';
 
 describe('KeyboardInputScript', () => {
   let engineState: IEngineState;
@@ -33,6 +34,7 @@ describe('KeyboardInputScript', () => {
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      renameGameObject: () => {},
     };
 
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
@@ -40,6 +42,12 @@ describe('KeyboardInputScript', () => {
 
     const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
     gameObjectsByName.set('Lives', livesGameObject);
+
+    const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [
+      (go) => PortalManagerScript.create(go),
+    ]);
+    portalManagerGameObject.start();
+    gameObjectsByName.set('PortalManager', portalManagerGameObject);
 
     player = GameObject.create('Player', engineState, { x: 8, y: 16 }, [
       (go) => KeyboardInputScript.create(go),

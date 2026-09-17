@@ -18,7 +18,7 @@ export class GameObject implements IGameObject {
   public readonly engineState: IEngineState;
 
   private readonly positionInstance: Vector2 = { x: 0, y: 0 };
-  public readonly name: string;
+  private _name: string;
   private scriptInstances: Script[] = [];
 
   public enabled: boolean = true;
@@ -26,7 +26,7 @@ export class GameObject implements IGameObject {
   private destroyed: boolean = false;
 
   private constructor(name: string, engineState: IEngineState, position: Vector2) {
-    this.name = name;
+    this._name = name;
     this.engineState = engineState;
     // Clone rather than alias - callers may hold onto the position object they
     // passed in (e.g. a spawn point reused after death), and setPosition()
@@ -41,6 +41,14 @@ export class GameObject implements IGameObject {
   public setPosition(x: number, y: number): void {
     this.positionInstance.x = x;
     this.positionInstance.y = y;
+  }
+
+  public get name(): string {
+    return this._name;
+  }
+
+  public set name(value: string) {
+    this._name = value;
   }
 
   public getScript<T extends Script>(scriptType: Function & { prototype: T }): T | undefined {

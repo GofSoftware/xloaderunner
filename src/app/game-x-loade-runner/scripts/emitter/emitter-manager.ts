@@ -6,7 +6,14 @@ import { MapHelper } from '../../helpers/map.helper';
 import { EmitterColor } from './emitter-color';
 import type { EmitterScript } from './emitter-script';
 import { Mg, UPPER_EFFECT_LAYER } from '../../../engine/screen/screen.constants';
-import { OBJECT_BEAM_HORIZONTAL_1, OBJECT_BEAM_HORIZONTAL_2, OBJECT_BEAM_VERTICAL_1, OBJECT_BEAM_VERTICAL_2 } from '../../data/sprites';
+import {
+  OBJECT_BEAM_ANGLE_BL,
+  OBJECT_BEAM_ANGLE_BR,
+  OBJECT_BEAM_ANGLE_TL,
+  OBJECT_BEAM_ANGLE_TR,
+  OBJECT_BEAM_HORIZONTAL_1,
+  OBJECT_BEAM_VERTICAL_1,
+} from '../../data/sprites';
 import { BitmapSpriteRenderer } from '../../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { TileType } from '../tile-map/tile-map-types';
 import { MirrorHelper } from '../mirror/mirror-helper';
@@ -52,8 +59,10 @@ export class EmitterManager extends Script {
   }
 
   private get portalManager(): PortalManagerScript {
-    return this._portalManager ??
-      (this._portalManager = this.gameObject.engineState.getGameObjectByName('PortalManager')!.getScript(PortalManagerScript)!);
+    return (
+      this._portalManager ??
+      (this._portalManager = this.gameObject.engineState.getGameObjectByName('PortalManager')!.getScript(PortalManagerScript)!)
+    );
   }
 
   public register(emitter: EmitterScript): void {
@@ -107,7 +116,7 @@ export class EmitterManager extends Script {
   }
 
   private updateSegmentGameObject(descriptor: IBeamSegmentDescriptor): void {
-    const bitmap = this.isHorizontal(descriptor.direction) ? HORIZONTAL_BEAM : VERTICAL_BEAM;
+    const bitmap = this.calcBitmap(descriptor);
     const { x, y } = MapHelper.mapToScreen(descriptor.column, descriptor.row);
     const colorOverride = descriptor.afterCollision
       ? (c: number) => 0x00000000 /*c === Mg ? 0x00000000 : c*/
@@ -143,6 +152,7 @@ export class EmitterManager extends Script {
         prevColumn: emitter.column,
         color: emitter.color,
         direction: emitter.direction,
+        prevDirection: null,
         afterCollision: false,
         overDirectionChanger: false,
       };
@@ -201,6 +211,9 @@ export class EmitterManager extends Script {
 
   private changeDirectionIfMirrored(segment: IBeamSegmentDescriptor): boolean {
     const mirrorTile = this.tileMap.getTile(segment.column, segment.row);
+
+    segment.prevDirection = null;
+
     if (!MirrorHelper.isMirror(mirrorTile)) {
       return false;
     }
@@ -213,6 +226,8 @@ export class EmitterManager extends Script {
     ) {
       return true;
     }
+
+    segment.prevDirection = segment.direction;
 
     if (
       (segment.direction === Direction.Left && mirrorTile === TileType.MirrorRB) ||
@@ -301,5 +316,42 @@ export class EmitterManager extends Script {
     }
     segment.column = calculatedPos.position.column;
     segment.row = calculatedPos.position.row;
+  }
+
+  private calcBitmap(segment: IBeamSegmentDescriptor): number[][][] {
+    // return this.isHorizontal(segment.direction) ? HORIZONTAL_BEAM : VERTICAL_BEAM;
+    if (segment.direction === Direction.Left) {
+      return segment.prevDirection === Direction.Up
+        ? [OBJECT_BEAM_ANGLE_BL]
+        : segment.prevDirection === Direction.Down
+          ? [OBJECT_BEAM_ANGLE_TL]
+          : [OBJECT_BEAM_HORIZONTAL_1];
+    }
+
+    if (segment.direction === Direction.Right) {
+      return segment.prevDirection === Direction.Up
+        ? [OBJECT_BEAM_ANGLE_BR]
+        : segment.prevDirection === Direction.Down
+          ? [OBJECT_BEAM_ANGLE_TR]
+          : [OBJECT_BEAM_HORIZONTAL_1];
+    }
+
+    if (segment.direction === Direction.Up) {
+      return segment.prevDirection === Direction.Left
+        ? [OBJECT_BEAM_ANGLE_TR]
+        : segment.prevDirection === Direction.Right
+          ? [OBJECT_BEAM_ANGLE_TL]
+          : [OBJECT_BEAM_VERTICAL_1];
+    }
+
+    if (segment.direction === Direction.Down) {
+      return segment.prevDirection === Direction.Right
+        ? [OBJECT_BEAM_ANGLE_BL]
+        : segment.prevDirection === Direction.Left
+          ? [OBJECT_BEAM_ANGLE_BR]
+          : [OBJECT_BEAM_VERTICAL_1];
+    }
+
+    throw new Error('Unknown direction');
   }
 }

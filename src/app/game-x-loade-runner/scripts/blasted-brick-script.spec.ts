@@ -11,6 +11,7 @@ import { Keyboard } from '../../engine/keyboard/keyboard';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { LAYER_COUNT } from '../../engine/screen/screen.constants';
 import { IEngineState } from '../../engine/i-engine-state';
+import { PortalManagerScript } from './portal-manager-script';
 
 const HUD_LAYER = 1;
 
@@ -84,11 +85,22 @@ describe('BlastedBrickScript', () => {
       },
       removeGameObject: (gameObject: GameObject) => gameObjectsByName.delete(gameObject.name),
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      renameGameObject: (gameObject: GameObject, name: string) => {
+        gameObjectsByName.delete(gameObject.name);
+        gameObject.name = name;
+        gameObjectsByName.set(name, gameObject);
+      },
     };
 
     const mapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
     tileMap = mapGameObject.getScript(TileMap)!;
     gameObjectsByName.set('Map', mapGameObject);
+
+    const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [
+      (go) => PortalManagerScript.create(go),
+    ]);
+    portalManagerGameObject.start();
+    gameObjectsByName.set('PortalManager', portalManagerGameObject);
 
     player = createPlayer(5, 5);
   });
