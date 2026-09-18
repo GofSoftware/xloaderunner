@@ -44,6 +44,8 @@ import {
   PLAYER_SPAWN_GATE_07,
   PLAYER_SPAWN_GATE_05,
   PLAYER_SPAWN_GATE_08,
+  OBJECT_BRICK_HARD,
+  OBJECT_BEAM_SWITCH_GREEN,
 } from './data/sprites';
 import { GameObject } from '../engine/game-object/game-object';
 import { Script } from '../engine/game-object/script';
@@ -67,6 +69,7 @@ import { BitmapAnimationDirection } from '../engine/scripts/i-bitmap-animation-d
 
 export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
+  [TileType.BrickHard]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK_HARD },
   [TileType.Stairs]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_STAIRS },
   [TileType.Crossbar]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_CROSSBAR },
   [TileType.Gold]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_GOLD, layer: MIDDLE_TILE_LAYER },
@@ -94,6 +97,7 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   [TileType.MirrorRT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RT },
   [TileType.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R },
   [TileType.BeamSwitchBlue]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_BLUE },
+  [TileType.BeamSwitchGreen]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_GREEN },
   [TileType.GoldenGates]: {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {
@@ -174,7 +178,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
     scriptFactories.push((gameObject) => MirrorScript.create(gameObject));
   }
 
-  if (type === TileType.BeamSwitchBlue) {
+  if (type === TileType.BeamSwitchBlue || type === TileType.BeamSwitchGreen) {
     scriptFactories.push((gameObject) => SwitchScript.create(gameObject));
     scriptFactories.push((gameObject) => OnOffScript.create(gameObject, false));
 
@@ -192,12 +196,12 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
           direction: () => {
             const angle = Math.random() * Math.PI * 2;
             return { x: Math.cos(angle), y: -1 * Math.abs(Math.sin(angle)) };
-          }, // or (i) => ({ x: Math.cos(i / 12 * Math.PI * 2), y: Math.sin(...) })
+          },
           color: Yl,
           colorOverrides: [
             (color, particle) => {
               const x = (particle.remainingLife * 255) / ttlMax;
-              return (x << 8) | 0x000000ff;
+              return type === TileType.BeamSwitchBlue ? (x << 8) | 0x000000ff : (x << 16) | 0x000000ff;
             },
           ],
           timeToLive: { min: ttlMin, max: ttlMax },

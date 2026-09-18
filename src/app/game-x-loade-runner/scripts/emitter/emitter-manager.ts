@@ -20,7 +20,7 @@ import { MirrorHelper } from '../mirror/mirror-helper';
 import { BeamScript } from '../beam-script';
 import { IBeamSegmentDescriptor } from './i-beam-segment-descriptor';
 
-import { Direction } from '../direction';
+import { Direction, shiftByDirection } from '../direction';
 import { PortalManagerScript } from '../portal-manager-script';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
@@ -273,6 +273,7 @@ export class EmitterManager extends Script {
       !this.isInBounds(column, row) ||
       this.tileMap.isWall(column, row) ||
       this.tileMap.isDangerous(column, row) ||
+      this.tileMap.isEmitter(column, row) ||
       this.hasCharacterAt(column, row)
     );
   }
@@ -314,8 +315,10 @@ export class EmitterManager extends Script {
     if (calculatedPos == null) {
       return;
     }
-    segment.column = calculatedPos.position.column;
-    segment.row = calculatedPos.position.row;
+    segment.direction = calculatedPos.direction;
+    const pos = shiftByDirection(calculatedPos.position.column, calculatedPos.position.row, calculatedPos.direction);
+    segment.column = pos.column;
+    segment.row = pos.row;
   }
 
   private calcBitmap(segment: IBeamSegmentDescriptor): number[][][] {

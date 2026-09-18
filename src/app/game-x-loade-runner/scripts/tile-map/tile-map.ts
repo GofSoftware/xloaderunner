@@ -39,17 +39,49 @@ export class TileMap extends Script {
   public isSolid(column: number, row: number): boolean {
     return (
       this.getTile(column, row) === TileType.Brick ||
+      this.getTile(column, row) === TileType.BrickHard ||
       this.getTile(column, row) === TileType.Stairs ||
       this.getTile(column, row) === TileType.GoldenGates
     );
   }
 
   public isWall(column: number, row: number): boolean {
-    return this.getTile(column, row) === TileType.Brick || this.getTile(column, row) === TileType.GoldenGates;
+    return (
+      this.getTile(column, row) === TileType.Brick ||
+      this.getTile(column, row) === TileType.BrickHard ||
+      this.getTile(column, row) === TileType.GoldenGates
+    );
+  }
+
+  public isTeleportDestinationBlocker(column: number, row: number): boolean {
+    return (
+      this.getTile(column, row) === TileType.Brick ||
+      this.getTile(column, row) === TileType.Lava ||
+      this.getTile(column, row) === TileType.BrickHard
+    );
+  }
+
+  public isPortableSurface(column: number, row: number): boolean {
+    const tile = this.getTile(column, row);
+    return tile === TileType.Brick || tile === TileType.BrickHard || tile === TileType.Stairs;
   }
 
   public isDangerous(column: number, row: number): boolean {
     return this.getTile(column, row) === TileType.Lava;
+  }
+
+  public isEmitter(column: number, row: number): boolean {
+    const tile = this.getTile(column, row);
+    return (
+      tile === TileType.EmitterGreenUp ||
+      tile === TileType.EmitterGreenDown ||
+      tile === TileType.EmitterGreenLeft ||
+      tile === TileType.EmitterGreenRight ||
+      tile === TileType.EmitterBlueUp ||
+      tile === TileType.EmitterBlueDown ||
+      tile === TileType.EmitterBlueLeft ||
+      tile === TileType.EmitterBlueRight
+    );
   }
 
   public isClimbable(column: number, row: number): boolean {

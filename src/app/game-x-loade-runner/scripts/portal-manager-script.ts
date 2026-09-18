@@ -69,7 +69,7 @@ export class PortalManagerScript extends BaseScript {
     return false;
   }
 
-  public calcTeleportation(direction: Direction, position: IMapPosition): { direction: Direction, position: IMapPosition } | null {
+  public calcTeleportation(direction: Direction, position: IMapPosition): { direction: Direction; position: IMapPosition } | null {
     const { column, row } = position;
     if (!this.isOnPortal(column, row)) {
       return null;
@@ -83,8 +83,7 @@ export class PortalManagerScript extends BaseScript {
     for (const direction of directions) {
       const shift = DIRECTION_SHIFT.get(direction)!;
       const shiftedPosition = { column: destinationPosition.column + shift.shiftColumn, row: destinationPosition.row + shift.shiftRow };
-      const destTile = this.tileMap.getTile(shiftedPosition.column, shiftedPosition.row);
-      if (destTile !== TileType.Brick && destTile !== TileType.Lava) {
+      if (!this.tileMap.isTeleportDestinationBlocker(shiftedPosition.column, shiftedPosition.row)) {
         return { direction, position: destinationPosition };
       }
     }
@@ -117,7 +116,7 @@ export class PortalManagerScript extends BaseScript {
         return;
       }
 
-      if (this.isPortableSurface(tile)) {
+      if (this.tileMap.isPortableSurface(column, row)) {
         if (!this.isEmpty(projectile.objectPosition.column, projectile.objectPosition.row)) {
           this.removeProjectile(projectile);
           return;
@@ -196,15 +195,15 @@ export class PortalManagerScript extends BaseScript {
   }
 
   private getDestinationPortalPosition(currentColumn: number, currentRow: number): IMapPosition | null {
-    const {column: blueColumn, row: blueRow} = this.bluePortal?.getScript(ObjectPosition) ?? {column: -1, row: -1};
-    const {column: orangeColumn, row: orangeRow} = this.orangePortal?.getScript(ObjectPosition) ?? {column: -1, row: -1};
+    const { column: blueColumn, row: blueRow } = this.bluePortal?.getScript(ObjectPosition) ?? { column: -1, row: -1 };
+    const { column: orangeColumn, row: orangeRow } = this.orangePortal?.getScript(ObjectPosition) ?? { column: -1, row: -1 };
 
-    let destinationPosition: IMapPosition = {column: -1, row: -1};
+    let destinationPosition: IMapPosition = { column: -1, row: -1 };
 
     if (currentColumn === blueColumn && currentRow === blueRow) {
-      destinationPosition = {column: orangeColumn, row: orangeRow};
-    } else if (currentColumn === orangeColumn && orangeRow === orangeRow){
-      destinationPosition = {column: blueColumn, row: blueRow};
+      destinationPosition = { column: orangeColumn, row: orangeRow };
+    } else if (currentColumn === orangeColumn && orangeRow === orangeRow) {
+      destinationPosition = { column: blueColumn, row: blueRow };
     }
 
     if (destinationPosition.column !== -1) {
@@ -223,9 +222,5 @@ export class PortalManagerScript extends BaseScript {
       );
     });
     return this.tileMap.getTile(column, row) === TileType.Empty && gameObjects.length === 0 && !this.isOnPortal(column, row);
-  }
-
-  private isPortableSurface(tile: TileType): boolean {
-    return tile === TileType.Brick || tile === TileType.Stairs;
   }
 }

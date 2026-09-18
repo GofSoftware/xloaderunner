@@ -1,4 +1,4 @@
-import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk, Dg, Sg } from '../../engine/screen/screen.constants';
+import { Wt, Rd, Gr, Bl, __, Lg, Mg, Or, Ol, Yl, Bk, Dg, Sg, Rk, Yk } from '../../engine/screen/screen.constants';
 
 export const PLAYER_SPAWN_GATE_01: number[][] = [
   [__, Yl, Yl, Yl, Yl, Yl, Yl, __],
@@ -437,6 +437,17 @@ export const OBJECT_BRICK: number[][] = [
   [Rd, Rd, Rd, Rd, Rd, Bk, Rd, Rd],
   [Rd, Rd, Rd, Rd, Rd, Bk, Rd, Rd],
   [Rd, Rd, Rd, Rd, Rd, Bk, Rd, Rd],
+  [Bk, Bk, Bk, Bk, Bk, Bk, Bk, Bk],
+];
+
+export const OBJECT_BRICK_HARD: number[][] = [
+  [Rd, Yk, Bk, Rd, Rd, Rd, Yk, Rd],
+  [Yk, Rd, Bk, Rd, Yk, Yk, Rd, Yk],
+  [Rd, Rd, Bk, Yk, Rd, Rd, Yk, Rd],
+  [Bk, Bk, Bk, Bk, Bk, Bk, Bk, Bk],
+  [Rd, Yk, Rd, Rd, Yk, Bk, Rd, Rd],
+  [Yk, Rd, Yk, Yk, Rd, Bk, Rd, Yk],
+  [Rd, Yk, Rd, Rd, Rd, Bk, Yk, Rd],
   [Bk, Bk, Bk, Bk, Bk, Bk, Bk, Bk],
 ];
 
@@ -920,6 +931,17 @@ export const OBJECT_BEAM_SWITCH_BLUE: number[][] = [
   [Wt, Yl, Bl, Bl, Bl, Bl, Yl, Wt],
   [Wt, Yl, Bl, Bl, Bl, Bl, Yl, Wt],
   [Yl, __, Yl, Bl, Bl, Yl, __, Yl],
+  [__, __, __, Yl, Yl, __, __, __],
+  [__, __, Yl, Wt, Wt, Yl, __, __],
+];
+
+export const OBJECT_BEAM_SWITCH_GREEN: number[][] = [
+  [__, __, Yl, Wt, Wt, Yl, __, __],
+  [__, __, __, Yl, Yl, __, __, __],
+  [Yl, __, Yl, Gr, Gr, Yl, __, Yl],
+  [Wt, Yl, Gr, Gr, Gr, Gr, Yl, Wt],
+  [Wt, Yl, Gr, Gr, Gr, Gr, Yl, Wt],
+  [Yl, __, Yl, Gr, Gr, Yl, __, Yl],
   [__, __, __, Yl, Yl, __, __, __],
   [__, __, Yl, Wt, Wt, Yl, __, __],
 ];

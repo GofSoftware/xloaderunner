@@ -17,6 +17,10 @@ export class Keyboard {
     return this.pressedThisRound.has(code);
   }
 
+  public stopPressedThisFramePropagation(code: string): boolean {
+    return this.pressedThisRound.delete(code);
+  }
+
   public wasReleasedThisFrame(code: string): boolean {
     return this.releasedThisRound.has(code);
   }

@@ -45,6 +45,7 @@ export class MirrorScript extends Script {
       if (!this.hasPlayerNearby()) {
         return;
       }
+      this.gameObject.engineState.keyboard.stopPressedThisFramePropagation('Space');
 
       const { column, row } = MapHelper.screenToMap(this.gameObject.position.x, this.gameObject.position.y);
       let tile = this.tileMap.getTile(column, row);
