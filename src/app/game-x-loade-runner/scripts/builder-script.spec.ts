@@ -1,4 +1,5 @@
 import { BuildableTileType, BuilderScript, DEFAULT_BUILD_COUNTS, DEFAULT_REMOVE_COUNT } from './builder-script';
+import { createTileGameObject } from '../tile-bitmap-factory';
 import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
@@ -152,6 +153,47 @@ describe('BuilderScript', () => {
     player.update();
 
     expect(tileMap.getTile(6, 5)).toBe(TileType.Crossbar);
+  });
+
+  it('builds a mirror immediately when Digit4 is pressed', () => {
+    press('Digit4');
+    player.update();
+
+    expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorRB);
+  });
+
+  describe('mirror rotation', () => {
+    // Mirrors MirrorScript's own rotation order (mirror-types.ts): MirrorRB is followed by MirrorB.
+    function createMirror(column: number, row: number): void {
+      tileMap.setTile(column, row, TileType.MirrorRB);
+      const mirrorGameObject = createTileGameObject(engineState, column, row, TileType.MirrorRB)!;
+      engineState.addGameObject(mirrorGameObject);
+    }
+
+    it('rotates an existing mirror instead of building a duplicate when Digit4 is pressed facing it', () => {
+      createMirror(6, 5);
+
+      press('Digit4');
+      player.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorB);
+    });
+
+    it('does not spend build supply when rotating an existing mirror', () => {
+      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.MirrorRB]: 1 });
+      createMirror(6, 5);
+
+      press('Digit4');
+      limited.update();
+      nextFrame();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorB);
+
+      press('Digit4');
+      limited.update();
+
+      expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorLB);
+    });
   });
 
   it('does not build over a cell that is already occupied', () => {

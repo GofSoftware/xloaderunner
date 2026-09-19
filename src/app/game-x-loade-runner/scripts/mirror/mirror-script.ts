@@ -2,20 +2,9 @@ import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { TileMap } from '../tile-map/tile-map';
 import { MapHelper } from '../../helpers/map.helper';
-import { ObjectPosition } from '../object-position';
-import { StateScript } from '../state-script';
 import { BitmapRenderer } from '../../../engine/scripts/renderer/bitmap-renderer';
 import { creatTileGameObjectName, TILE_BITMAPS } from '../../tile-bitmap-factory';
 import { MirrorDirection, ORDERED_MIRROR_TILES } from './mirror-types';
-
-import { Direction } from '../direction';
-
-const PLAYER_NEARBY_DISTANCE = [
-  { x: 0, y: 1 },
-  { x: 1, y: 0 },
-  { x: 0, y: -1 },
-  { x: -1, y: 0 },
-];
 
 export class MirrorScript extends Script {
   public static create(gameObject: GameObject): MirrorScript {
@@ -39,51 +28,20 @@ export class MirrorScript extends Script {
     }
   }
 
-  public override update(): void {
-    super.update();
-    if (this.gameObject.engineState.keyboard.wasPressedThisFrame('Space')) {
-      if (!this.hasPlayerNearby()) {
-        return;
-      }
-      this.gameObject.engineState.keyboard.stopPressedThisFramePropagation('Space');
-
-      const { column, row } = MapHelper.screenToMap(this.gameObject.position.x, this.gameObject.position.y);
-      let tile = this.tileMap.getTile(column, row);
-      if (ORDERED_MIRROR_TILES.includes(tile as MirrorDirection)) {
-        tile = ORDERED_MIRROR_TILES[(ORDERED_MIRROR_TILES.indexOf(tile as MirrorDirection) + 1) % ORDERED_MIRROR_TILES.length];
-        this.tileMap.setTile(column, row, tile);
-        this.gameObject.engineState.renameGameObject(this.gameObject, creatTileGameObjectName(tile, column, row));
-      }
-
-      const bitmap = TILE_BITMAPS[tile]?.staticBitmap;
-      if (bitmap == null) {
-        return;
-      }
-
-      this.gameObject.getScript(BitmapRenderer)?.setBitmap(bitmap);
-    }
-  }
-
-  private hasPlayerNearby(): boolean {
+  public rotate(): void {
     const { column, row } = MapHelper.screenToMap(this.gameObject.position.x, this.gameObject.position.y);
-    const playerPosition = this.gameObject.engineState.getGameObjectByName('Player')?.getScript(ObjectPosition);
-    const playerState = this.gameObject.engineState.getGameObjectByName('Player')?.getScript(StateScript);
-    if (playerPosition == null || playerState == null) {
-      return false;
+    let tile = this.tileMap.getTile(column, row);
+    if (ORDERED_MIRROR_TILES.includes(tile as MirrorDirection)) {
+      tile = ORDERED_MIRROR_TILES[(ORDERED_MIRROR_TILES.indexOf(tile as MirrorDirection) + 1) % ORDERED_MIRROR_TILES.length];
+      this.tileMap.setTile(column, row, tile);
+      this.gameObject.engineState.renameGameObject(this.gameObject, creatTileGameObjectName(tile, column, row));
     }
 
-    const shift = PLAYER_NEARBY_DISTANCE.find(
-      (offset) => column + offset.x === playerPosition.column && row + offset.y === playerPosition.row,
-    );
-    if (shift == null) {
-      return false;
+    const bitmap = TILE_BITMAPS[tile]?.staticBitmap;
+    if (bitmap == null) {
+      return;
     }
 
-    return (
-      (shift.x === 0 && shift.y === 1 && playerState.direction === Direction.Up) ||
-      (shift.x === 0 && shift.y === -1 && playerState.direction === Direction.Down) ||
-      (shift.x === 1 && shift.y === 0 && playerState.direction === Direction.Left) ||
-      (shift.x === -1 && shift.y === 0 && playerState.direction === Direction.Right)
-    );
+    this.gameObject.getScript(BitmapRenderer)?.setBitmap(bitmap);
   }
 }

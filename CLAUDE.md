@@ -61,6 +61,10 @@ The app renders a tiny fixed-resolution pixel "screen" (256×192, a ZX-Spectrum-
 
 `src/app/data/glyphs.ts` / `sprites.ts` hold hand-authored `number[][]` pixel art (e.g. `LETTER_A`; `MAN_STANDING_FRAME_1..4`; `OBJECT_EMPTY`/`OBJECT_BRICK`/`OBJECT_STAIRS`), each built directly from `screen.constants.ts`'s pixel constants (no parsing/decoding step).
 
+### Player-triggered tile interactions (game-x-loade-runner)
+
+A tile `Script` that reacts to the player "using" it (e.g. `MirrorScript.rotate()`) should expose a public method for the action, not poll the keyboard itself in `update()`. `BuilderScript` (`src/app/game-x-loade-runner/scripts/builder-script.ts`) is the single place that reads the build/interact keys and knows which cell the player is facing; it looks up the `GameObject`(s) at that cell, finds the relevant script, and calls its action method directly. Letting multiple scripts each listen for the same key independently causes them to double-fire on one keypress (this previously needed a `Keyboard.stopPressedThisFramePropagation()` workaround to suppress one listener in favor of another — removed once the interaction was centralized in `BuilderScript`).
+
 ### Known issues (found while reviewing the GameObject/Script addition)
 
 - **`BitmapSpriteRenderer`'s frame-wrap logic looks wrong.** When `spriteIndexTime >= bitmap.length`, it resets via `spriteIndexTime - Math.floor(spriteIndexTime)`, which is just the fractional part of the number (equivalent to `% 1`), not `% bitmap.length`. For any animation with more than one frame this snaps the animation back to indexes 0–1 instead of looping through all frames.

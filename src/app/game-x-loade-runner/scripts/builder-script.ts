@@ -24,6 +24,7 @@ import { TileType } from './tile-map/tile-map-types';
 import { MirrorHelper } from './mirror/mirror-helper';
 
 import { Direction } from './direction';
+import { MirrorScript } from './mirror/mirror-script';
 
 export type BuildableTileType = TileType.Brick | TileType.Stairs | TileType.Crossbar | TileType.MirrorRB;
 
@@ -158,10 +159,15 @@ export class BuilderScript extends Script {
     if (targetColumn < 0 || targetColumn >= this.tileMap.columns || targetRow < 0 || targetRow >= this.tileMap.rows) {
       return;
     }
-    if (this.tileMap.getTile(targetColumn, targetRow) !== TileType.Empty) {
+
+    const gameObject = this.tileMap.getObjectsAt(targetColumn, targetRow);
+    const mirrorScript = gameObject.find((g) => g.getScript(MirrorScript) != null)?.getScript(MirrorScript);
+    if (mirrorScript != null) {
+      mirrorScript.rotate();
       return;
     }
-    if (this.counts[type] <= 0) {
+
+    if (this.tileMap.getTile(targetColumn, targetRow) !== TileType.Empty || this.counts[type] <= 0) {
       return;
     }
 
