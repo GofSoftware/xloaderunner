@@ -1,8 +1,9 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
-import { LivesScript, MAX_LIVES } from './lives-script';
+import { LivesScript } from './lives-script';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 import { OBJECT_HEART } from '../data/sprites';
+import { MAX_LIVES } from '../x-lode-runner-constants';
 
 export class HeartsRenderer extends Script {
   public static create(gameObject: GameObject, layer: number): HeartsRenderer {

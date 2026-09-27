@@ -1,0 +1,27 @@
+import { TileType } from '../../scripts/tile-map/tile-map-types';
+
+export const ___ = TileType.Empty;
+export const Brk = TileType.Brick;
+export const Brh = TileType.BrickHard;
+export const Str = TileType.Stairs;
+export const Crb = TileType.Crossbar;
+export const Lav = TileType.Lava;
+export const PlS = TileType.PlayerStart;
+export const PlF = TileType.PlayerFinish;
+export const EnS = TileType.EnemyStart;
+export const Gld = TileType.Gold;
+export const EmL = TileType.EmitterGreenLeft;
+export const EmR = TileType.EmitterGreenRight;
+export const EmU = TileType.EmitterGreenUp;
+export const EmD = TileType.EmitterGreenDown;
+export const EbL = TileType.EmitterBlueLeft;
+export const EbR = TileType.EmitterBlueRight;
+export const EbU = TileType.EmitterBlueUp;
+export const EbD = TileType.EmitterBlueDown;
+export const MRB = TileType.MirrorRB;
+export const MLt = TileType.MirrorLB;
+export const MRT = TileType.MirrorRT;
+export const MLT = TileType.MirrorLT;
+export const BSB = TileType.BeamSwitchBlue;
+export const BSG = TileType.BeamSwitchGreen;
+export const GGT = TileType.GoldenGates;

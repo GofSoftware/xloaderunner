@@ -5,7 +5,8 @@ import { GameObject } from './game-object/game-object';
 import { IEngineState } from './i-engine-state';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer, TWINKLE_TWINKLE_LITTLE_STAR } from './audio/music-player';
-import { ILevel } from './i-level';
+import { ILevel } from '../game-x-loade-runner/i-level';
+import { IGame } from './i-game';
 
 const FRAME_RATE = 0;
 
@@ -29,14 +30,14 @@ export class Engine implements IEngineState {
   public fps: number = 0;
   public timeFromStart: number = 0;
   public startedAt: number = 0;
-  public get level(): ILevel {
-    if (this.levelInstance == null) throw new Error('Level not set');
-    return this.levelInstance!;
+  public get game(): IGame {
+    if (this.gameInstance == null) throw new Error('Level not set');
+    return this.gameInstance!;
   }
 
   private fpsFrameCount: number = 0;
   private fpsElapsedTime: number = 0;
-  private levelInstance: ILevel | null = null;
+  private gameInstance: IGame | null = null;
 
   private constructor() {
     this.screenBuffer = ScreenBuffer.create(LAYER_COUNT);
@@ -49,15 +50,15 @@ export class Engine implements IEngineState {
     this.uiRender = uiRender;
   }
 
-  public async start(level: ILevel): Promise<void> {
+  public async start(game: IGame): Promise<void> {
     this.previousFrameTime = Date.now();
     this.startedAt = Date.now();
     this.started = true;
     this.keyboard.attach();
     this.gameObjects = [];
     this.gameObjectsByName.clear();
-    this.levelInstance = level;
-    await this.level.initialize(this);
+    this.gameInstance = game;
+    await this.game.start(this);
     this.render();
   }
 

@@ -1,18 +1,16 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 
-export const MAX_LIVES = 5;
-
 export class LivesScript extends Script {
-  public static create(gameObject: GameObject, count: number = MAX_LIVES): LivesScript {
-    return new LivesScript(gameObject, count);
+  public static create(gameObject: GameObject, lives: number): LivesScript {
+    return new LivesScript(gameObject, lives);
   }
 
   private remaining: number;
 
-  private constructor(gameObject: GameObject, count: number) {
+  private constructor(gameObject: GameObject, lives: number) {
     super(gameObject);
-    this.remaining = count;
+    this.remaining = lives;
   }
 
   public get count(): number {

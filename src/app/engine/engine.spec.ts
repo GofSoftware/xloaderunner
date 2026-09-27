@@ -2,10 +2,10 @@ import { vi } from 'vitest';
 import { Engine } from './engine';
 import { GameObject } from './game-object/game-object';
 import { Script } from './game-object/script';
-import { ILevel } from './i-level';
+import { IGame } from './i-game';
 
-class NoopLevel implements ILevel {
-  public async initialize(): Promise<void> {}
+class NoopGame implements IGame {
+  public async start(): Promise<void> {}
   public onMoseMove(): void {}
 }
 
@@ -62,7 +62,7 @@ describe('Engine', () => {
   beforeEach(async () => {
     log = [];
     vi.useFakeTimers();
-    await Engine.instance.start(new NoopLevel());
+    await Engine.instance.start(new NoopGame());
   });
 
   afterEach(() => {

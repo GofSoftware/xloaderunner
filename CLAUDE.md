@@ -16,6 +16,8 @@ No lint script/config is set up in this repo.
 
 Formatting: Prettier (`.prettierrc`) — 140-char print width, single quotes, Angular parser for `.html`.
 
+When reading, searching, or editing files in this repo, use the dedicated Read/Edit/Write/Grep/Glob tools rather than shell commands (`sed`, `awk`, `cat`, `find`, heredocs) — including for a repetitive edit applied across several files one at a time.
+
 ## Project layout
 
 `src/app/` is split by what depends on Angular and what doesn't:
@@ -38,12 +40,15 @@ The app renders a tiny fixed-resolution pixel "screen" (256×192, a ZX-Spectrum-
 ### Engine and the GameObject/Script component system
 
 - **`Engine`** (`src/app/engine/engine.ts`) is a plain-TypeScript singleton (private constructor, lazily created via the static `Engine.instance` getter) and implements `IEngineState` (see below). It owns a `ScreenBuffer` and a `gameObjects: GameObject[]` list, and drives the game loop:
-  - `start()` records `previousFrameTime`, sets `started = true`, calls `initLevel()` to build the scene's `GameObject`s (calling `.start()` on each), and then calls `render()` directly to kick off the loop.
+  - `start(game: IGame)` records `previousFrameTime`, sets `started = true`, stores `game` (exposed back to scripts via the `game` getter), awaits `game.start(this)` to let the game build its scene's `GameObject`s, and then calls `render()` directly to kick off the loop.
   - `stop()` clears `started` and calls `.destroy()` on every game object.
   - `setRender(uiRender)` lets any UI layer register a callback of shape `(buffer: Readonly<number[][]>) => void` — this is the *only* connection between Engine and the UI; Engine never imports anything Angular.
   - A private `render()` computes `deltaTime` (in seconds), calls `.update()` on every game object (which is what actually mutates `ScreenBuffer` — see below), invokes the registered `uiRender` callback with the buffer, and reschedules itself via `setTimeout(() => this.render(), FRAME_RATE)` (`FRAME_RATE` is currently `0`, i.e. "as fast as the timer allows" — a placeholder, not a real frame-rate limiter yet).
-  - `initLevel()` hardcodes the current demo scene as a list of `GameObject.create(engineState, position, scriptFactories)` calls (the letter, brick/stair tiles, and an animated standing man) — this is where new game content currently gets added.
-- **`IEngineState`** (`src/app/engine/i-engine-state.ts`) is the interface `Engine` implements and the only thing a `GameObject`/`Script` sees of it: `{ screenBuffer: ScreenBuffer; deltaTime: number }`. This is how engine-driven code reaches the buffer and frame timing without depending on the `Engine` class itself.
+- **`IEngineState`** (`src/app/engine/i-engine-state.ts`) is the interface `Engine` implements and the only thing a `GameObject`/`Script` sees of it — the screen/keyboard/audio handles, frame timing, the current `game: IGame`, and the `addGameObject`/`removeGameObject`/`getGameObjectByName`/`renameGameObject` registry methods. This is how engine-driven code reaches everything Engine owns without depending on the `Engine` class itself.
+- **`IGame`** (`src/app/engine/i-game.ts`) is the engine's entry point into game-specific code — the only thing `Engine.start()` takes: `start(engineState): Promise<void>` (build the initial scene) and `onMoseMove(x, y): void` (forwarded from `Screen`'s mousemove handler). It's the one piece of the game/engine split allowed to live in `engine/` despite being game-facing, precisely because `Engine` needs to call it. `game-x-loade-runner/x-lode-runner.ts`'s `XLodeRunner` is the concrete `IGame` — it owns a list of level factories and switches between them (see below).
+- **`ILevel`** (`src/app/game-x-loade-runner/i-level.ts`) is game-specific (it references `TileType`), so it lives under `game-x-loade-runner/`, not `engine/`: `{ engineState, map: TileType[][], initialize(): Promise<GameObject[]> }`. `initialize()` builds and returns the level's `GameObject`s without adding them to the engine itself — the `IGame` (`XLodeRunner.startLevel()`) does that, after also adding shared HUD/title objects common to every level.
+- **`game-x-loade-runner/data/level/`** holds one file per `ILevel`: `x-lode-runner-level.ts` exports the abstract `XLodeRunnerLevel` base class (shared tile-map/player/enemy setup logic), `x-lode-runner-level-1.ts` is the concrete playable level (its `TileType[][]` map literal plus `XLodeRunnerLevel1 extends XLodeRunnerLevel`), and `start-menu-level.ts`/`game-over-level.ts` are placeholder `ILevel`s (currently stubs whose `initialize()` returns `[]`). `level-map-constants.ts` holds the short `TileType` aliases (`Brk`, `Str`, `Lav`, …) every level's map literal is built from.
+- **`x-lode-runner-constants.ts`** (`src/app/game-x-loade-runner/x-lode-runner-constants.ts`) holds small cross-script game constants (currently just `MAX_LIVES`) — put a constant here, not on the class most closely associated with it (e.g. not on `LivesScript`), when multiple otherwise-unrelated scripts need to import it, to avoid tying their imports to each other's module.
 - **`GameObject`** (`src/app/engine/game-object/game-object.ts`) is a Unity-style entity: an `IEngineState` reference, a `position` (`Vector2`), and a list of `Script` instances. Constructed via `GameObject.create(engineState, position, scriptFactories)`, where each `scriptFactory` is `(gameObject: GameObject) => Script` — factories (not script instances) are passed in so each script can receive a reference to the `GameObject` that owns it. `start()`/`update()`/`destroy()` just fan out to every attached script's same-named lifecycle method.
 - **`Script`** (`src/app/engine/game-object/script.ts`) is a base class with no-op `start()`/`update()`/`destroy()` methods, meant to be subclassed (Unity `MonoBehaviour`-style). `IScript` (`i-script.ts`) exists alongside it but is currently an empty marker interface that `Script` doesn't implement — not yet wired up to anything.
 - **`BitmapRenderer`** (`src/app/engine/scripts/bitmap-renderer.ts`) is a `Script` that copies a single static `number[][]` bitmap onto `ScreenBuffer` at its `GameObject`'s position every `update()`.
@@ -57,7 +62,7 @@ The app renders a tiny fixed-resolution pixel "screen" (256×192, a ZX-Spectrum-
 - **`screen.constants.ts`** (same folder) defines `SCREEN_WIDTH`/`SCREEN_HEIGHT` and single-letter packed-pixel constants — `_` (transparent), `W`/`R`/`G`/`B` (white/red/green/blue) — deliberately short so literal sprite arrays read as a recognizable pixel-art grid in source.
 - **`Screen`** (`src/app/ui/components/screen/screen.ts`) is the only place canvas-drawing code lives. It sizes itself from `window.innerWidth` (via a `(window:resize)` host binding), computes `scale = windowWidth / SCREEN_WIDTH`, and emits that via a `scaleChange` output. In `afterNextRender()` it registers its own `render(buffer)` method with `Engine.instance.setRender(...)` — every Engine tick calls back into `Screen` with the latest buffer, and `Screen` does the `ImageData`/`putImageData` work to paint it.
 - **`Header`** (`src/app/ui/components/header/`) just displays the current scale (`{{ scale().toFixed(2) }}x`) — no controls.
-- **`App`** (`src/app/app.ts`) is the composition root: it holds the `scale` signal (fed by `Screen`'s `scaleChange`, displayed by `Header`) and kicks off everything by calling `Engine.instance.start()` in its constructor.
+- **`App`** (`src/app/app.ts`) is the composition root: it holds the `scale` signal (fed by `Screen`'s `scaleChange`, displayed by `Header`) and kicks off everything by calling `Engine.instance.start(XLodeRunner.create())` in its constructor.
 
 `src/app/data/glyphs.ts` / `sprites.ts` hold hand-authored `number[][]` pixel art (e.g. `LETTER_A`; `MAN_STANDING_FRAME_1..4`; `OBJECT_EMPTY`/`OBJECT_BRICK`/`OBJECT_STAIRS`), each built directly from `screen.constants.ts`'s pixel constants (no parsing/decoding step).
 
@@ -68,6 +73,7 @@ A tile `Script` that reacts to the player "using" it (e.g. `MirrorScript.rotate(
 ### Known issues (found while reviewing the GameObject/Script addition)
 
 - **`BitmapSpriteRenderer`'s frame-wrap logic looks wrong.** When `spriteIndexTime >= bitmap.length`, it resets via `spriteIndexTime - Math.floor(spriteIndexTime)`, which is just the fractional part of the number (equivalent to `% 1`), not `% bitmap.length`. For any animation with more than one frame this snaps the animation back to indexes 0–1 instead of looping through all frames.
+- **`onMoseMove` is a typo for `onMouseMove`**, but it's the real, consistently-used method name across `IGame`, `XLodeRunner`, and `Screen`'s call site — don't "fix" it in just one place.
 
 ### Testing notes
 

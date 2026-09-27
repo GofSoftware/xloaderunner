@@ -40,8 +40,8 @@ export class Screen {
   protected onMouseMove(event: MouseEvent): void {
     const x = Math.floor(event.offsetX / this.scale());
     const y = Math.floor(event.offsetY / this.scale());
-    Engine.instance.level.onMoseMove(x, y);
-  };
+    Engine.instance.game.onMoseMove(x, y);
+  }
 
   protected onResize(): void {
     this.windowWidth.set(window.innerWidth);

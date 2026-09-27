@@ -78,7 +78,7 @@ describe('BlastedBrickScript', () => {
       fps: 0,
       timeFromStart: 0,
       startedAt: 0,
-      level: {} as IEngineState['level'],
+      game: {} as IEngineState['game'],
       addGameObject: (gameObject: GameObject) => {
         gameObjectsByName.set(gameObject.name, gameObject);
         gameObject.start();

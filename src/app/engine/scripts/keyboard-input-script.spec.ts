@@ -30,7 +30,7 @@ describe('KeyboardInputScript', () => {
       fps: 0,
       timeFromStart: 0,
       startedAt: 0,
-      level: {} as IEngineState['level'],
+      game: {} as IEngineState['game'],
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),

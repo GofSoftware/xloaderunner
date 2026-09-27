@@ -46,6 +46,10 @@ import {
   PLAYER_SPAWN_GATE_08,
   OBJECT_BRICK_HARD,
   OBJECT_BEAM_SWITCH_GREEN,
+  PLAYER_SPAWN_GATE_002,
+  PLAYER_SPAWN_GATE_001,
+  PLAYER_SPAWN_GATE_003,
+  PLAYER_SPAWN_GATE_004,
 } from './data/sprites';
 import { GameObject } from '../engine/game-object/game-object';
 import { Script } from '../engine/game-object/script';
@@ -119,6 +123,10 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {
       bitmap: [
+        PLAYER_SPAWN_GATE_001,
+        PLAYER_SPAWN_GATE_002,
+        PLAYER_SPAWN_GATE_003,
+        PLAYER_SPAWN_GATE_004,
         PLAYER_SPAWN_GATE_01,
         PLAYER_SPAWN_GATE_02,
         PLAYER_SPAWN_GATE_03,
@@ -127,6 +135,10 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
         PLAYER_SPAWN_GATE_06,
         PLAYER_SPAWN_GATE_07,
         PLAYER_SPAWN_GATE_08,
+        PLAYER_SPAWN_GATE_004,
+        PLAYER_SPAWN_GATE_003,
+        PLAYER_SPAWN_GATE_002,
+        PLAYER_SPAWN_GATE_001,
       ],
       framePerSecond: 10,
     },
@@ -212,7 +224,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
   }
 
   if (type === TileType.GoldenGates) {
-    scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, { column: 22, row: 15 }));
+    scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, { column: 14, row: 16 }));
   }
 
   scriptFactories.push((gameObject) =>

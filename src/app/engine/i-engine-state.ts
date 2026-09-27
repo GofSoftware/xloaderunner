@@ -3,7 +3,7 @@ import { Keyboard } from './keyboard/keyboard';
 import { SoundPlayer } from './audio/sound-player';
 import { MusicPlayer } from './audio/music-player';
 import { GameObject } from './game-object/game-object';
-import { ILevel } from './i-level';
+import { IGame } from './i-game';
 
 export interface IEngineState {
   screenBuffer: ScreenBuffer;
@@ -14,7 +14,7 @@ export interface IEngineState {
   fps: number;
   timeFromStart: number;
   startedAt: number;
-  level: ILevel;
+  game: IGame;
 
   addGameObject(gameObject: GameObject, after?: GameObject): void;
   removeGameObject(gameObject: GameObject): void;

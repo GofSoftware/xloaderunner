@@ -1,5 +1,6 @@
 import { HeartsRenderer } from './hearts-renderer';
-import { LivesScript, MAX_LIVES } from './lives-script';
+import { LivesScript } from './lives-script';
+import { MAX_LIVES } from '../x-lode-runner-constants';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';

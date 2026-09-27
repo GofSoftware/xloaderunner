@@ -6,7 +6,7 @@ import { ObjectPosition } from './object-position';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
-import { MAX_LIVES } from './lives-script';
+import { MAX_LIVES } from '../x-lode-runner-constants';
 import { GLYPH_MAP } from '../data/glyphs';
 import { OBJECT_GOLD_HUD } from '../data/sprites';
 import { IEngineState } from '../../engine/i-engine-state';

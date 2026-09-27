@@ -1,33 +1,11 @@
-import { TileType } from '../scripts/tile-map/tile-map-types';
-
-const ___ = TileType.Empty;
-const Brk = TileType.Brick;
-const Brh = TileType.BrickHard;
-const Str = TileType.Stairs;
-const Crb = TileType.Crossbar;
-const Lav = TileType.Lava;
-const PlS = TileType.PlayerStart;
-const PlF = TileType.PlayerFinish;
-const EnS = TileType.EnemyStart;
-const Gld = TileType.Gold;
-const EmL = TileType.EmitterGreenLeft;
-const EmR = TileType.EmitterGreenRight;
-const EmU = TileType.EmitterGreenUp;
-const EmD = TileType.EmitterGreenDown;
-const EbL = TileType.EmitterBlueLeft;
-const EbR = TileType.EmitterBlueRight;
-const EbU = TileType.EmitterBlueUp;
-const EbD = TileType.EmitterBlueDown;
-const MRB = TileType.MirrorRB;
-const MLt = TileType.MirrorLB;
-const MRT = TileType.MirrorRT;
-const MLT = TileType.MirrorLT;
-const BSB = TileType.BeamSwitchBlue;
-const BSG = TileType.BeamSwitchGreen;
-const GGT = TileType.GoldenGates;
+import { TileType } from '../../scripts/tile-map/tile-map-types';
+import { ___, Brh, Brk, BSG, Crb, EbL, EbR, EmD, EmL, EmU, EnS, GGT, Gld, Lav, PlF, PlS, Str } from './level-map-constants';
+import { IEngineState } from '../../../engine/i-engine-state';
+import { XLodeRunnerLevel } from './x-lode-runner-level';
+import { GameObject } from '../../../engine/game-object/game-object';
 
 // prettier-ignore
-export const LEVEL_TILES_ARR: TileType[][] = [
+const map: TileType[][] = [
   [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
   [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
   [___, PlF, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
@@ -42,14 +20,30 @@ export const LEVEL_TILES_ARR: TileType[][] = [
   [___, ___, ___, ___, ___, ___, ___, ___, Brk, EbR, ___, ___, ___, ___, ___, ___, ___, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
   [___, ___, ___, ___, ___, ___, ___, ___, Brk, ___, ___, ___, ___, ___, ___, ___, ___, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
   [___, ___, ___, ___, ___, ___, ___, ___, Gld, ___, ___, ___, ___, ___, EmU, ___, ___, Gld, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
-  [___, ___, ___, ___, ___, ___, ___, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, ___, ___, ___, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___],
-  [___, ___, ___, ___, ___, ___, ___, ___, EbD, ___, Crb, Crb, Crb, Crb, Brh, ___, ___, ___, ___, ___, ___, ___, BSG, ___, ___, ___, ___, ___, ___, ___, ___, ___],
-  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brk, Lav, Brk, Lav, Brk, Lav, Brk, ___],
-  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brk, Brk, Brk, Brk, Brk, Brk, Brk, ___],
+  [___, ___, ___, ___, ___, ___, ___, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brh, ___, ___, PlS, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, BSG, ___, ___, ___, ___, ___, ___, ___, ___, EmL, Brk, Lav, Brk, Lav, Brk, Lav, Brk, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brh, ___, ___, ___, ___, ___, ___, Brk, Brk, Brk, Brk, Brk, Brk, Brk, ___],
   [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brk, Brk, Brk, EnS, Brk, Brk, Brk, ___],
-  [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, PlS, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brk, Brk, ___, Brk, Brk, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Brk, Brk, ___, Brk, Brk, ___, ___],
   [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, Brk, Brk, ___, Brk, Brk, ___, ___],
   [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, ___, ___, Brk, Brk, ___, Brk, Brk, ___, ___],
-  [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, EbU, Brh, ___, ___, ___, ___, ___, ___, ___, EmL, Str, EbR, ___, ___, ___, GGT, ___, ___, ___, GGT, ___, ___],
+  [___, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, Brh, ___, ___, ___, ___, ___, ___, ___, ___, Str, ___, ___, Crb, Crb, GGT, ___, ___, ___, GGT, Crb, Crb],
   [Brk, Brk, Lav, Lav, Lav, Brk, Brk, Brk, Brk, Brk, Brk, Brh, Brh, Brh, Brh, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Brk, Lav, Lav, Brk, Brk, Brk, Brk, Brk, Lav, Lav],
 ];
+
+export class XLodeRunnerLevel1 extends XLodeRunnerLevel {
+  public static create(engineState: IEngineState): XLodeRunnerLevel1 {
+    return new XLodeRunnerLevel1(engineState);
+  }
+
+  protected constructor(engineState: IEngineState) {
+    super(engineState);
+  }
+
+  public map: TileType[][] = map;
+
+  public async initialize(): Promise<GameObject[]> {
+    return this.setup();
+  }
+}

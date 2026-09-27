@@ -140,6 +140,7 @@ export class StateScript extends Script {
   private get tileMap(): TileMap {
     return this.gameObject.engineState.getGameObjectByName('Map')!.getScript(TileMap)!;
   }
+
   private get portalManager(): PortalManagerScript {
     return this.gameObject.engineState.getGameObjectByName('PortalManager')!.getScript(PortalManagerScript)!;
   }
@@ -203,9 +204,11 @@ export class StateScript extends Script {
     if (this.dying) {
       return this.advanceDying();
     }
+
     if (this.tileMap.isDangerous(column, row)) {
       return this.beginDying();
     }
+
     if (this.getsTrappedInHoles && this.tileMap.getTile(column, row) === TileType.BlastedBrick) {
       this.hesitation = undefined;
       return PlayerState.Trapped;
