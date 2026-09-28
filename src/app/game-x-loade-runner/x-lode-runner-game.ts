@@ -8,27 +8,23 @@ import { GameOverLevel } from './data/level/game-over-level';
 import { StartMenuLevel } from './data/level/start-menu-level';
 import { GameObject } from '../engine/game-object/game-object';
 import { BackgroundStars } from './scripts/background-stars';
-import { BACKGROUND_LAYER, CELL_SIZE, HUD_LAYER } from '../engine/screen/screen.constants';
+import { BACKGROUND_LAYER, HUD_LAYER } from '../engine/screen/screen.constants';
 import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LivesScript } from './scripts/lives-script';
-import { DissolveTextureEffect } from '../engine/scripts/effects/dissolve-texture-effect';
-import { TextRenderer } from '../engine/scripts/text-renderer';
-import { DestroyAfterTime } from '../engine/scripts/destroy-after-time';
-import { LinearMoveScript } from '../engine/scripts/linear-move-script';
 import { MAX_LIVES } from './x-lode-runner-constants';
 import { TileType } from './scripts/tile-map/tile-map-types';
 
-export class XLodeRunner implements IGame {
-  public static create(): XLodeRunner {
-    return new XLodeRunner();
+export class XLodeRunnerGame implements IGame {
+  public static create(): XLodeRunnerGame {
+    return new XLodeRunnerGame();
   }
 
-  private eState: IEngineState | null = null;
+  private _engineState: IEngineState | null = null;
   private get engineState(): IEngineState {
-    if (this.eState == null) {
+    if (this._engineState == null) {
       throw new Error('EngineState is not initialized');
     }
-    return this.eState!;
+    return this._engineState!;
   }
 
   private levels: ((engineState: IEngineState) => ILevel)[] = [(engineState: IEngineState) => XLodeRunnerLevel1.create(engineState)];
@@ -38,10 +34,14 @@ export class XLodeRunner implements IGame {
   private constructor() {}
 
   public async start(engineState: IEngineState): Promise<void> {
-    this.eState = engineState;
+    this._engineState = engineState;
 
     if (this.currentLevel == null) {
-      await this.startLevel(this.levels[0](this.engineState) /*StartMenuLevel.create(this.engineState)*/);
+      await this.startLevel(
+        StartMenuLevel.create(this.engineState, () => {
+          this.startLevel(this.levels[0](this.engineState));
+        }),
+      );
     } else if (this.lives <= 0) {
       await this.startLevel(GameOverLevel.create(this.engineState));
     } else if (this.lives > 0) {
@@ -52,14 +52,10 @@ export class XLodeRunner implements IGame {
   }
 
   public async startLevel(level: ILevel): Promise<void> {
+    this.engineState.reset();
+
     const gameObjects = await level.initialize();
     [
-      GameObject.create('Title', this.engineState, { x: CELL_SIZE * 10, y: CELL_SIZE * 2 }, [
-        (gameObject: GameObject) => LinearMoveScript.create(gameObject, { x: 0, y: -1 }, 5),
-        (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 5000),
-        (gameObject: GameObject) =>
-          TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [DissolveTextureEffect.create(this.engineState, 0.5, (v) => v * v)]),
-      ]),
       GameObject.create('Lives', this.engineState, { x: 0, y: 0 }, [
         (gameObject: GameObject) => LivesScript.create(gameObject, this.lives),
         (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),

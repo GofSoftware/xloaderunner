@@ -235,4 +235,41 @@ describe('Engine', () => {
       expect(destroyed.length).toBe(new Set(destroyed).size);
     });
   });
+
+  describe('reset', () => {
+    it('should destroy and untrack every game object, so a same-named one can be added again afterward', () => {
+      const destroyed: string[] = [];
+      const first = GameObject.create('Level', Engine.instance, { x: 0, y: 0 }, [(go) => new DestroyRecordingScript(go, destroyed)]);
+      Engine.instance.addGameObject(first);
+
+      Engine.instance.reset();
+
+      expect(destroyed).toEqual(['Level']);
+      expect(Engine.instance.getGameObjectByName('Level')).toBeUndefined();
+
+      const second = createRecorder('Level');
+      Engine.instance.addGameObject(second);
+      advanceOneFrame();
+
+      expect(Engine.instance.getGameObjectByName('Level')).toBe(second);
+      expect(log).toContain('Level');
+    });
+
+    it('should leave the engine running, unlike stop() - a game object added afterward still gets updated', () => {
+      Engine.instance.reset();
+
+      Engine.instance.addGameObject(createRecorder('AfterReset'));
+      advanceOneFrame();
+
+      expect(log).toContain('AfterReset');
+    });
+
+    it('should clear held keyboard state', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }));
+
+      Engine.instance.reset();
+
+      expect(Engine.instance.keyboard.isPressed('Space')).toBe(false);
+    });
+  });
 });

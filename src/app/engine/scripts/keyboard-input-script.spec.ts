@@ -35,6 +35,7 @@ describe('KeyboardInputScript', () => {
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
       renameGameObject: () => {},
+      reset: () => {},
     };
 
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);

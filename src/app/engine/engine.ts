@@ -122,6 +122,13 @@ export class Engine implements IEngineState {
     this.setNamed(gameObject, name);
   }
 
+  public reset(): void {
+    this.gameObjects.forEach((gameObject) => this.removeGameObject(gameObject));
+    this.gameObjects = [];
+    this.gameObjectsByName.clear();
+    this.keyboard.reset();
+  }
+
   private render(): void {
     if (!this.started) {
       return;

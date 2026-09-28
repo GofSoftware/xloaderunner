@@ -69,6 +69,7 @@ describe('EnemyScript', () => {
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
       renameGameObject: () => {},
+      reset: () => {},
     };
 
     const mapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);

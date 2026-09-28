@@ -13,6 +13,18 @@ export class Keyboard {
     return this.heldKeys.has(code);
   }
 
+  public get heldKeysCodes(): string[] {
+    return Array.from(this.heldKeys);
+  }
+
+  public get pressedThisRoundCodes(): string[] {
+    return Array.from(this.pressedThisRound);
+  }
+
+  public get releasedThisRoundCodes(): string[] {
+    return Array.from(this.releasedThisRound);
+  }
+
   public wasPressedThisFrame(code: string): boolean {
     return this.pressedThisRound.has(code);
   }
@@ -35,6 +47,11 @@ export class Keyboard {
     this.releasedThisRound.forEach((code) => this.heldKeys.delete(code));
     this.pressedThisRound.clear();
     this.releasedThisRound.clear();
+  }
+
+  public reset(): void {
+    this.heldKeys.clear();
+    this.pressedThisRound.clear();
   }
 
   private readonly handleKeyDown = (event: KeyboardEvent): void => {

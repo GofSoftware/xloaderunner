@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { Header } from './ui/components/header/header';
 import { Screen } from './ui/components/screen/screen';
 import { Engine } from './engine/engine';
-import { XLodeRunner } from './game-x-loade-runner/x-lode-runner';
+import { XLodeRunnerGame } from './game-x-loade-runner/x-lode-runner-game';
 
 @Component({
   selector: 'app-root',
@@ -11,13 +11,11 @@ import { XLodeRunner } from './game-x-loade-runner/x-lode-runner';
   styleUrl: './app.scss',
 })
 export class App {
-
   protected readonly scale = signal(1);
 
-  constructor() {
-  }
+  constructor() {}
 
   public async ngOnInit() {
-    await Engine.instance.start(XLodeRunner.create());
+    await Engine.instance.start(XLodeRunnerGame.create());
   }
 }

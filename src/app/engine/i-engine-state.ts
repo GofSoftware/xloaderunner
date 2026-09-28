@@ -20,4 +20,5 @@ export interface IEngineState {
   removeGameObject(gameObject: GameObject): void;
   getGameObjectByName(name: string): GameObject | undefined;
   renameGameObject(gameObject: GameObject, name: string): void;
+  reset(): void;
 }

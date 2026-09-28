@@ -55,4 +55,37 @@ describe('Keyboard', () => {
       expect(keyboard.isPressed('KeyA')).toBe(false);
     });
   });
+
+  describe('reset', () => {
+    it('should clear held and pressed-this-round state', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+
+      keyboard.reset();
+
+      expect(keyboard.isPressed('ArrowLeft')).toBe(false);
+      expect(keyboard.wasPressedThisFrame('ArrowLeft')).toBe(false);
+    });
+
+    it('should leave the keyboard able to record new presses afterward', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+      keyboard.reset();
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      expect(keyboard.isPressed('ArrowRight')).toBe(true);
+    });
+  });
+
+  describe('pressedThisRoundCodes', () => {
+    it('should list every code pressed this round', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      expect(keyboard.pressedThisRoundCodes.sort()).toEqual(['ArrowLeft', 'ArrowRight']);
+    });
+
+    it('should be empty once no key has been pressed this round', () => {
+      expect(keyboard.pressedThisRoundCodes).toEqual([]);
+    });
+  });
 });

@@ -107,6 +107,7 @@ describe('BuilderScript', () => {
         gameObject.name = name;
         gameObjectsByName.set(name, gameObject);
       },
+      reset: () => {},
     };
 
     const mapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
