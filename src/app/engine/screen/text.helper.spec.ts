@@ -4,7 +4,7 @@ import { CELL_SIZE } from './screen.constants';
 import { GLYPH_QUESTION_MARK, GLYPH_UPPER_A, GLYPH_UPPER_B } from '../../game-x-loade-runner/data/glyphs';
 import { ITextureEffect } from '../scripts/effects/i-texture-effect';
 
-function createEffect(apply: (texture: number[][]) => number[][], isEnabled = true): ITextureEffect {
+function createEffect(apply: (texture: number[][], x: number, y: number) => number[][], isEnabled = true): ITextureEffect {
   return { isEnabled, apply };
 }
 
@@ -91,5 +91,21 @@ describe('TextHelper', () => {
     TextHelper.print(screenBuffer, 'A', 0, 0, 0, [disabledZeroOut, setToOne]);
 
     expect(screenBuffer.buffers[0].slice(0, 8).map((row) => row.slice(0, 8))).toEqual(GLYPH_UPPER_A.map((row) => row.map(() => 1)));
+  });
+
+  it("should pass each glyph's own screen position to its effects, not the string's starting position", () => {
+    const screenBuffer = ScreenBuffer.create(1);
+    const positions: { x: number; y: number }[] = [];
+    const recordPosition = createEffect((glyph, x, y) => {
+      positions.push({ x, y });
+      return glyph;
+    });
+
+    TextHelper.print(screenBuffer, 'AB', 20, 30, 0, [recordPosition]);
+
+    expect(positions).toEqual([
+      { x: 20, y: 30 },
+      { x: 20 + CELL_SIZE, y: 30 },
+    ]);
   });
 });

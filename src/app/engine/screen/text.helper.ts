@@ -12,8 +12,12 @@ export class TextHelper {
   static print(screenBuffer: ScreenBuffer, text: string, x: number, y: number, layer: number, effects: ITextureEffect[] = []): void {
     for (let i = 0; i < text.length; i++) {
       const glyph = GLYPH_MAP[text[i]] ?? GLYPH_MAP['?'];
-      const effectedGlyph = effects.reduce((currentGlyph, effect) => (effect.isEnabled ? effect.apply(currentGlyph) : currentGlyph), glyph);
-      screenBuffer.copy(effectedGlyph, x + i * CELL_SIZE, y, layer);
+      const xPos = x + i * CELL_SIZE;
+      const effectedGlyph = effects.reduce(
+        (currentGlyph, effect) => (effect.isEnabled ? effect.apply(currentGlyph, xPos, y) : currentGlyph),
+        glyph,
+      );
+      screenBuffer.copy(effectedGlyph, xPos, y, layer);
     }
   }
 }

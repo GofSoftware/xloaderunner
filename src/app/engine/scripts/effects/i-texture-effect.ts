@@ -2,7 +2,7 @@ import { IEngineState } from '../../i-engine-state';
 
 export interface ITextureEffect {
   isEnabled: boolean;
-  apply(texture: number[][]): number[][];
+  apply(texture: number[][], x: number, y: number): number[][];
 }
 
 export abstract class TextureEffect {
@@ -10,5 +10,5 @@ export abstract class TextureEffect {
 
   public constructor(protected enginesState: IEngineState) {}
 
-  public abstract apply(texture: number[][]): number[][];
+  public abstract apply(texture: number[][], x: number, y: number): number[][];
 }

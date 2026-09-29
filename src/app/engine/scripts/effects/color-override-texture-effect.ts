@@ -15,13 +15,13 @@ export class ColorOverrideTextureEffect extends TextureEffect {
     super(engineState);
   }
 
-  public apply(texture: number[][]): number[][] {
+  public apply(texture: number[][], xStart: number, yStart: number): number[][] {
     const res = new Array(texture.length);
 
     texture.forEach((row, y) => {
       res[y] = new Array(row.length);
       row.forEach((pixel, x) => {
-        res[y][x] = this.fn(pixel, x, y);
+        res[y][x] = this.fn(pixel, xStart + x, yStart + y);
       });
     });
 
