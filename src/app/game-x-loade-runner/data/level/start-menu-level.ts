@@ -14,7 +14,7 @@ export class StartMenuLevel implements ILevel {
     return new StartMenuLevel(engineState, continueCallback);
   }
 
-  private continueCallback: VoidCallback = () => {};
+  private readonly continueCallback: VoidCallback = () => {};
 
   public engineState: IEngineState;
   public map: TileType[][] = [[]];

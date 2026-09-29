@@ -38,6 +38,7 @@ export class Engine implements IEngineState {
   private fpsFrameCount: number = 0;
   private fpsElapsedTime: number = 0;
   private gameInstance: IGame | null = null;
+  private afterUpdateFn: (() => void) | null = null;
 
   private constructor() {
     this.screenBuffer = ScreenBuffer.create(LAYER_COUNT);
@@ -67,7 +68,7 @@ export class Engine implements IEngineState {
     this.keyboard.detach();
     // removeGameObject() removes the object from this.gameObjects, so iterate a copy -
     // forEach over the live array would skip every other element as it shrinks.
-    [...this.gameObjects].forEach((gameObject) => this.removeGameObject(gameObject));
+    this.removeAllGameObjects();
   }
 
   public addGameObject(gameObject: GameObject, after?: GameObject): void {
@@ -123,10 +124,17 @@ export class Engine implements IEngineState {
   }
 
   public reset(): void {
-    this.gameObjects.forEach((gameObject) => this.removeGameObject(gameObject));
-    this.gameObjects = [];
-    this.gameObjectsByName.clear();
+    this.removeAllGameObjects();
     this.keyboard.reset();
+  }
+
+  public registerAfterUpdate(fn: () => void): void {
+    this.afterUpdateFn = fn;
+  }
+
+  private removeAllGameObjects(): void {
+    [...this.gameObjects].forEach((gameObject) => this.removeGameObject(gameObject));
+    this.gameObjectsByName.clear();
   }
 
   private render(): void {
@@ -156,7 +164,14 @@ export class Engine implements IEngineState {
 
     this.uiRender && this.uiRender(this.screenBuffer.buffers);
     this.keyboard.next();
+
     setTimeout(() => this.render(), FRAME_RATE);
+
+    if (this.afterUpdateFn) {
+      const fn = this.afterUpdateFn;
+      this.afterUpdateFn = null;
+      fn();
+    }
   }
 
   private updateFps(): void {

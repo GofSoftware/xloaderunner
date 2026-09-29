@@ -6,14 +6,13 @@ import { ObjectPosition } from './object-position';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
-import { MAX_LIVES } from '../x-lode-runner-constants';
 import { GLYPH_MAP } from '../data/glyphs';
 import { OBJECT_GOLD_HUD } from '../data/sprites';
 import { IEngineState } from '../../engine/i-engine-state';
 
 describe('GoldScript', () => {
-  // Cols 0-1 right after the hearts are left blank.
-  const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE + 2 * CELL_SIZE;
+  // Fixed 4-cell-wide gap from the right edge, independent of MAX_LIVES.
+  const startX = SCREEN_WIDTH - 4 * CELL_SIZE;
 
   let engineState: IEngineState;
   let tileMap: TileMap;

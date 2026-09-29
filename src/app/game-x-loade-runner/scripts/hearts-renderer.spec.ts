@@ -22,35 +22,39 @@ describe('HeartsRenderer', () => {
   it('should draw one heart per remaining life, right-anchored in the top row', () => {
     const engineState = createEngineState();
     const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
-      (go) => LivesScript.create(go, 3),
+      (go) => LivesScript.create(go, MAX_LIVES, () => {}),
       (go) => HeartsRenderer.create(go, 0),
     ]);
 
     gameObject.update();
 
-    expect(heartAt(engineState, 0)).toEqual(OBJECT_HEART);
-    expect(heartAt(engineState, 1)).toEqual(OBJECT_HEART);
-    expect(heartAt(engineState, 2)).toEqual(OBJECT_HEART);
+    for (let i = 0; i < MAX_LIVES; i++) {
+      expect(heartAt(engineState, i)).toEqual(OBJECT_HEART);
+    }
   });
 
-  it('should draw fewer hearts as lives decrease', () => {
+  // LivesScript no longer decrements its own count - loseLife() just defers to
+  // XLodeRunnerGame, which recreates the whole level (and a fresh LivesScript/HeartsRenderer
+  // pair) with the new count. So "fewer lives" here just means constructing with a lower count.
+  it('should draw fewer hearts when constructed with a lower count', () => {
     const engineState = createEngineState();
     const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
-      (go) => LivesScript.create(go, 2),
+      (go) => LivesScript.create(go, MAX_LIVES - 1, () => {}),
       (go) => HeartsRenderer.create(go, 0),
     ]);
-    gameObject.getScript(LivesScript)!.loseLife();
 
     gameObject.update();
 
-    expect(heartAt(engineState, 0)).toEqual(OBJECT_HEART);
-    expect(heartAt(engineState, 1)).toEqual(OBJECT_HEART.map((row) => row.map(() => 0)));
+    for (let i = 0; i < MAX_LIVES - 1; i++) {
+      expect(heartAt(engineState, i)).toEqual(OBJECT_HEART);
+    }
+    expect(heartAt(engineState, MAX_LIVES - 1)).toEqual(OBJECT_HEART.map((row) => row.map(() => 0)));
   });
 
   it('should draw onto the given layer only', () => {
     const engineState = { screenBuffer: ScreenBuffer.create(2) } as IEngineState;
     const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
-      (go) => LivesScript.create(go, 1),
+      (go) => LivesScript.create(go, 1, () => {}),
       (go) => HeartsRenderer.create(go, 1),
     ]);
 

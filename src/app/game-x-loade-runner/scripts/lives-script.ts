@@ -2,28 +2,24 @@ import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 
 export class LivesScript extends Script {
-  public static create(gameObject: GameObject, lives: number): LivesScript {
-    return new LivesScript(gameObject, lives);
+  public static create(gameObject: GameObject, lives: number, loseLifeCallback: () => void): LivesScript {
+    return new LivesScript(gameObject, lives, loseLifeCallback);
   }
 
-  private remaining: number;
+  private readonly remaining: number;
+  private readonly loseLifeCallback: (() => void) | null = null;
 
-  private constructor(gameObject: GameObject, lives: number) {
+  private constructor(gameObject: GameObject, lives: number, loseLifeCallback: () => void) {
     super(gameObject);
     this.remaining = lives;
+    this.loseLifeCallback = loseLifeCallback;
   }
 
   public get count(): number {
     return this.remaining;
   }
 
-  public get isGameOver(): boolean {
-    return this.remaining <= 0;
-  }
-
   public loseLife(): void {
-    if (this.remaining > 0) {
-      this.remaining--;
-    }
+    this.gameObject.engineState.registerAfterUpdate(() => this.loseLifeCallback?.());
   }
 }

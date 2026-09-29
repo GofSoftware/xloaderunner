@@ -50,7 +50,7 @@ describe('BlastedBrickScript', () => {
     for (let column = 0; column <= 8; column++) {
       tileMap.setTile(column, 6, TileType.Brick);
     }
-    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
+    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2, () => {})]);
     gameObjectsByName.set('Lives', livesGameObject);
 
     const movingPlayer = GameObject.create('MovingPlayer', engineState, { x: 5 * 8, y: 5 * 8 }, [
@@ -91,6 +91,7 @@ describe('BlastedBrickScript', () => {
         gameObjectsByName.set(name, gameObject);
       },
       reset: () => {},
+      registerAfterUpdate: () => {},
     };
 
     const mapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);

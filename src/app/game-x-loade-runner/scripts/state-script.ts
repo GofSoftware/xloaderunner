@@ -2,7 +2,7 @@ import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { TileMap } from './tile-map/tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE, FOREGROUND_LAYER } from '../../engine/screen/screen.constants';
+import { BACKGROUND_LAYER, CELL_SIZE } from '../../engine/screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   FALL_ANIMATION,
@@ -19,9 +19,6 @@ import {
 import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
 import { OBJECT_EXCLAMATION } from '../data/sprites';
 import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
-import { TextRenderer } from '../../engine/scripts/text-renderer';
-import { DEATH_JINGLE } from '../../engine/audio/music-player';
-import { LivesScript } from './lives-script';
 import { ObjectPosition } from './object-position';
 import { TileType } from './tile-map/tile-map-types';
 import { PlayerState } from './state/state-types';
@@ -35,7 +32,6 @@ const LEDGE_HESITATION_SECONDS = 0.3;
 // Kept tiny on purpose: long enough to swallow a direction key tap as a pure look-around,
 // short enough that holding the key to actually run never reads as a pause.
 const TURN_DELAY_SECONDS = 0.1;
-const DYING_DURATION_SECONDS = 1;
 const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerSecond: number }> = {
   [PlayerState.Stand]: STAND_ANIMATION,
   [PlayerState.TurnLeft]: STAND_ANIMATION_LOOK_LEFT,
@@ -84,7 +80,7 @@ export class StateScript extends Script {
   private state: PlayerState | undefined;
   private movingState: PlayerState | undefined;
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
-  private dying: { elapsed: number } | undefined;
+  private dying: boolean = false;
 
   // currentDirection is the way the sprite is looking, updated by updateFacingDirection() from
   // whichever arrow key is held - regardless of whether a step that way is actually possible.
@@ -145,12 +141,12 @@ export class StateScript extends Script {
     return this.gameObject.engineState.getGameObjectByName('PortalManager')!.getScript(PortalManagerScript)!;
   }
 
-  private get lives(): LivesScript {
-    return this.gameObject.engineState.getGameObjectByName('Lives')!.getScript(LivesScript)!;
-  }
-
   public get direction(): Direction {
     return this.currentDirection;
+  }
+
+  public isDying(): boolean {
+    return this.dying;
   }
 
   public forceLeft(value: boolean): void {
@@ -202,7 +198,7 @@ export class StateScript extends Script {
     const { column, row } = this.objectPosition;
 
     if (this.dying) {
-      return this.advanceDying();
+      return PlayerState.Dying;
     }
 
     if (this.tileMap.isDangerous(column, row)) {
@@ -357,41 +353,8 @@ export class StateScript extends Script {
   }
 
   private beginDying(): PlayerState {
-    this.hesitation = undefined;
-    this.dying = { elapsed: 0 };
-    const { musicPlayer } = this.gameObject.engineState;
-    musicPlayer.register('Death', DEATH_JINGLE);
-    musicPlayer.play('Death');
+    this.dying = true;
     return PlayerState.Dying;
-  }
-
-  private advanceDying(): PlayerState {
-    this.dying!.elapsed += this.gameObject.engineState.deltaTime;
-    if (this.dying!.elapsed < DYING_DURATION_SECONDS) {
-      return PlayerState.Dying;
-    }
-    this.dying = undefined;
-    return this.respawnOrEndGame();
-  }
-
-  private respawnOrEndGame(): PlayerState {
-    this.lives.loseLife();
-    if (this.lives.isGameOver) {
-      this.showGameOver();
-      return PlayerState.GameOver;
-    }
-    this.objectPosition.teleportTo(this.spawnCell.column, this.spawnCell.row);
-    this.currentDirection = Direction.Right;
-    this.lastMoveDirection = undefined;
-    this.turnPause = undefined;
-    return PlayerState.Stand;
-  }
-
-  private showGameOver(): void {
-    const gameOverText = GameObject.create('GameOverText', this.gameObject.engineState, { x: 96, y: 88 }, [
-      (gameObject: GameObject) => TextRenderer.create(gameObject, 'GAME OVER', FOREGROUND_LAYER),
-    ]);
-    this.gameObject.engineState.addGameObject(gameOverText);
   }
 
   private isGroundedBelow(): boolean {

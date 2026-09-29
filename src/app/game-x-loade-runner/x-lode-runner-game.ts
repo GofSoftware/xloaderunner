@@ -29,26 +29,17 @@ export class XLodeRunnerGame implements IGame {
 
   private levels: ((engineState: IEngineState) => ILevel)[] = [(engineState: IEngineState) => XLodeRunnerLevel1.create(engineState)];
   private lives: number = MAX_LIVES;
-  private currentLevel: ILevel | null = null;
 
   private constructor() {}
 
   public async start(engineState: IEngineState): Promise<void> {
     this._engineState = engineState;
 
-    if (this.currentLevel == null) {
-      await this.startLevel(
-        StartMenuLevel.create(this.engineState, () => {
-          this.startLevel(this.levels[0](this.engineState));
-        }),
-      );
-    } else if (this.lives <= 0) {
-      await this.startLevel(GameOverLevel.create(this.engineState));
-    } else if (this.lives > 0) {
-      await this.startLevel(this.levels[0](this.engineState));
-    } else {
-      throw new Error('Game initialization failure: incorrect IGame state.');
-    }
+    await this.startLevel(
+      StartMenuLevel.create(this.engineState, () => {
+        this.startLevel(this.levels[0](this.engineState));
+      }),
+    );
   }
 
   public async startLevel(level: ILevel): Promise<void> {
@@ -57,7 +48,22 @@ export class XLodeRunnerGame implements IGame {
     const gameObjects = await level.initialize();
     [
       GameObject.create('Lives', this.engineState, { x: 0, y: 0 }, [
-        (gameObject: GameObject) => LivesScript.create(gameObject, this.lives),
+        (gameObject: GameObject) =>
+          LivesScript.create(gameObject, this.lives, () => {
+            this.lives--;
+            this.lives > 0
+              ? this.startLevel(level)
+              : this.startLevel(
+                  GameOverLevel.create(this.engineState, () => {
+                    this.lives = MAX_LIVES;
+                    this.startLevel(
+                      StartMenuLevel.create(this.engineState, () => {
+                        this.startLevel(this.levels[0](this.engineState));
+                      }),
+                    );
+                  }),
+                );
+          }),
         (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),
       ]),
       GameObject.create('Stars', this.engineState, { x: 0, y: 0 }, [

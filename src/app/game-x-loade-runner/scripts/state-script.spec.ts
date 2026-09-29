@@ -11,7 +11,6 @@ import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { CELL_SIZE, FOREGROUND_LAYER, LAYER_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 import { IEngineState } from '../../engine/i-engine-state';
 import { MAN_MOVING_LEFT_FRAME_1 } from '../data/sprites';
-import { LivesScript } from './lives-script';
 import { Direction } from './direction';
 import { PortalManagerScript } from './portal-manager-script';
 
@@ -19,7 +18,6 @@ describe('StateScript', () => {
   let engineState: IEngineState;
   let keyboard: Keyboard;
   let tileMap: TileMap;
-  let livesScript: LivesScript;
   let spawnCell: { column: number; row: number };
   let player: GameObject;
 
@@ -70,16 +68,13 @@ describe('StateScript', () => {
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
       renameGameObject: () => {},
       reset: () => {},
+      registerAfterUpdate: () => {},
     };
 
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
     tileMap = tileMapGameObject.getScript(TileMap)!;
     tileMap.setTile(1, 3, TileType.Brick);
     gameObjectsByName.set('Map', tileMapGameObject);
-
-    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2)]);
-    livesScript = livesGameObject.getScript(LivesScript)!;
-    gameObjectsByName.set('Lives', livesGameObject);
 
     const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [
       (go) => PortalManagerScript.create(go),
@@ -484,33 +479,19 @@ describe('StateScript', () => {
     expect(player.position).toEqual({ x: 40, y: 16 });
   });
 
-  it('should respawn at the spawn position and lose a life once the dying timer elapses', () => {
-    teleportPlayer(player, 5, 2);
-    tileMap.setTile(5, 2, TileType.Lava);
-
-    player.update();
-    expect(livesScript.count).toBe(2);
-
-    player.update();
-
-    expect(player.position).toEqual({ x: 8, y: 16 });
-    expect(livesScript.count).toBe(1);
-  });
-
-  it('should transition to GameOver instead of respawning once lives reach zero, and stop responding to input', () => {
-    livesScript.loseLife();
+  // StateScript no longer owns the dying timer, respawn, or lives/game-over sequencing itself -
+  // that moved to PlayerScript (which alone knows this is *the* player, not any other character
+  // driven by StateScript) plus LivesScript/XLodeRunnerGame. Once dying, StateScript just stays
+  // there indefinitely; see player-script.spec.ts for the respawn/game-over flow.
+  it('should stay in the Dying state indefinitely once it begins dying, never respawning on its own', () => {
     teleportPlayer(player, 5, 2);
     tileMap.setTile(5, 2, TileType.Lava);
 
     player.update();
     player.update();
-
-    expect(livesScript.isGameOver).toBe(true);
-    expect(player.position).toEqual({ x: 40, y: 16 });
-
-    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
     player.update();
 
+    expect(player.getScript(StateScript)!.isDying()).toBe(true);
     expect(player.position).toEqual({ x: 40, y: 16 });
   });
 

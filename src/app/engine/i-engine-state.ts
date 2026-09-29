@@ -21,4 +21,5 @@ export interface IEngineState {
   getGameObjectByName(name: string): GameObject | undefined;
   renameGameObject(gameObject: GameObject, name: string): void;
   reset(): void;
+  registerAfterUpdate(fn: () => void): void;
 }

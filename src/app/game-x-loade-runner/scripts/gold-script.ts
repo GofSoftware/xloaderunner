@@ -7,7 +7,6 @@ import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 import { TextHelper } from '../../engine/screen/text.helper';
 import { OBJECT_GOLD_HUD } from '../data/sprites';
 import { TileType } from './tile-map/tile-map-types';
-import { MAX_LIVES } from '../x-lode-runner-constants';
 
 export class GoldScript extends Script {
   public static create(gameObject: GameObject, hudLayer: number): GoldScript {
@@ -55,8 +54,9 @@ export class GoldScript extends Script {
 
   private drawHud(): void {
     const { screenBuffer } = this.gameObject.engineState;
-    // Cols 0-1 right after the hearts are left blank - the gold icon and count start at cols 2-3.
-    const startX = SCREEN_WIDTH - MAX_LIVES * CELL_SIZE + 2 * CELL_SIZE;
+    // Fixed 2-cell-wide gap from the right edge, independent of how many hearts MAX_LIVES draws -
+    // the gold icon and count start 4 cells in from the right (row 1, one row below the hearts).
+    const startX = SCREEN_WIDTH - 4 * CELL_SIZE;
     TextHelper.print(screenBuffer, `${this.collected}`, startX + CELL_SIZE, CELL_SIZE, this.hudLayer);
     screenBuffer.copy(OBJECT_GOLD_HUD, startX, CELL_SIZE, this.hudLayer);
   }
