@@ -30,6 +30,11 @@ describe('StateScript', () => {
       (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
     ]);
     gameObject.start();
+    // A freshly created StateScript starts in Borning until something calls startLife() - in the
+    // real game that's PlayerScript/EnemyScript, after their own spawn-animation timer elapses.
+    // Skip straight past it here so these tests exercise ordinary movement, not the spawn freeze
+    // (that's covered separately below, under "Borning").
+    gameObject.getScript(StateScript)!.startLife();
     return gameObject;
   }
 
@@ -46,6 +51,7 @@ describe('StateScript', () => {
       (go) => ObjectPosition.create(go, column, row),
     ]);
     gameObject.start();
+    gameObject.getScript(StateScript)!.startLife();
     return gameObject;
   }
 
@@ -88,6 +94,40 @@ describe('StateScript', () => {
 
   afterEach(() => {
     keyboard.detach();
+  });
+
+  describe('Borning', () => {
+    // Bypasses createPlayer()'s own startLife() call, to exercise the raw just-constructed state.
+    function createNewbornPlayer(): GameObject {
+      const gameObject = GameObject.create('Player', engineState, { x: 8, y: 16 }, [
+        (go) => KeyboardInputScript.create(go),
+        (go) => StateScript.create(go, spawnCell),
+        (go) => ObjectPosition.create(go, 1, 2),
+        (go) => BitmapSpriteRenderer.create(go, { bitmap: [MAN_MOVING_LEFT_FRAME_1], framePerSecond: 1 }, FOREGROUND_LAYER),
+      ]);
+      gameObject.start();
+      return gameObject;
+    }
+
+    it('should stay frozen in place, ignoring input, until something calls startLife()', () => {
+      const newborn = createNewbornPlayer();
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      newborn.update();
+      newborn.update();
+
+      expect(newborn.position).toEqual({ x: 8, y: 16 });
+    });
+
+    it('should resume ordinary movement the same frame startLife() is called', () => {
+      const newborn = createNewbornPlayer();
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+
+      newborn.getScript(StateScript)!.startLife();
+      newborn.update();
+
+      expect(newborn.position.x).toBeGreaterThan(8);
+    });
   });
 
   it('should stand still when grounded and no key is pressed', () => {

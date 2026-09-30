@@ -119,30 +119,6 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
       oneTime: true,
     },
   },
-  [TileType.PlayerStart]: {
-    bitmapType: TileBitmapType.Animated,
-    animatedBitmap: {
-      bitmap: [
-        PLAYER_SPAWN_GATE_001,
-        PLAYER_SPAWN_GATE_002,
-        PLAYER_SPAWN_GATE_003,
-        PLAYER_SPAWN_GATE_004,
-        PLAYER_SPAWN_GATE_01,
-        PLAYER_SPAWN_GATE_02,
-        PLAYER_SPAWN_GATE_03,
-        PLAYER_SPAWN_GATE_04,
-        PLAYER_SPAWN_GATE_05,
-        PLAYER_SPAWN_GATE_06,
-        PLAYER_SPAWN_GATE_07,
-        PLAYER_SPAWN_GATE_08,
-        PLAYER_SPAWN_GATE_004,
-        PLAYER_SPAWN_GATE_003,
-        PLAYER_SPAWN_GATE_002,
-        PLAYER_SPAWN_GATE_001,
-      ],
-      framePerSecond: 10,
-    },
-  },
   [TileType.PlayerFinish]: {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {

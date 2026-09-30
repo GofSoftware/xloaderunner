@@ -11,6 +11,7 @@ import {
   ON_CROSSBAR_ANIMATION,
   ON_CROSSBAR_MOVE_LEFT_ANIMATION,
   ON_CROSSBAR_MOVE_RIGHT_ANIMATION,
+  ON_PLAYER_BORN,
   ON_STAIRS_ANIMATION,
   STAND_ANIMATION,
   STAND_ANIMATION_LOOK_LEFT,
@@ -54,6 +55,7 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
   // Reuses STAND_ANIMATION as a placeholder - no dedicated death/game-over art yet.
   [PlayerState.Dying]: STAND_ANIMATION,
   [PlayerState.GameOver]: STAND_ANIMATION,
+  [PlayerState.Borning]: ON_PLAYER_BORN,
 };
 const TURN_STATE_BY_DIRECTION: Record<Direction, PlayerState> = {
   [Direction.Left]: PlayerState.TurnLeft,
@@ -77,7 +79,7 @@ export class StateScript extends Script {
   // Whether landing on a blasted-open brick pins this character in place (Trapped) instead of
   // falling straight through it - used to trap Enemy in a dug hole, but not the Player.
   private readonly getsTrappedInHoles: boolean;
-  private state: PlayerState | undefined;
+  private state: PlayerState | null = null;
   private movingState: PlayerState | undefined;
   private hesitation: { state: PlayerState.MoveLeft | PlayerState.MoveRight; elapsed: number; warned: boolean } | undefined;
   private dying: boolean = false;
@@ -126,6 +128,7 @@ export class StateScript extends Script {
       [PlayerState.OnCrossbarMoveRight]: MOVE_SPEED * runSpeedMultiplier,
       [PlayerState.Dying]: 0,
       [PlayerState.GameOver]: 0,
+      [PlayerState.Borning]: 0,
     };
   }
 
@@ -143,6 +146,10 @@ export class StateScript extends Script {
 
   public get direction(): Direction {
     return this.currentDirection;
+  }
+
+  public startLife(): void {
+    this.state = PlayerState.Stand;
   }
 
   public isDying(): boolean {
@@ -196,6 +203,10 @@ export class StateScript extends Script {
   private resolveState(): PlayerState {
     this.updateFacingDirection();
     const { column, row } = this.objectPosition;
+
+    if (this.state == null || this.state === PlayerState.Borning) {
+      return PlayerState.Borning;
+    }
 
     if (this.dying) {
       return PlayerState.Dying;

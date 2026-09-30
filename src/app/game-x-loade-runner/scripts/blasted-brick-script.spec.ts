@@ -61,6 +61,9 @@ describe('BlastedBrickScript', () => {
       (go) => ObjectPosition.create(go, 5, 5),
     ]);
     movingPlayer.start();
+    // A freshly created StateScript starts frozen in Borning until something calls startLife() -
+    // normally PlayerScript, absent here since this test only needs a real facing direction.
+    movingPlayer.getScript(StateScript)!.startLife();
     return movingPlayer;
   }
 

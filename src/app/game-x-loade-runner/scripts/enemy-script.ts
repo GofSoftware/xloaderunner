@@ -4,6 +4,7 @@ import { StateScript } from './state-script';
 import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
+import { DelayedAction } from '../../engine/delayed-action';
 
 interface ICell {
   column: number;
@@ -11,6 +12,8 @@ interface ICell {
 }
 
 export const ENEMY_SPEED_SLOWDOWN = 1.5;
+
+const BORNING_DURATION_SECONDS = 1.1;
 
 /**
  * Chases the Player by pathfinding to its current cell every frame and forcing the direction of
@@ -27,6 +30,8 @@ export class EnemyScript extends Script {
   public static create(gameObject: GameObject): EnemyScript {
     return new EnemyScript(gameObject);
   }
+
+  private borning: DelayedAction = DelayedAction.create(BORNING_DURATION_SECONDS, () => this.stateScript.startLife());
 
   private constructor(gameObject: GameObject) {
     super(gameObject);
@@ -49,6 +54,11 @@ export class EnemyScript extends Script {
   }
 
   public override update(): void {
+    if (this.borning.isPending) {
+      this.borning.advance(this.gameObject.engineState.deltaTime);
+      return;
+    }
+
     const playerPosition = this.player?.getScript(ObjectPosition);
     const from: ICell = { column: this.objectPosition.column, row: this.objectPosition.row };
     const next = playerPosition ? this.findNextStep(from, { column: playerPosition.column, row: playerPosition.row }) : undefined;

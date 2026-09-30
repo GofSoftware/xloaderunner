@@ -39,6 +39,15 @@ describe('EnemyScript', () => {
     ]);
     gameObject.start();
     gameObjectsByName.set('Enemy', gameObject);
+
+    // EnemyScript starts every life frozen in its own Borning delay, same as the real game (see
+    // player-script.spec.ts for that in isolation) - skip past it with one oversized-deltaTime
+    // update so these tests exercise real pathfinding instead of the spawn freeze.
+    const realDeltaTime = engineState.deltaTime;
+    engineState.deltaTime = 999;
+    gameObject.getScript(EnemyScript)!.update();
+    engineState.deltaTime = realDeltaTime;
+
     return gameObject;
   }
 

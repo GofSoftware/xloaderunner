@@ -16,4 +16,5 @@ export enum PlayerState {
   OnCrossbarMoveRight = 'OnCrossbarMoveRight',
   Dying = 'Dying',
   GameOver = 'GameOver',
+  Borning = 'Borning',
 }

@@ -30,6 +30,17 @@ describe('PlayerScript', () => {
     return gameObject;
   }
 
+  // Every new PlayerScript starts frozen in its own Borning (spawn) delay, same as EnemyScript -
+  // see the dedicated Borning tests below. Skip past it here with one oversized-deltaTime update
+  // to PlayerScript alone (not the whole GameObject - StateScript would misread that same huge
+  // deltaTime as a giant movement step), so the dying/lives tests exercise that behavior in isolation.
+  function skipBorning(target: GameObject): void {
+    const realDeltaTime = engineState.deltaTime;
+    engineState.deltaTime = 999;
+    target.getScript(PlayerScript)!.update();
+    engineState.deltaTime = realDeltaTime;
+  }
+
   function killPlayer(): void {
     tileMap.setTile(1, 2, TileType.Lava);
   }
@@ -70,6 +81,29 @@ describe('PlayerScript', () => {
     gameObjectsByName.set('Lives', livesGameObject);
 
     player = createPlayer({ x: 8, y: 16 });
+    skipBorning(player);
+  });
+
+  describe('Borning', () => {
+    it('should do nothing and not react to isDying() while still frozen in the spawn delay', () => {
+      const newborn = createPlayer({ x: 24, y: 16 });
+      tileMap.setTile(3, 2, TileType.Lava);
+
+      expect(() => newborn.update()).not.toThrow();
+
+      expect(musicPlayer.play).not.toHaveBeenCalled();
+    });
+
+    it('should resume normal behavior once the spawn delay elapses', () => {
+      const newborn = createPlayer({ x: 24, y: 16 });
+
+      skipBorning(newborn);
+      tileMap.setTile(3, 2, TileType.Lava);
+      newborn.update();
+      newborn.update();
+
+      expect(musicPlayer.play).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should do nothing while the player is not dying', () => {
@@ -98,16 +132,29 @@ describe('PlayerScript', () => {
     expect(loseLife).not.toHaveBeenCalled();
   });
 
-  // Not tested further past this point: in the real game, loseLife()'s deferred callback
-  // (XLodeRunnerGame's loseLifeCallback, via engineState.registerAfterUpdate) resets the whole
-  // level - destroying this exact Player/PlayerScript before it could ever receive another
-  // update(). PlayerScript itself has no guard against re-entering its dying sequence if it
-  // somehow did receive one anyway (isDying() stays true on StateScript indefinitely) - it relies
-  // entirely on being destroyed in time, the same way this test's registerAfterUpdate mock does.
   it('should lose exactly one life once the dying timer elapses', () => {
     const loseLife = vi.spyOn(livesScript, 'loseLife');
     killPlayer();
 
+    player.update();
+    player.update();
+    player.update();
+
+    expect(loseLife).toHaveBeenCalledTimes(1);
+  });
+
+  // In the real game, loseLife()'s deferred callback (XLodeRunnerGame's loseLifeCallback, via
+  // engineState.registerAfterUpdate) resets the whole level - destroying this exact
+  // Player/PlayerScript before it would ever receive another update(). This asserts PlayerScript
+  // stays safe even if that didn't happen: the DelayedAction backing `dying` latches once fired,
+  // so it never re-triggers the sequence even if isDying() keeps reporting true (which it does
+  // indefinitely - StateScript never clears it) and update() keeps being called.
+  it('should not lose a second life even if it somehow keeps receiving updates after dying', () => {
+    const loseLife = vi.spyOn(livesScript, 'loseLife');
+    killPlayer();
+
+    player.update();
+    player.update();
     player.update();
     player.update();
     player.update();

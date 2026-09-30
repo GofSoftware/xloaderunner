@@ -1,10 +1,12 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { DEATH_JINGLE } from '../../engine/audio/music-player';
+import { DelayedAction } from '../../engine/delayed-action';
 import { LivesScript } from './lives-script';
 import { StateScript } from './state-script';
 
 const DYING_DURATION_SECONDS = 1;
+const BORNING_DURATION_SECONDS = 1.1;
 
 export class PlayerScript extends Script {
   public static create(gameObject: GameObject): PlayerScript {
@@ -12,7 +14,8 @@ export class PlayerScript extends Script {
   }
 
   private _stateScript: StateScript | null = null;
-  private dying: { elapsed: number } | null = null;
+  private dying: DelayedAction | null = null;
+  private borning: DelayedAction = DelayedAction.create(BORNING_DURATION_SECONDS, () => this.stateScript.startLife());
 
   private constructor(gameObject: GameObject) {
     super(gameObject);
@@ -27,8 +30,13 @@ export class PlayerScript extends Script {
   }
 
   public override update(): void {
+    if (this.borning.isPending) {
+      this.borning.advance(this.gameObject.engineState.deltaTime);
+      return;
+    }
+
     if (this.dying != null) {
-      this.advanceDying();
+      this.dying.advance(this.gameObject.engineState.deltaTime);
       return;
     }
 
@@ -38,18 +46,9 @@ export class PlayerScript extends Script {
   }
 
   private beginDying(): void {
-    this.dying = { elapsed: 0 };
+    this.dying = DelayedAction.create(DYING_DURATION_SECONDS, () => this.lives.loseLife());
     const { musicPlayer } = this.gameObject.engineState;
     musicPlayer.register('Death', DEATH_JINGLE);
     musicPlayer.play('Death');
-  }
-
-  private advanceDying(): void {
-    this.dying!.elapsed += this.gameObject.engineState.deltaTime;
-    if (this.dying!.elapsed < DYING_DURATION_SECONDS) {
-      return;
-    }
-    this.dying = null;
-    this.lives.loseLife();
   }
 }
