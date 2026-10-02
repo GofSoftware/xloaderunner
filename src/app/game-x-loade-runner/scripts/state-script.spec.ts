@@ -72,6 +72,10 @@ describe('StateScript', () => {
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      getGameObjectsByName: (name: string) => {
+        const gameObject = gameObjectsByName.get(name);
+        return gameObject ? [gameObject] : [];
+      },
       renameGameObject: () => {},
       reset: () => {},
       registerAfterUpdate: () => {},
@@ -533,6 +537,38 @@ describe('StateScript', () => {
 
     expect(player.getScript(StateScript)!.isDying()).toBe(true);
     expect(player.position).toEqual({ x: 40, y: 16 });
+  });
+
+  // A trapped character (getsTrappedInHoles) can be left standing inside a BlastedBrick cell that
+  // then reforms into a solid Brick wall around it - without this check it would be stuck
+  // embedded in solid terrain forever instead of dying.
+  it('should die when left standing inside a tile that has become a solid wall', () => {
+    teleportPlayer(player, 5, 2);
+    tileMap.setTile(5, 2, TileType.Brick);
+
+    player.update();
+
+    expect(player.getScript(StateScript)!.isDying()).toBe(true);
+  });
+
+  describe('die() and clearState()', () => {
+    it('die() should start dying immediately, regardless of the current tile', () => {
+      player.getScript(StateScript)!.die();
+
+      expect(player.getScript(StateScript)!.isDying()).toBe(true);
+    });
+
+    it('clearState() should stop dying and drop back to the Borning state', () => {
+      const stateScript = player.getScript(StateScript)!;
+      stateScript.die();
+
+      stateScript.clearState();
+
+      expect(stateScript.isDying()).toBe(false);
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
+      player.update();
+      expect(player.position).toEqual({ x: 8, y: 16 }); // Still frozen - back in Borning, not Stand.
+    });
   });
 
   describe('direction', () => {

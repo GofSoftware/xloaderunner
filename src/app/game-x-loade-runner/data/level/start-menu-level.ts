@@ -35,9 +35,9 @@ export class StartMenuLevel implements ILevel {
           }),
         ]),
     ]);
-    const anyKey = GameObject.create('Any Key', this.engineState, { x: CELL_SIZE * 4, y: CELL_SIZE * 11 }, [
+    const anyKey = GameObject.create('Any Key', this.engineState, { x: CELL_SIZE * 5, y: CELL_SIZE * 11 }, [
       (gameObject: GameObject) =>
-        TextRenderer.create(gameObject, 'Press Any Key To Continue', HUD_LAYER, [
+        TextRenderer.create(gameObject, 'Press Any Key To Play!', HUD_LAYER, [
           ColorOverrideTextureEffect.create(this.engineState, (v: number, x: number, y: number) => {
             const color = Math.abs(Math.sin(this.engineState.timeFromStart / 1000)) * 255;
             const result = (color << 8) | (color << 16) | (color << 24) | 0xff;

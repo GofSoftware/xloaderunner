@@ -5,6 +5,8 @@ import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
 import { TileType } from './tile-map/tile-map-types';
 import { DelayedAction } from '../../engine/delayed-action';
+import { DEATH_ENEMY_JINGLE } from '../../engine/audio/music-player';
+import { IMapPosition } from './tile-map/i-map-position';
 
 interface ICell {
   column: number;
@@ -14,6 +16,7 @@ interface ICell {
 export const ENEMY_SPEED_SLOWDOWN = 1.5;
 
 const BORNING_DURATION_SECONDS = 1.1;
+const DYING_DURATION_SECONDS = 0.9;
 
 /**
  * Chases the Player by pathfinding to its current cell every frame and forcing the direction of
@@ -27,14 +30,17 @@ const BORNING_DURATION_SECONDS = 1.1;
  * cell into the hole and pins it there (Trapped) until the brick reforms.
  */
 export class EnemyScript extends Script {
-  public static create(gameObject: GameObject): EnemyScript {
-    return new EnemyScript(gameObject);
+  public static create(gameObject: GameObject, reSpawnPosition: IMapPosition): EnemyScript {
+    return new EnemyScript(gameObject, reSpawnPosition);
   }
 
   private borning: DelayedAction = DelayedAction.create(BORNING_DURATION_SECONDS, () => this.stateScript.startLife());
+  private dying: DelayedAction | null = null;
+  private readonly reSpawnPosition: IMapPosition;
 
-  private constructor(gameObject: GameObject) {
+  private constructor(gameObject: GameObject, reSpawnPosition: IMapPosition) {
     super(gameObject);
+    this.reSpawnPosition = reSpawnPosition;
   }
 
   private get stateScript(): StateScript {
@@ -57,6 +63,15 @@ export class EnemyScript extends Script {
     if (this.borning.isPending) {
       this.borning.advance(this.gameObject.engineState.deltaTime);
       return;
+    }
+
+    if (this.dying != null) {
+      this.dying.advance(this.gameObject.engineState.deltaTime);
+      return;
+    }
+
+    if (this.stateScript.isDying()) {
+      this.beginDying();
     }
 
     const playerPosition = this.player?.getScript(ObjectPosition);
@@ -149,5 +164,19 @@ export class EnemyScript extends Script {
 
   private static key(cell: ICell): string {
     return `${cell.column},${cell.row}`;
+  }
+
+  private beginDying(): void {
+    this.dying = DelayedAction.create(DYING_DURATION_SECONDS, () => this.respawn());
+    const { musicPlayer } = this.gameObject.engineState;
+    musicPlayer.register('EnemyDeath', DEATH_ENEMY_JINGLE);
+    musicPlayer.play('EnemyDeath');
+  }
+
+  private respawn(): void {
+    this.dying = null;
+    this.gameObject.getScript(ObjectPosition)!.teleportTo(this.reSpawnPosition.column, this.reSpawnPosition.row);
+    this.stateScript.clearState();
+    this.borning = DelayedAction.create(BORNING_DURATION_SECONDS, () => this.stateScript.startLife());
   }
 }

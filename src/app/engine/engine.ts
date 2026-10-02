@@ -119,6 +119,10 @@ export class Engine implements IEngineState {
     return this.gameObjectsByName.get(name)?.[0];
   }
 
+  public getGameObjectsByName(name: string): GameObject[] {
+    return this.gameObjectsByName.get(name) ?? [];
+  }
+
   public renameGameObject(gameObject: GameObject, name: string): void {
     this.setNamed(gameObject, name);
   }

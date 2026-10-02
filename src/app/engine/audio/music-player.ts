@@ -15,6 +15,8 @@ export const DEATH_JINGLE: IMusicNote[] = [
   { frequency: C4, duration: 0.4 },
 ];
 
+export const DEATH_ENEMY_JINGLE: IMusicNote[] = [{ frequency: 50, duration: 0.3 }];
+
 export const TWINKLE_TWINKLE_LITTLE_STAR: IMusicNote[] = [
   { frequency: C4, duration: 0.4 },
   { frequency: C4, duration: 0.4 },
@@ -111,6 +113,4 @@ export class MusicPlayer {
       state.timeoutId = undefined;
     }
   }
-
-
 }

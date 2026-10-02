@@ -41,6 +41,16 @@ import {
   PLAYER_SPAWN_GATE_001,
   PLAYER_SPAWN_GATE_003,
   PLAYER_SPAWN_GATE_004,
+  DIE_HARD_01,
+  DIE_HARD_02,
+  DIE_HARD_03,
+  DIE_HARD_04,
+  DIE_HARD_05,
+  DIE_HARD_06,
+  DIE_HARD_07,
+  DIE_HARD_08,
+  DIE_HARD_09,
+  DIE_HARD_10,
 } from '../../game-x-loade-runner/data/sprites';
 
 export const STAND_ANIMATION = { frames: [MAN_STANDING_FRAME_1, MAN_STANDING_FRAME_2], framesPerSecond: 2 };
@@ -109,6 +119,22 @@ export const ON_PLAYER_BORN = {
     // PLAYER_SPAWN_GATE_003,
     // PLAYER_SPAWN_GATE_002,
     // PLAYER_SPAWN_GATE_001
+  ],
+  framesPerSecond: 10,
+};
+
+export const DYING_ANIMATION = {
+  frames: [
+    DIE_HARD_01,
+    DIE_HARD_02,
+    DIE_HARD_03,
+    DIE_HARD_04,
+    DIE_HARD_05,
+    DIE_HARD_06,
+    DIE_HARD_07,
+    DIE_HARD_08,
+    DIE_HARD_09,
+    DIE_HARD_10,
   ],
   framesPerSecond: 10,
 };

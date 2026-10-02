@@ -91,7 +91,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
 
   private createEnemy(enemyPosition: { mapPosition: IMapPosition; screenPosition: IVector2 }): GameObject {
     return GameObject.create('Enemy', this.engineState, enemyPosition.screenPosition, [
-      (gameObject: GameObject) => EnemyScript.create(gameObject),
+      (gameObject: GameObject) => EnemyScript.create(gameObject, enemyPosition.mapPosition),
       (gameObject: GameObject) => RunnerScript.create(gameObject),
       (gameObject: GameObject) => StateScript.create(gameObject, enemyPosition.mapPosition, 1 / ENEMY_SPEED_SLOWDOWN, true),
       (gameObject: GameObject) => ObjectPosition.create(gameObject, enemyPosition.mapPosition.column, enemyPosition.mapPosition.row),

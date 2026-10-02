@@ -5,6 +5,7 @@ import { TileMap } from './tile-map/tile-map';
 import { BACKGROUND_LAYER, CELL_SIZE } from '../../engine/screen/screen.constants';
 import {
   CLIMB_ANIMATION,
+  DYING_ANIMATION,
   FALL_ANIMATION,
   MOVE_ANIMATION_LEFT,
   MOVE_ANIMATION_RIGHT,
@@ -53,7 +54,7 @@ const ANIMATION_BY_STATE: Record<PlayerState, { frames: number[][][]; framesPerS
   [PlayerState.OnCrossbarMoveLeft]: ON_CROSSBAR_MOVE_LEFT_ANIMATION,
   [PlayerState.OnCrossbarMoveRight]: ON_CROSSBAR_MOVE_RIGHT_ANIMATION,
   // Reuses STAND_ANIMATION as a placeholder - no dedicated death/game-over art yet.
-  [PlayerState.Dying]: STAND_ANIMATION,
+  [PlayerState.Dying]: DYING_ANIMATION,
   [PlayerState.GameOver]: STAND_ANIMATION,
   [PlayerState.Borning]: ON_PLAYER_BORN,
 };
@@ -152,6 +153,11 @@ export class StateScript extends Script {
     this.state = PlayerState.Stand;
   }
 
+  public clearState(): void {
+    this.state = null;
+    this.dying = false;
+  }
+
   public isDying(): boolean {
     return this.dying;
   }
@@ -193,6 +199,10 @@ export class StateScript extends Script {
     this.setState(activeState);
   }
 
+  public die(): void {
+    this.beginDying();
+  }
+
   private resetForces(): void {
     this.isForcedLeft = false;
     this.isForcedRight = false;
@@ -212,7 +222,8 @@ export class StateScript extends Script {
       return PlayerState.Dying;
     }
 
-    if (this.tileMap.isDangerous(column, row)) {
+    // There might be a wall if it was standing on broken brick.
+    if (this.tileMap.isDangerous(column, row) || this.tileMap.isWall(column, row)) {
       return this.beginDying();
     }
 
@@ -451,7 +462,7 @@ export class StateScript extends Script {
     if (this.state === PlayerState.Stand && this.currentDirection === Direction.Right) {
       animation = STAND_ANIMATION_LOOK_RIGHT;
     }
-    spriteRenderer.setAnimation({ bitmap: animation.frames, framePerSecond: animation.framesPerSecond });
+    spriteRenderer.setAnimation({ bitmap: animation.frames, framePerSecond: animation.framesPerSecond, spriteIndexTime: 0 });
   }
 
   private showExclamation(): void {

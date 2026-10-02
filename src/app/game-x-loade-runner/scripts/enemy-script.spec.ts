@@ -15,6 +15,7 @@ describe('EnemyScript', () => {
   let keyboard: Keyboard;
   let tileMap: TileMap;
   let gameObjectsByName: Map<string, GameObject>;
+  let musicPlayer: { register: ReturnType<typeof vi.fn>; play: ReturnType<typeof vi.fn> };
 
   function createFloor(row: number, fromColumn: number, toColumn: number): void {
     for (let column = fromColumn; column <= toColumn; column++) {
@@ -33,7 +34,7 @@ describe('EnemyScript', () => {
 
   function createEnemy(column: number, row: number): GameObject {
     const gameObject = GameObject.create('Enemy', engineState, { x: column * 8, y: row * 8 }, [
-      (go) => EnemyScript.create(go),
+      (go) => EnemyScript.create(go, { column, row }),
       (go) => StateScript.create(go, { column, row }),
       (go) => ObjectPosition.create(go, column, row),
     ]);
@@ -64,11 +65,12 @@ describe('EnemyScript', () => {
     keyboard = Keyboard.create();
     keyboard.attach();
     gameObjectsByName = new Map<string, GameObject>();
+    musicPlayer = { register: vi.fn(), play: vi.fn() };
     engineState = {
       screenBuffer: ScreenBuffer.create(LAYER_COUNT),
       keyboard,
       soundPlayer: {} as IEngineState['soundPlayer'],
-      musicPlayer: {} as IEngineState['musicPlayer'],
+      musicPlayer: musicPlayer as unknown as IEngineState['musicPlayer'],
       deltaTime: 1,
       fps: 0,
       timeFromStart: 0,
@@ -77,6 +79,10 @@ describe('EnemyScript', () => {
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      getGameObjectsByName: (name: string) => {
+        const gameObject = gameObjectsByName.get(name);
+        return gameObject ? [gameObject] : [];
+      },
       renameGameObject: () => {},
       reset: () => {},
       registerAfterUpdate: () => {},
@@ -217,5 +223,52 @@ describe('EnemyScript', () => {
     expect(forces.left).toHaveBeenCalledWith(false);
     expect(forces.up).toHaveBeenCalledWith(false);
     expect(forces.down).toHaveBeenCalledWith(false);
+  });
+
+  describe('dying and respawn', () => {
+    // Drives the whole GameObject (not just EnemyScript directly, like the pathfinding tests
+    // above) - StateScript is what actually notices the lava and sets isDying().
+    function killEnemy(enemy: GameObject, column: number, row: number): void {
+      tileMap.setTile(column, row, TileType.Lava);
+      enemy.update(); // StateScript notices the lava and starts dying.
+      enemy.update(); // EnemyScript sees isDying() and begins its own dying sequence.
+    }
+
+    it('should play the enemy death jingle exactly once when it begins dying', () => {
+      const enemy = createEnemy(2, 5);
+
+      killEnemy(enemy, 2, 5);
+
+      expect(musicPlayer.register).toHaveBeenCalledTimes(1);
+      expect(musicPlayer.play).toHaveBeenCalledTimes(1);
+    });
+
+    it('should respawn at its original spawn position, not wherever it died, once the dying timer elapses', () => {
+      const enemy = createEnemy(2, 5);
+      enemy.getScript(ObjectPosition)!.teleportTo(7, 5);
+
+      killEnemy(enemy, 7, 5);
+      enemy.update(); // EnemyScript advances its dying timer past DYING_DURATION_SECONDS and respawns.
+
+      expect(enemy.position).toEqual({ x: 2 * 8, y: 5 * 8 });
+    });
+
+    it('should freeze in a fresh Borning delay immediately after respawning', () => {
+      createFloor(6, 0, 10);
+      createPlayer(8, 5);
+      const enemy = createEnemy(2, 5);
+
+      killEnemy(enemy, 2, 5);
+      enemy.update(); // respawns here
+
+      const stateScript = enemy.getScript(StateScript)!;
+      const forces = spyOnForces(stateScript);
+      enemy.getScript(EnemyScript)!.update();
+
+      expect(forces.left).not.toHaveBeenCalled();
+      expect(forces.right).not.toHaveBeenCalled();
+      expect(forces.up).not.toHaveBeenCalled();
+      expect(forces.down).not.toHaveBeenCalled();
+    });
   });
 });

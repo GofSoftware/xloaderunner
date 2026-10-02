@@ -4,8 +4,11 @@ import { DEATH_JINGLE } from '../../engine/audio/music-player';
 import { DelayedAction } from '../../engine/delayed-action';
 import { LivesScript } from './lives-script';
 import { StateScript } from './state-script';
+import { TileMap } from './tile-map/tile-map';
+import { ObjectPosition } from './object-position';
+import { EnemyScript } from './enemy-script';
 
-const DYING_DURATION_SECONDS = 1;
+const DYING_DURATION_SECONDS = 0.9;
 const BORNING_DURATION_SECONDS = 1.1;
 
 export class PlayerScript extends Script {
@@ -16,6 +19,13 @@ export class PlayerScript extends Script {
   private _stateScript: StateScript | null = null;
   private dying: DelayedAction | null = null;
   private borning: DelayedAction = DelayedAction.create(BORNING_DURATION_SECONDS, () => this.stateScript.startLife());
+
+  private get tileMap(): TileMap {
+    return this.gameObject.engineState.getGameObjectByName('Map')!.getScript(TileMap)!;
+  }
+  private get objectPosition(): ObjectPosition {
+    return this.gameObject.getScript(ObjectPosition)!;
+  }
 
   private constructor(gameObject: GameObject) {
     super(gameObject);
@@ -43,6 +53,8 @@ export class PlayerScript extends Script {
     if (this.stateScript.isDying()) {
       this.beginDying();
     }
+
+    this.checkEnemy();
   }
 
   private beginDying(): void {
@@ -50,5 +62,13 @@ export class PlayerScript extends Script {
     const { musicPlayer } = this.gameObject.engineState;
     musicPlayer.register('Death', DEATH_JINGLE);
     musicPlayer.play('Death');
+  }
+
+  private checkEnemy(): void {
+    const { column, row } = this.objectPosition;
+    const objects = this.tileMap.getObjectsAt(column, row);
+    if (objects.some((o) => o.getScript(EnemyScript) != null)) {
+      this.stateScript.die();
+    }
   }
 }

@@ -34,6 +34,10 @@ describe('KeyboardInputScript', () => {
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      getGameObjectsByName: (name: string) => {
+        const gameObject = gameObjectsByName.get(name);
+        return gameObject ? [gameObject] : [];
+      },
       renameGameObject: () => {},
       reset: () => {},
       registerAfterUpdate: () => {},

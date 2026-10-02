@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { PlayerScript } from './player-script';
 import { StateScript } from './state-script';
 import { LivesScript } from './lives-script';
+import { EnemyScript } from './enemy-script';
 import { ObjectPosition } from './object-position';
 import { PortalManagerScript } from './portal-manager-script';
 import { TileMap } from './tile-map/tile-map';
@@ -50,7 +51,7 @@ describe('PlayerScript', () => {
     musicPlayer = { register: vi.fn(), play: vi.fn() };
     engineState = {
       screenBuffer: ScreenBuffer.create(LAYER_COUNT),
-      keyboard: {} as IEngineState['keyboard'],
+      keyboard: { wasPressedThisFrame: () => false } as unknown as IEngineState['keyboard'],
       soundPlayer: {} as IEngineState['soundPlayer'],
       musicPlayer: musicPlayer as unknown as IEngineState['musicPlayer'],
       deltaTime: 1,
@@ -61,6 +62,10 @@ describe('PlayerScript', () => {
       addGameObject: () => {},
       removeGameObject: () => {},
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      getGameObjectsByName: (name: string) => {
+        const gameObject = gameObjectsByName.get(name);
+        return gameObject ? [gameObject] : [];
+      },
       renameGameObject: () => {},
       reset: () => {},
       registerAfterUpdate: (fn: () => void) => fn(),
@@ -160,5 +165,33 @@ describe('PlayerScript', () => {
     player.update();
 
     expect(loseLife).toHaveBeenCalledTimes(1);
+  });
+
+  describe('touching an enemy', () => {
+    function createEnemyAt(column: number, row: number): GameObject {
+      const gameObject = GameObject.create('Enemy', engineState, { x: column * 8, y: row * 8 }, [
+        (go) => EnemyScript.create(go, { column, row }),
+        (go) => ObjectPosition.create(go, column, row),
+      ]);
+      gameObject.start();
+      return gameObject;
+    }
+
+    it('should start dying once the player shares a cell with an enemy', () => {
+      const { column, row } = player.getScript(ObjectPosition)!;
+      createEnemyAt(column, row);
+
+      player.update();
+
+      expect(player.getScript(StateScript)!.isDying()).toBe(true);
+    });
+
+    it('should not die while no enemy occupies the same cell', () => {
+      createEnemyAt(5, 5);
+
+      player.update();
+
+      expect(player.getScript(StateScript)!.isDying()).toBe(false);
+    });
   });
 });

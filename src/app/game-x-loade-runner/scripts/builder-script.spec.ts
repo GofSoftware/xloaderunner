@@ -105,6 +105,10 @@ describe('BuilderScript', () => {
       },
       removeGameObject: (gameObject: GameObject) => gameObjectsByName.delete(gameObject.name),
       getGameObjectByName: (name: string) => gameObjectsByName.get(name),
+      getGameObjectsByName: (name: string) => {
+        const gameObject = gameObjectsByName.get(name);
+        return gameObject ? [gameObject] : [];
+      },
       renameGameObject: (gameObject: GameObject, name: string) => {
         gameObjectsByName.delete(gameObject.name);
         gameObject.name = name;

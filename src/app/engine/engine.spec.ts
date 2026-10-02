@@ -220,6 +220,32 @@ describe('Engine', () => {
     });
   });
 
+  describe('getGameObjectsByName', () => {
+    it('should return every tracked game object sharing a name, in add order', () => {
+      const first = createRecorder('Duplicate');
+      const second = createRecorder('Duplicate');
+      Engine.instance.addGameObject(first);
+      Engine.instance.addGameObject(second);
+
+      expect(Engine.instance.getGameObjectsByName('Duplicate')).toEqual([first, second]);
+    });
+
+    it('should return an empty array for a name that is not tracked', () => {
+      expect(Engine.instance.getGameObjectsByName('Nope')).toEqual([]);
+    });
+
+    it('should stop including a game object once it is removed', () => {
+      const first = createRecorder('Duplicate');
+      const second = createRecorder('Duplicate');
+      Engine.instance.addGameObject(first);
+      Engine.instance.addGameObject(second);
+
+      Engine.instance.removeGameObject(first);
+
+      expect(Engine.instance.getGameObjectsByName('Duplicate')).toEqual([second]);
+    });
+  });
+
   describe('stop', () => {
     it('should destroy every tracked game object, not skip every other one as the array shrinks', () => {
       const destroyed: string[] = [];
