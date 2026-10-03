@@ -200,6 +200,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
   }
 
   if (type === TileType.GoldenGates) {
+    todo add mechanism how to link OnOffScript with the Gate
     scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, { column: 14, row: 16 }));
   }
 
