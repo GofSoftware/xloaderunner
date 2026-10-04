@@ -3,7 +3,7 @@ import { EmitterScript } from './emitter-script';
 import { EmitterColor } from './emitter-color';
 import { StateScript } from '../state-script';
 import { TileMap } from '../tile-map/tile-map';
-import { TileType } from '../tile-map/tile-map-types';
+import { Tile } from '../tile-map/tile-map-types';
 import { ObjectPosition } from '../object-position';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../../engine/screen/screen-buffer';
@@ -155,7 +155,7 @@ describe('EmitterManager', () => {
 
   it('reaches a stable length once it hits a wall, and never draws on or past it', () => {
     createEmitter(2, 5, EmitterColor.Green, Direction.Right);
-    tileMap.setTile(6, 5, TileType.Brick);
+    tileMap.setTile(6, 5, Tile.Brick);
 
     advanceSteps(8);
 
@@ -168,7 +168,7 @@ describe('EmitterManager', () => {
 
   it('stops at lava the same way', () => {
     createEmitter(2, 5, EmitterColor.Green, Direction.Right);
-    tileMap.setTile(6, 5, TileType.Lava);
+    tileMap.setTile(6, 5, Tile.Lava);
 
     advanceSteps(8);
 
@@ -203,7 +203,7 @@ describe('EmitterManager', () => {
 
     // Placed one cell ahead of the beam's current tip, so every future step is affected - no segment
     // that's already past this cell to still be in flight and grandfathered through.
-    tileMap.setTile(4, 5, TileType.Brick);
+    tileMap.setTile(4, 5, Tile.Brick);
     advanceSteps(5);
 
     expect(pixelAt(3, 5)).toBe(GREEN);
@@ -213,7 +213,7 @@ describe('EmitterManager', () => {
 
   it('bends through a mirror tile instead of continuing straight', () => {
     createEmitter(2, 5, EmitterColor.Green, Direction.Right);
-    tileMap.setTile(5, 5, TileType.MirrorLB);
+    tileMap.setTile(5, 5, Tile.MirrorLB);
 
     advanceSteps(8);
 

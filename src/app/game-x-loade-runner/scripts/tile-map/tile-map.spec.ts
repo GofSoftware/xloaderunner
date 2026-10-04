@@ -1,5 +1,5 @@
 import { TileMap } from './tile-map';
-import { TileType, MAP_COLUMNS, MAP_ROWS } from './tile-map-types';
+import { Tile, MAP_COLUMNS, MAP_ROWS } from './tile-map-types';
 import { GameObject } from '../../../engine/game-object/game-object';
 import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/screen.constants';
 import { IEngineState } from '../../../engine/i-engine-state';
@@ -22,20 +22,20 @@ describe('TileMap', () => {
   });
 
   it('should report cells as empty and not solid until a tile is set', () => {
-    expect(tileMap.getTile(1, 3)).toBe(TileType.Empty);
+    expect(tileMap.getTile(1, 3)).toBe(Tile.Empty);
     expect(tileMap.isSolid(1, 3)).toBe(false);
 
-    tileMap.setTile(1, 3, TileType.Brick);
+    tileMap.setTile(1, 3, Tile.Brick);
 
-    expect(tileMap.getTile(1, 3)).toBe(TileType.Brick);
+    expect(tileMap.getTile(1, 3)).toBe(Tile.Brick);
     expect(tileMap.isSolid(1, 3)).toBe(true);
   });
 
   it('should not treat crossbar, lava, player-start, or gold tiles as solid ground', () => {
-    tileMap.setTile(1, 3, TileType.Crossbar);
-    tileMap.setTile(2, 3, TileType.Lava);
-    tileMap.setTile(6, 3, TileType.PlayerStart);
-    tileMap.setTile(7, 3, TileType.Gold);
+    tileMap.setTile(1, 3, Tile.Crossbar);
+    tileMap.setTile(2, 3, Tile.Lava);
+    tileMap.setTile(6, 3, Tile.PlayerStart);
+    tileMap.setTile(7, 3, Tile.Gold);
 
     expect(tileMap.isSolid(1, 3)).toBe(false);
     expect(tileMap.isSolid(2, 3)).toBe(false);
@@ -44,12 +44,12 @@ describe('TileMap', () => {
   });
 
   it('should only treat brick tiles as walls, not stairs, crossbars, lava, player-start, gold, or empty cells', () => {
-    tileMap.setTile(1, 3, TileType.Brick);
-    tileMap.setTile(2, 3, TileType.Stairs);
-    tileMap.setTile(4, 3, TileType.Crossbar);
-    tileMap.setTile(5, 3, TileType.Lava);
-    tileMap.setTile(6, 3, TileType.PlayerStart);
-    tileMap.setTile(7, 3, TileType.Gold);
+    tileMap.setTile(1, 3, Tile.Brick);
+    tileMap.setTile(2, 3, Tile.Stairs);
+    tileMap.setTile(4, 3, Tile.Crossbar);
+    tileMap.setTile(5, 3, Tile.Lava);
+    tileMap.setTile(6, 3, Tile.PlayerStart);
+    tileMap.setTile(7, 3, Tile.Gold);
 
     expect(tileMap.isWall(1, 3)).toBe(true);
     expect(tileMap.isWall(2, 3)).toBe(false);
@@ -61,12 +61,12 @@ describe('TileMap', () => {
   });
 
   it('should only treat lava tiles as dangerous, not brick, stairs, crossbar, player-start, gold, or empty cells', () => {
-    tileMap.setTile(1, 3, TileType.Lava);
-    tileMap.setTile(2, 3, TileType.Brick);
-    tileMap.setTile(4, 3, TileType.Stairs);
-    tileMap.setTile(5, 3, TileType.Crossbar);
-    tileMap.setTile(6, 3, TileType.PlayerStart);
-    tileMap.setTile(7, 3, TileType.Gold);
+    tileMap.setTile(1, 3, Tile.Lava);
+    tileMap.setTile(2, 3, Tile.Brick);
+    tileMap.setTile(4, 3, Tile.Stairs);
+    tileMap.setTile(5, 3, Tile.Crossbar);
+    tileMap.setTile(6, 3, Tile.PlayerStart);
+    tileMap.setTile(7, 3, Tile.Gold);
 
     expect(tileMap.isDangerous(1, 3)).toBe(true);
     expect(tileMap.isDangerous(0, 3)).toBe(false);
@@ -78,12 +78,12 @@ describe('TileMap', () => {
   });
 
   it('should only treat brick, stairs, and crossbar tiles as removable, not lava, player-start, gold, or empty cells', () => {
-    tileMap.setTile(1, 3, TileType.Brick);
-    tileMap.setTile(2, 3, TileType.Stairs);
-    tileMap.setTile(3, 3, TileType.Crossbar);
-    tileMap.setTile(4, 3, TileType.Lava);
-    tileMap.setTile(6, 3, TileType.PlayerStart);
-    tileMap.setTile(7, 3, TileType.Gold);
+    tileMap.setTile(1, 3, Tile.Brick);
+    tileMap.setTile(2, 3, Tile.Stairs);
+    tileMap.setTile(3, 3, Tile.Crossbar);
+    tileMap.setTile(4, 3, Tile.Lava);
+    tileMap.setTile(6, 3, Tile.PlayerStart);
+    tileMap.setTile(7, 3, Tile.Gold);
 
     expect(tileMap.isRemovable(1, 3)).toBe(true);
     expect(tileMap.isRemovable(2, 3)).toBe(true);
@@ -95,21 +95,21 @@ describe('TileMap', () => {
   });
 
   it('should treat out-of-bounds cells as empty and ignore writes to them', () => {
-    expect(tileMap.getTile(-1, 0)).toBe(TileType.Empty);
-    expect(tileMap.getTile(MAP_COLUMNS, 0)).toBe(TileType.Empty);
-    expect(tileMap.getTile(0, MAP_ROWS)).toBe(TileType.Empty);
+    expect(tileMap.getTile(-1, 0)).toBe(Tile.Empty);
+    expect(tileMap.getTile(MAP_COLUMNS, 0)).toBe(Tile.Empty);
+    expect(tileMap.getTile(0, MAP_ROWS)).toBe(Tile.Empty);
 
-    tileMap.setTile(-1, 0, TileType.Brick);
-    tileMap.setTile(MAP_COLUMNS, 0, TileType.Brick);
+    tileMap.setTile(-1, 0, Tile.Brick);
+    tileMap.setTile(MAP_COLUMNS, 0, Tile.Brick);
   });
 
   it('should list every non-empty tile with its position', () => {
-    tileMap.setTile(0, 3, TileType.Brick);
-    tileMap.setTile(3, 4, TileType.Stairs);
+    tileMap.setTile(0, 3, Tile.Brick);
+    tileMap.setTile(3, 4, Tile.Stairs);
 
     expect(tileMap.getTiles()).toEqual([
-      { column: 0, row: 3, type: TileType.Brick },
-      { column: 3, row: 4, type: TileType.Stairs },
+      { column: 0, row: 3, type: Tile.Brick },
+      { column: 3, row: 4, type: Tile.Stairs },
     ]);
   });
 

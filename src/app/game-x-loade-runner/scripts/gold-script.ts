@@ -6,7 +6,7 @@ import { ObjectPosition } from './object-position';
 import { CELL_SIZE, SCREEN_WIDTH } from '../../engine/screen/screen.constants';
 import { TextHelper } from '../../engine/screen/text.helper';
 import { OBJECT_GOLD_HUD } from '../data/sprites';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 
 export class GoldScript extends Script {
   public static create(gameObject: GameObject, hudLayer: number): GoldScript {
@@ -48,7 +48,7 @@ export class GoldScript extends Script {
     this.gameObject.engineState.removeGameObject(gold);
     // The tile grid still remembers this cell as Gold independently of the collected GameObject -
     // clear it back to Empty so BuilderScript can build here afterwards.
-    this.tileMap.setTile(column, row, TileType.Empty);
+    this.tileMap.setTile(column, row, Tile.Empty);
     this.collected++;
   }
 

@@ -1,12 +1,12 @@
 import { Script } from '../../../engine/game-object/script';
 import { GameObject } from '../../../engine/game-object/game-object';
-import { MAP_COLUMNS, MAP_ROWS, TileType } from './tile-map-types';
+import { MAP_COLUMNS, MAP_ROWS, Tile } from './tile-map-types';
 import { MirrorHelper } from '../mirror/mirror-helper';
 
 export interface ITile {
   column: number;
   row: number;
-  type: TileType;
+  type: Tile;
 }
 
 export class TileMap extends Script {
@@ -17,80 +17,80 @@ export class TileMap extends Script {
   public readonly columns: number = MAP_COLUMNS;
   public readonly rows: number = MAP_ROWS;
 
-  private readonly cells: TileType[][];
+  private readonly cells: Tile[][];
   private readonly objectsAt: GameObject[][][];
 
   private constructor(gameObject: GameObject) {
     super(gameObject);
-    this.cells = Array.from({ length: this.rows }, () => new Array<TileType>(this.columns).fill(TileType.Empty));
+    this.cells = Array.from({ length: this.rows }, () => new Array<Tile>(this.columns).fill(Tile.Empty));
     this.objectsAt = Array.from({ length: this.rows }, () => Array.from({ length: this.columns }, () => []));
   }
 
-  public setTile(column: number, row: number, type: TileType): void {
+  public setTile(column: number, row: number, type: Tile): void {
     if (this.isInBounds(column, row)) {
       this.cells[row][column] = type;
     }
   }
 
-  public getTile(column: number, row: number): TileType {
-    return this.isInBounds(column, row) ? this.cells[row][column] : TileType.Empty;
+  public getTile(column: number, row: number): Tile {
+    return this.isInBounds(column, row) ? this.cells[row][column] : Tile.Empty;
   }
 
   public isSolid(column: number, row: number): boolean {
     return (
-      this.getTile(column, row) === TileType.Brick ||
-      this.getTile(column, row) === TileType.BrickHard ||
-      this.getTile(column, row) === TileType.Stairs ||
-      this.getTile(column, row) === TileType.GoldenGates
+      this.getTile(column, row) === Tile.Brick ||
+      this.getTile(column, row) === Tile.BrickHard ||
+      this.getTile(column, row) === Tile.Stairs ||
+      this.getTile(column, row) === Tile.GoldenGates
     );
   }
 
   public isWall(column: number, row: number): boolean {
     return (
-      this.getTile(column, row) === TileType.Brick ||
-      this.getTile(column, row) === TileType.BrickHard ||
-      this.getTile(column, row) === TileType.GoldenGates
+      this.getTile(column, row) === Tile.Brick ||
+      this.getTile(column, row) === Tile.BrickHard ||
+      this.getTile(column, row) === Tile.GoldenGates
     );
   }
 
   public isTeleportDestinationBlocker(column: number, row: number): boolean {
     return (
-      this.getTile(column, row) === TileType.Brick ||
-      this.getTile(column, row) === TileType.Lava ||
-      this.getTile(column, row) === TileType.BrickHard
+      this.getTile(column, row) === Tile.Brick ||
+      this.getTile(column, row) === Tile.Lava ||
+      this.getTile(column, row) === Tile.BrickHard
     );
   }
 
   public isPortableSurface(column: number, row: number): boolean {
     const tile = this.getTile(column, row);
-    return tile === TileType.Brick || tile === TileType.BrickHard || tile === TileType.Stairs;
+    return tile === Tile.Brick || tile === Tile.BrickHard || tile === Tile.Stairs;
   }
 
   public isDangerous(column: number, row: number): boolean {
-    return this.getTile(column, row) === TileType.Lava;
+    return this.getTile(column, row) === Tile.Lava;
   }
 
   public isEmitter(column: number, row: number): boolean {
     const tile = this.getTile(column, row);
     return (
-      tile === TileType.EmitterGreenUp ||
-      tile === TileType.EmitterGreenDown ||
-      tile === TileType.EmitterGreenLeft ||
-      tile === TileType.EmitterGreenRight ||
-      tile === TileType.EmitterBlueUp ||
-      tile === TileType.EmitterBlueDown ||
-      tile === TileType.EmitterBlueLeft ||
-      tile === TileType.EmitterBlueRight
+      tile === Tile.EmitterGreenUp ||
+      tile === Tile.EmitterGreenDown ||
+      tile === Tile.EmitterGreenLeft ||
+      tile === Tile.EmitterGreenRight ||
+      tile === Tile.EmitterBlueUp ||
+      tile === Tile.EmitterBlueDown ||
+      tile === Tile.EmitterBlueLeft ||
+      tile === Tile.EmitterBlueRight
     );
   }
 
   public isClimbable(column: number, row: number): boolean {
-    return this.getTile(column, row) === TileType.Stairs || this.getTile(column, row) === TileType.Crossbar;
+    return this.getTile(column, row) === Tile.Stairs || this.getTile(column, row) === Tile.Crossbar;
   }
 
   public isRemovable(column: number, row: number): boolean {
     const type = this.getTile(column, row);
-    return type === TileType.Brick || type === TileType.Stairs || type === TileType.Crossbar || MirrorHelper.isMirror(type);
+    return type === Tile.Brick || type === Tile.Stairs || type === Tile.Crossbar || MirrorHelper.isMirror(type);
   }
 
   public getObjectsAt(column: number, row: number): GameObject[] {
@@ -120,7 +120,7 @@ export class TileMap extends Script {
     for (let row = 0; row < this.rows; row++) {
       for (let column = 0; column < this.columns; column++) {
         const type = this.cells[row][column];
-        if (type !== TileType.Empty) {
+        if (type !== Tile.Empty) {
           tiles.push({ column, row, type });
         }
       }

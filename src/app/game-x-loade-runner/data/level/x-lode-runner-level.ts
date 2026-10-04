@@ -1,4 +1,4 @@
-import { TileType } from '../../scripts/tile-map/tile-map-types';
+import { Tile, TileElement, TileWithOptions } from '../../scripts/tile-map/tile-map-types';
 import { ILevel } from '../../i-level';
 import { IEngineState } from '../../../engine/i-engine-state';
 import { GameObject } from '../../../engine/game-object/game-object';
@@ -21,10 +21,11 @@ import { IVector2 } from '../../../engine/math/i-vector-2';
 import { MapHelper } from '../../helpers/map.helper';
 import { EmitterManager } from '../../scripts/emitter/emitter-manager';
 import { PortalManagerScript } from '../../scripts/portal-manager-script';
+import { OnOffManager } from '../../scripts/on-off/on-off-manager';
 
 export abstract class XLodeRunnerLevel implements ILevel {
   public engineState: IEngineState;
-  public abstract map: TileType[][];
+  public abstract map: TileElement[][];
   public abstract initialize(): Promise<GameObject[]>;
 
   protected constructor(engineState: IEngineState) {
@@ -33,13 +34,16 @@ export abstract class XLodeRunnerLevel implements ILevel {
 
   protected setup(): GameObject[] {
     const { tileMap, tileGameObjects, mapGameObject } = this.setupTileMap();
-    const playerPosition = this.getPositionAndClear(tileMap, TileType.PlayerStart);
-    const enemyPosition = this.getPositionAndClear(tileMap, TileType.EnemyStart);
+    const playerPosition = this.getPositionAndClear(tileMap, Tile.PlayerStart);
+    const enemyPosition = this.getPositionAndClear(tileMap, Tile.EnemyStart);
 
     return [
       GameObject.create('Emitters', this.engineState, { x: 0, y: 0 }, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
       GameObject.create('PortalManager', this.engineState, { x: 0, y: 0 }, [
         (gameObject: GameObject) => PortalManagerScript.create(gameObject),
+      ]),
+      GameObject.create('OnOffManager', this.engineState, { x: 0, y: 0 }, [
+        (gameObject: GameObject) => OnOffManager.create(gameObject),
       ]),
       mapGameObject,
       ...tileGameObjects,
@@ -54,16 +58,17 @@ export abstract class XLodeRunnerLevel implements ILevel {
     ]);
     const tileMap = mapGameObject.getScript(TileMap)!;
 
+    const tileGameObjects: GameObject[] = []
     this.map.forEach((value, y) => {
       value.forEach((type, x) => {
-        tileMap.setTile(x, y, type);
+        tileMap.setTile(x, y, (type as TileWithOptions).type == null ? type as Tile : (type as TileWithOptions).type);
+        const gameObject = createTileGameObject(this.engineState, x, y, type);
+        if (gameObject != null) {
+          tileGameObjects.push(gameObject);
+        }
       });
     });
 
-    const tileGameObjects = tileMap
-      .getTiles()
-      .map(({ column, row, type }) => createTileGameObject(this.engineState, column, row, type))
-      .filter((gameObject): gameObject is GameObject => gameObject !== undefined);
     return { tileMap, tileGameObjects, mapGameObject };
   }
 
@@ -107,7 +112,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
 
   private getPositionAndClear(
     tileMap: TileMap,
-    type: TileType,
+    type: Tile,
     defaultPosition: IMapPosition = { column: 0, row: 0 },
   ): { mapPosition: IMapPosition; screenPosition: IVector2 } {
     const startTile = tileMap.getTiles().find((tile) => tile.type === type);
@@ -115,7 +120,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
     const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
     // PlayerStart/EnemyStart have no bitmap and never renders anything, but the tile grid still remembers it as
     // non-Empty - clear it, so BuilderScript can build on the spawn cell once the player has moved off it.
-    tileMap.setTile(spawnCell.column, spawnCell.row, TileType.Empty);
+    tileMap.setTile(spawnCell.column, spawnCell.row, Tile.Empty);
     return { mapPosition: spawnCell, screenPosition: spawnPosition };
   }
 }

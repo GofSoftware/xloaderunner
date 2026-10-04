@@ -1,7 +1,7 @@
 import { ILevel } from '../../i-level';
 import { IEngineState } from '../../../engine/i-engine-state';
 import { GameObject } from '../../../engine/game-object/game-object';
-import { TileType } from '../../scripts/tile-map/tile-map-types';
+import { Tile } from '../../scripts/tile-map/tile-map-types';
 import { CELL_SIZE, HUD_LAYER } from '../../../engine/screen/screen.constants';
 import { TextRenderer } from '../../../engine/scripts/text-renderer';
 import { ColorOverrideTextureEffect } from '../../../engine/scripts/effects/color-override-texture-effect';
@@ -15,7 +15,7 @@ export class GameOverLevel implements ILevel {
 
   private readonly continueCallback: VoidCallback = () => {};
   public engineState: IEngineState;
-  public map: TileType[][] = [[]];
+  public map: Tile[][] = [[]];
 
   private constructor(engineState: IEngineState, continueCallback: VoidCallback) {
     this.engineState = engineState;

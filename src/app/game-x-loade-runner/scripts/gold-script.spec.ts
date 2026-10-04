@@ -1,7 +1,7 @@
 import { GoldScript } from './gold-script';
 import { GoldItem } from './gold-item';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { ObjectPosition } from './object-position';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
@@ -36,7 +36,7 @@ describe('GoldScript', () => {
   });
 
   function createGoldItem(column: number, row: number): GameObject {
-    tileMap.setTile(column, row, TileType.Gold);
+    tileMap.setTile(column, row, Tile.Gold);
     const gold = GameObject.create('Gold', engineState, { x: column * CELL_SIZE, y: row * CELL_SIZE }, [
       (go) => ObjectPosition.create(go, column, row),
       (go) => GoldItem.create(go),
@@ -73,10 +73,10 @@ describe('GoldScript', () => {
     createGoldItem(2, 2);
     const player = createPlayer(2, 2);
 
-    expect(tileMap.getTile(2, 2)).toBe(TileType.Gold);
+    expect(tileMap.getTile(2, 2)).toBe(Tile.Gold);
     player.update();
 
-    expect(tileMap.getTile(2, 2)).toBe(TileType.Empty);
+    expect(tileMap.getTile(2, 2)).toBe(Tile.Empty);
   });
 
   it('should not collect a gold object the player is merely standing near, not on', () => {

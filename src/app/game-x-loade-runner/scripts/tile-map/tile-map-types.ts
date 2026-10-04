@@ -3,7 +3,17 @@ import { CELL_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../engine/screen/s
 export const MAP_COLUMNS = Math.floor(SCREEN_WIDTH / CELL_SIZE);
 export const MAP_ROWS = Math.floor(SCREEN_HEIGHT / CELL_SIZE);
 
-export enum TileType {
+export interface IBaseTileElementOptions {
+}
+
+export interface TileWithOptions {
+  type: Tile;
+  options: IBaseTileElementOptions;
+}
+
+export type TileElement = Tile | TileWithOptions;
+
+export enum Tile {
   Empty = 'Empty',
   Brick = 'Brick',
   BrickHard = 'BrickHard',

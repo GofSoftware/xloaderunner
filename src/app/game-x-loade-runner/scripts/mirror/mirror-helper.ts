@@ -1,14 +1,14 @@
-import { TileType } from '../tile-map/tile-map-types';
+import { Tile } from '../tile-map/tile-map-types';
 
 export class MirrorHelper {
-  public static isMirror(type: TileType): boolean {
-    return type === TileType.MirrorRB ||
-      type === TileType.MirrorB ||
-      type === TileType.MirrorLB ||
-      type === TileType.MirrorL ||
-      type === TileType.MirrorLT ||
-      type === TileType.MirrorT ||
-      type === TileType.MirrorRT ||
-      type === TileType.MirrorR;
+  public static isMirror(type: Tile): boolean {
+    return type === Tile.MirrorRB ||
+      type === Tile.MirrorB ||
+      type === Tile.MirrorLB ||
+      type === Tile.MirrorL ||
+      type === Tile.MirrorLT ||
+      type === Tile.MirrorT ||
+      type === Tile.MirrorRT ||
+      type === Tile.MirrorR;
   }
 }

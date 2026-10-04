@@ -22,7 +22,7 @@ import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
 import { OBJECT_EXCLAMATION } from '../data/sprites';
 import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { ObjectPosition } from './object-position';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { PlayerState } from './state/state-types';
 import { Direction } from './direction';
 import { IMapPosition } from './tile-map/i-map-position';
@@ -227,7 +227,7 @@ export class StateScript extends Script {
       return this.beginDying();
     }
 
-    if (this.getsTrappedInHoles && this.tileMap.getTile(column, row) === TileType.BlastedBrick) {
+    if (this.getsTrappedInHoles && this.tileMap.getTile(column, row) === Tile.BlastedBrick) {
       this.hesitation = undefined;
       return PlayerState.Trapped;
     }
@@ -387,17 +387,17 @@ export class StateScript extends Script {
     // A blasted-open brick isn't solid on its own, but once something is occupying it (an Enemy
     // trapped there - see getsTrappedInHoles) it forms a floor/bridge over the hole, so this
     // character stands on top of it instead of falling in too.
-    return this.tileMap.getTile(column, row + 1) === TileType.BlastedBrick && this.tileMap.getObjectsAt(column, row + 1).length > 0;
+    return this.tileMap.getTile(column, row + 1) === Tile.BlastedBrick && this.tileMap.getObjectsAt(column, row + 1).length > 0;
   }
 
   private isOnStairs(): boolean {
     const { column, row } = this.objectPosition;
-    return this.tileMap.getTile(column, row) === TileType.Stairs;
+    return this.tileMap.getTile(column, row) === Tile.Stairs;
   }
 
   private isOnCrossbar(): boolean {
     const { column, row } = this.objectPosition;
-    return this.tileMap.getTile(column, row) === TileType.Crossbar;
+    return this.tileMap.getTile(column, row) === Tile.Crossbar;
   }
 
   private computeStepTarget(state: PlayerState): { column: number; row: number } {

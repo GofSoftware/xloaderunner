@@ -45,11 +45,7 @@ import {
   PLAYER_SPAWN_GATE_05,
   PLAYER_SPAWN_GATE_08,
   OBJECT_BRICK_HARD,
-  OBJECT_BEAM_SWITCH_GREEN,
-  PLAYER_SPAWN_GATE_002,
-  PLAYER_SPAWN_GATE_001,
-  PLAYER_SPAWN_GATE_003,
-  PLAYER_SPAWN_GATE_004,
+  OBJECT_BEAM_SWITCH_GREEN
 } from './data/sprites';
 import { GameObject } from '../engine/game-object/game-object';
 import { Script } from '../engine/game-object/script';
@@ -63,46 +59,48 @@ import { GoldItem } from './scripts/gold-item';
 import { MapHelper } from './helpers/map.helper';
 import { ObjectPosition } from './scripts/object-position';
 import { MirrorScript } from './scripts/mirror/mirror-script';
-import { TileType } from './scripts/tile-map/tile-map-types';
+import { Tile, TileElement, TileWithOptions } from './scripts/tile-map/tile-map-types';
 import { MirrorHelper } from './scripts/mirror/mirror-helper';
-import { SwitchScript } from './scripts/switch-script';
+import { BeamSwitchScript } from './scripts/beam-switch/beam-switch-script';
 import { ParticleScript } from '../engine/scripts/particle-script';
-import { GoldenGateLock } from './scripts/golden-gate-lock';
-import { OnOffScript } from './scripts/on-off-script';
+import { GoldenGateLock } from './scripts/golden-gate/golden-gate-lock';
+import { OnOffScript } from './scripts/on-off/on-off-script';
 import { BitmapAnimationDirection } from '../engine/scripts/i-bitmap-animation-description';
+import { IGoldenGateLockOptions } from './scripts/golden-gate/i-golden-gate-lock-options';
+import { IBeamSwitchOptions } from './scripts/beam-switch/i-beam-switch-options';
 
-export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
-  [TileType.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
-  [TileType.BrickHard]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK_HARD },
-  [TileType.Stairs]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_STAIRS },
-  [TileType.Crossbar]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_CROSSBAR },
-  [TileType.Gold]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_GOLD, layer: MIDDLE_TILE_LAYER },
-  [TileType.Lava]: {
+export const TILE_BITMAPS: Partial<Record<Tile, ITileBitmapDescription>> = {
+  [Tile.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
+  [Tile.BrickHard]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK_HARD },
+  [Tile.Stairs]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_STAIRS },
+  [Tile.Crossbar]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_CROSSBAR },
+  [Tile.Gold]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_GOLD, layer: MIDDLE_TILE_LAYER },
+  [Tile.Lava]: {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {
       bitmap: [OBJECT_LAVA_1, OBJECT_LAVA_2, OBJECT_LAVA_3, OBJECT_LAVA_4, OBJECT_LAVA_5, OBJECT_LAVA_6, OBJECT_LAVA_7, OBJECT_LAVA_8],
       framePerSecond: 4,
     },
   },
-  [TileType.EmitterGreenLeft]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_LEFT },
-  [TileType.EmitterGreenRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_RIGHT },
-  [TileType.EmitterGreenUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_UP },
-  [TileType.EmitterGreenDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_DOWN },
-  [TileType.EmitterBlueLeft]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_LEFT },
-  [TileType.EmitterBlueRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_RIGHT },
-  [TileType.EmitterBlueUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_UP },
-  [TileType.EmitterBlueDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_DOWN },
-  [TileType.MirrorRB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RB },
-  [TileType.MirrorB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_B },
-  [TileType.MirrorLB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LB },
-  [TileType.MirrorL]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_L },
-  [TileType.MirrorLT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LT },
-  [TileType.MirrorT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_T },
-  [TileType.MirrorRT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RT },
-  [TileType.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R },
-  [TileType.BeamSwitchBlue]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_BLUE },
-  [TileType.BeamSwitchGreen]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_GREEN },
-  [TileType.GoldenGates]: {
+  [Tile.EmitterGreenLeft]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_LEFT },
+  [Tile.EmitterGreenRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_RIGHT },
+  [Tile.EmitterGreenUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_UP },
+  [Tile.EmitterGreenDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_GREEN_DOWN },
+  [Tile.EmitterBlueLeft]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_LEFT },
+  [Tile.EmitterBlueRight]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_RIGHT },
+  [Tile.EmitterBlueUp]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_UP },
+  [Tile.EmitterBlueDown]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_EMITTER_BLUE_DOWN },
+  [Tile.MirrorRB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RB },
+  [Tile.MirrorB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_B },
+  [Tile.MirrorLB]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LB },
+  [Tile.MirrorL]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_L },
+  [Tile.MirrorLT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_LT },
+  [Tile.MirrorT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_T },
+  [Tile.MirrorRT]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_RT },
+  [Tile.MirrorR]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_MIRROR_R },
+  [Tile.BeamSwitchBlue]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_BLUE },
+  [Tile.BeamSwitchGreen]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BEAM_SWITCH_GREEN },
+  [Tile.GoldenGates]: {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {
       bitmap: [
@@ -119,7 +117,7 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
       oneTime: true,
     },
   },
-  [TileType.PlayerFinish]: {
+  [Tile.PlayerFinish]: {
     bitmapType: TileBitmapType.Animated,
     animatedBitmap: {
       bitmap: [
@@ -138,12 +136,13 @@ export const TILE_BITMAPS: Partial<Record<TileType, ITileBitmapDescription>> = {
   },
 };
 
-export function creatTileGameObjectName(type: TileType, column: number, row: number): string {
+export function creatTileGameObjectName(type: Tile, column: number, row: number): string {
   return `Tile-${type}-${column}-${row}`;
 }
 
 /** Builds the renderable GameObject for a tile cell (used both for the initial level layout and for tiles placed at runtime, e.g. by BuilderScript). */
-export function createTileGameObject(engineState: IEngineState, column: number, row: number, type: TileType): GameObject | undefined {
+export function createTileGameObject(engineState: IEngineState, column: number, row: number, tileElement: TileElement): GameObject | undefined {
+  const type = (tileElement as TileWithOptions).type == null ? (tileElement as Tile) : (tileElement as TileWithOptions).type;
   const tileBitmap = TILE_BITMAPS[type];
   if (!tileBitmap) {
     return undefined;
@@ -153,7 +152,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
   const scriptFactories: ((gameObject: GameObject) => Script)[] = [(gameObject) => ObjectPosition.create(gameObject, column, row)];
   const name = creatTileGameObjectName(type, column, row);
 
-  if (type === TileType.Gold) {
+  if (type === Tile.Gold) {
     scriptFactories.push((gameObject) => GoldItem.create(gameObject));
   }
 
@@ -166,9 +165,11 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
     scriptFactories.push((gameObject) => MirrorScript.create(gameObject));
   }
 
-  if (type === TileType.BeamSwitchBlue || type === TileType.BeamSwitchGreen) {
-    scriptFactories.push((gameObject) => SwitchScript.create(gameObject));
-    scriptFactories.push((gameObject) => OnOffScript.create(gameObject, false));
+  if (type === Tile.BeamSwitchBlue || type === Tile.BeamSwitchGreen) {
+    scriptFactories.push((gameObject) => BeamSwitchScript.create(gameObject));
+    scriptFactories.push((gameObject) => OnOffScript.create(
+      gameObject, false,  ((tileElement as TileWithOptions).options as IBeamSwitchOptions).onOffName
+    ));
 
     const ttlMin = 1;
     const ttlMax = 1.5;
@@ -189,7 +190,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
           colorOverrides: [
             (color, particle) => {
               const x = (particle.remainingLife * 255) / ttlMax;
-              return type === TileType.BeamSwitchBlue ? (x << 8) | 0x000000ff : (x << 16) | 0x000000ff;
+              return type === Tile.BeamSwitchBlue ? (x << 8) | 0x000000ff : (x << 16) | 0x000000ff;
             },
           ],
           timeToLive: { min: ttlMin, max: ttlMax },
@@ -199,9 +200,11 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
     );
   }
 
-  if (type === TileType.GoldenGates) {
-    todo add mechanism how to link OnOffScript with the Gate
-    scriptFactories.push((gameObject) => GoldenGateLock.create(gameObject, { column: 14, row: 16 }));
+  if (type === Tile.GoldenGates) {
+    scriptFactories.push((gameObject) => GoldenGateLock.create(
+      gameObject,
+      (tileElement as TileWithOptions).options as IGoldenGateLockOptions)
+    );
   }
 
   scriptFactories.push((gameObject) =>

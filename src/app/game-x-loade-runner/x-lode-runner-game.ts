@@ -12,7 +12,7 @@ import { BACKGROUND_LAYER, HUD_LAYER } from '../engine/screen/screen.constants';
 import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LivesScript } from './scripts/lives-script';
 import { MAX_LIVES } from './x-lode-runner-constants';
-import { TileType } from './scripts/tile-map/tile-map-types';
+import { Tile } from './scripts/tile-map/tile-map-types';
 
 export class XLodeRunnerGame implements IGame {
   public static create(): XLodeRunnerGame {
@@ -85,7 +85,7 @@ export class XLodeRunnerGame implements IGame {
     }
     const tile = mapGameObject.getTile(column, row);
     const objects = mapGameObject.getObjectsAt(column, row);
-    if (tile === TileType.Empty && objects.length === 0) {
+    if (tile === Tile.Empty && objects.length === 0) {
       return;
     }
     console.log(`Screen coords: x ${screenX} y ${screenY} Map coords: column ${column} row ${row}; Tile: ${tile}`, objects);

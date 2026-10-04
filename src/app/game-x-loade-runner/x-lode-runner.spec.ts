@@ -2,7 +2,7 @@ import { Engine } from '../engine/engine';
 import { XLodeRunnerGame } from './x-lode-runner-game';
 import { XLodeRunnerLevel1 } from './data/level/x-lode-runner-level-1';
 import { TileMap } from './scripts/tile-map/tile-map';
-import { TileType } from './scripts/tile-map/tile-map-types';
+import { Tile } from './scripts/tile-map/tile-map-types';
 
 describe('XLodeRunner', () => {
   afterEach(() => {
@@ -19,7 +19,7 @@ describe('XLodeRunner', () => {
     const tileMap = Engine.instance.getGameObjectByName('Map')!.getScript(TileMap)!;
     for (let row = 0; row < tileMap.rows; row++) {
       for (let column = 0; column < tileMap.columns; column++) {
-        expect(tileMap.getTile(column, row)).not.toBe(TileType.PlayerStart);
+        expect(tileMap.getTile(column, row)).not.toBe(Tile.PlayerStart);
       }
     }
   });

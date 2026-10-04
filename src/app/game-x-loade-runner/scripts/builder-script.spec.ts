@@ -2,7 +2,7 @@ import { BuildableTileType, BuilderScript, DEFAULT_BUILD_COUNTS, DEFAULT_REMOVE_
 import { createTileGameObject } from '../tile-bitmap-factory';
 import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { StateScript } from './state-script';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { LivesScript } from './lives-script';
@@ -40,7 +40,7 @@ describe('BuilderScript', () => {
     return engineState.screenBuffer.buffers[HUD_LAYER].slice(0, CELL_SIZE).map((row) => row.slice(x, x + CELL_SIZE));
   }
 
-  function createTrackedTile(column: number, row: number, type: TileType): GameObject {
+  function createTrackedTile(column: number, row: number, type: Tile): GameObject {
     tileMap.setTile(column, row, type);
     const tileGameObject = GameObject.create(`Tile-${type}-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
@@ -67,7 +67,7 @@ describe('BuilderScript', () => {
   // turns/moves it and BuilderScript can read a facing direction other than the Right fallback.
   function createMovingPlayer(): GameObject {
     for (let column = 0; column <= 8; column++) {
-      tileMap.setTile(column, 6, TileType.Brick);
+      tileMap.setTile(column, 6, Tile.Brick);
     }
     const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2, () => {})]);
     gameObjectsByName.set('Lives', livesGameObject);
@@ -139,43 +139,43 @@ describe('BuilderScript', () => {
     press('ArrowRight');
     player.update();
 
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+    expect(tileMap.getTile(6, 5)).toBe(Tile.Empty);
   });
 
   it('builds a brick immediately, in the cell the player faces (Right by default)', () => {
     press('Digit1');
     player.update();
 
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-    expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(true);
+    expect(tileMap.getTile(6, 5)).toBe(Tile.Brick);
+    expect(gameObjectsByName.has(`Tile-${Tile.Brick}-6-5`)).toBe(true);
   });
 
   it('builds stairs immediately when Digit2 is pressed', () => {
     press('Digit2');
     player.update();
 
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Stairs);
+    expect(tileMap.getTile(6, 5)).toBe(Tile.Stairs);
   });
 
   it('builds a crossbar immediately when Digit3 is pressed', () => {
     press('Digit3');
     player.update();
 
-    expect(tileMap.getTile(6, 5)).toBe(TileType.Crossbar);
+    expect(tileMap.getTile(6, 5)).toBe(Tile.Crossbar);
   });
 
   it('builds a mirror immediately when Digit4 is pressed', () => {
     press('Digit4');
     player.update();
 
-    expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorRB);
+    expect(tileMap.getTile(6, 5)).toBe(Tile.MirrorRB);
   });
 
   describe('mirror rotation', () => {
     // Mirrors MirrorScript's own rotation order (mirror-types.ts): MirrorRB is followed by MirrorB.
     function createMirror(column: number, row: number): void {
-      tileMap.setTile(column, row, TileType.MirrorRB);
-      const mirrorGameObject = createTileGameObject(engineState, column, row, TileType.MirrorRB)!;
+      tileMap.setTile(column, row, Tile.MirrorRB);
+      const mirrorGameObject = createTileGameObject(engineState, column, row, Tile.MirrorRB)!;
       engineState.addGameObject(mirrorGameObject);
     }
 
@@ -185,28 +185,28 @@ describe('BuilderScript', () => {
       press('Digit4');
       player.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorB);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.MirrorB);
     });
 
     it('does not spend build supply when rotating an existing mirror', () => {
-      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.MirrorRB]: 1 });
+      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [Tile.MirrorRB]: 1 });
       createMirror(6, 5);
 
       press('Digit4');
       limited.update();
       nextFrame();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorB);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.MirrorB);
 
       press('Digit4');
       limited.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.MirrorLB);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.MirrorLB);
     });
   });
 
   it('does not build over a cell that is already occupied', () => {
-    tileMap.setTile(6, 5, TileType.Brick);
+    tileMap.setTile(6, 5, Tile.Brick);
 
     press('Digit1');
     player.update();
@@ -223,32 +223,32 @@ describe('BuilderScript', () => {
 
   describe('supply', () => {
     it('refuses to build a type once its supply reaches zero', () => {
-      const brickless = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 0 });
+      const brickless = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [Tile.Brick]: 0 });
 
       press('Digit1');
       brickless.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Empty);
     });
 
     it('decrements the supply of the type just built', () => {
-      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 1 });
+      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [Tile.Brick]: 1 });
 
       press('Digit1');
       limited.update();
       nextFrame();
       // The first brick already occupies (6, 5); move the offset by removing it and re-pressing
       // Digit1 to confirm the supply - not just the occupied cell - is what blocks the second build.
-      tileMap.setTile(6, 5, TileType.Empty);
+      tileMap.setTile(6, 5, Tile.Empty);
 
       press('Digit1');
       limited.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Empty);
     });
 
     it('restocks the supply of the removed type after a remove', () => {
-      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 1 });
+      const limited = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [Tile.Brick]: 1 });
 
       press('Digit1');
       limited.update();
@@ -261,12 +261,12 @@ describe('BuilderScript', () => {
       press('Digit1');
       limited.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Brick);
     });
 
     it('never displays a restocked supply above 99', () => {
-      const nearlyFull = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [TileType.Brick]: 99 });
-      createTrackedTile(6, 5, TileType.Brick);
+      const nearlyFull = createPlayer(5, 5, { ...DEFAULT_BUILD_COUNTS, [Tile.Brick]: 99 });
+      createTrackedTile(6, 5, Tile.Brick);
 
       press('Digit0');
       nearlyFull.update();
@@ -278,47 +278,47 @@ describe('BuilderScript', () => {
 
   describe('remove', () => {
     it('removes a brick immediately in the cell the player faces, and destroys its game object', () => {
-      createTrackedTile(6, 5, TileType.Brick);
+      createTrackedTile(6, 5, Tile.Brick);
 
       press('Digit0');
       player.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
-      expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(false);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Empty);
+      expect(gameObjectsByName.has(`Tile-${Tile.Brick}-6-5`)).toBe(false);
     });
 
     it('removes stairs and a crossbar the same way, on separate presses', () => {
-      createTrackedTile(6, 5, TileType.Stairs);
+      createTrackedTile(6, 5, Tile.Stairs);
 
       press('Digit0');
       player.update();
       nextFrame();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Empty);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Empty);
     });
 
     it('does not remove lava, gold, or player-start tiles', () => {
-      tileMap.setTile(6, 5, TileType.Lava);
+      tileMap.setTile(6, 5, Tile.Lava);
 
       press('Digit0');
       player.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Lava);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Lava);
     });
 
     it('refuses to remove once the remove supply reaches zero', () => {
-      createTrackedTile(6, 5, TileType.Brick);
+      createTrackedTile(6, 5, Tile.Brick);
       const removeless = createPlayer(5, 5, DEFAULT_BUILD_COUNTS, 0);
 
       press('Digit0');
       removeless.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-      expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(true);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Brick);
+      expect(gameObjectsByName.has(`Tile-${Tile.Brick}-6-5`)).toBe(true);
     });
 
     it('decrements the remove supply on every successful removal, and is never restocked', () => {
-      createTrackedTile(6, 5, TileType.Brick);
+      createTrackedTile(6, 5, Tile.Brick);
       const limited = createPlayer(5, 5, DEFAULT_BUILD_COUNTS, 1);
 
       press('Digit0');
@@ -327,12 +327,12 @@ describe('BuilderScript', () => {
 
       expect(hudRegionAt(CELL_SIZE * 13)).toEqual(GLYPH_MAP['0']);
 
-      createTrackedTile(6, 5, TileType.Brick);
+      createTrackedTile(6, 5, Tile.Brick);
       press('Digit0');
       limited.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
-      expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-5`)).toBe(true);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Brick);
+      expect(gameObjectsByName.has(`Tile-${Tile.Brick}-6-5`)).toBe(true);
     });
   });
 
@@ -341,7 +341,7 @@ describe('BuilderScript', () => {
       press('Digit1');
       player.update();
 
-      expect(tileMap.getTile(6, 5)).toBe(TileType.Brick);
+      expect(tileMap.getTile(6, 5)).toBe(Tile.Brick);
     });
 
     it('builds in whichever direction the player is currently facing, not always to the right', () => {
@@ -358,19 +358,19 @@ describe('BuilderScript', () => {
       press('Digit1');
       movingPlayer.update();
 
-      expect(tileMap.getTile(column - 1, row)).toBe(TileType.Brick);
+      expect(tileMap.getTile(column - 1, row)).toBe(Tile.Brick);
       // Sanity check: it did not fall back to building on the original (Right) side.
-      expect(tileMap.getTile(column + 1, row)).toBe(TileType.Empty);
+      expect(tileMap.getTile(column + 1, row)).toBe(Tile.Empty);
     });
   });
 
   describe('HUD', () => {
-    const items: { type: TileType; icon: number[][]; x: number; digits: [string, string] }[] = [
-      { type: TileType.Brick, icon: OBJECT_BRICK, x: 0, digits: ['9', '9'] },
-      { type: TileType.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3, digits: ['9', '9'] },
-      { type: TileType.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6, digits: ['9', '9'] },
-      { type: TileType.MirrorRB, icon: OBJECT_MIRROR_RB, x: CELL_SIZE * 9, digits: ['9', '9'] },
-      { type: TileType.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 12, digits: ['9', '9'] },
+    const items: { type: Tile; icon: number[][]; x: number; digits: [string, string] }[] = [
+      { type: Tile.Brick, icon: OBJECT_BRICK, x: 0, digits: ['9', '9'] },
+      { type: Tile.Stairs, icon: OBJECT_STAIRS, x: CELL_SIZE * 3, digits: ['9', '9'] },
+      { type: Tile.Crossbar, icon: OBJECT_CROSSBAR, x: CELL_SIZE * 6, digits: ['9', '9'] },
+      { type: Tile.MirrorRB, icon: OBJECT_MIRROR_RB, x: CELL_SIZE * 9, digits: ['9', '9'] },
+      { type: Tile.Empty, icon: OBJECT_REMOVE, x: CELL_SIZE * 12, digits: ['9', '9'] },
     ];
 
     it('draws every buildable type, plus remove, at the top-left corner, icon followed by its two-digit supply', () => {
@@ -392,7 +392,7 @@ describe('BuilderScript', () => {
     });
 
     it('updates the displayed remove supply after a removal', () => {
-      createTrackedTile(6, 5, TileType.Brick);
+      createTrackedTile(6, 5, Tile.Brick);
 
       press('Digit0');
       player.update();

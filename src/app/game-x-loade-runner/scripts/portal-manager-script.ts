@@ -3,7 +3,7 @@ import { PortalType } from './portal/portal-type';
 import { ObjectPosition } from './object-position';
 import { Direction, DIRECTION_SHIFT, shiftByDirection } from './direction';
 import { BaseScript } from './base-script';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { MapHelper } from '../helpers/map.helper';
 import { PortalScript } from './portal/portal-script';
 import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
@@ -185,11 +185,11 @@ export class PortalManagerScript extends BaseScript {
     }
   }
 
-  private isBlocker(tile: TileType, column: number, row: number): boolean {
+  private isBlocker(tile: Tile, column: number, row: number): boolean {
     const gameObjects = this.tileMap.getObjectsAt(column, row);
     return (
       !this.tileMap.isInBounds(column, row) ||
-      tile === TileType.GoldenGates ||
+      tile === Tile.GoldenGates ||
       gameObjects.some((gameObject) => gameObject.getScript(RunnerScript) != null)
     );
   }
@@ -221,6 +221,6 @@ export class PortalManagerScript extends BaseScript {
         gameObject.getScript(BeamScript) == null
       );
     });
-    return this.tileMap.getTile(column, row) === TileType.Empty && gameObjects.length === 0 && !this.isOnPortal(column, row);
+    return this.tileMap.getTile(column, row) === Tile.Empty && gameObjects.length === 0 && !this.isOnPortal(column, row);
   }
 }

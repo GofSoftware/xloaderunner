@@ -6,7 +6,7 @@ import { EnemyScript } from './enemy-script';
 import { ObjectPosition } from './object-position';
 import { PortalManagerScript } from './portal-manager-script';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { GameObject } from '../../engine/game-object/game-object';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
 import { LAYER_COUNT } from '../../engine/screen/screen.constants';
@@ -43,7 +43,7 @@ describe('PlayerScript', () => {
   }
 
   function killPlayer(): void {
-    tileMap.setTile(1, 2, TileType.Lava);
+    tileMap.setTile(1, 2, Tile.Lava);
   }
 
   beforeEach(() => {
@@ -92,7 +92,7 @@ describe('PlayerScript', () => {
   describe('Borning', () => {
     it('should do nothing and not react to isDying() while still frozen in the spawn delay', () => {
       const newborn = createPlayer({ x: 24, y: 16 });
-      tileMap.setTile(3, 2, TileType.Lava);
+      tileMap.setTile(3, 2, Tile.Lava);
 
       expect(() => newborn.update()).not.toThrow();
 
@@ -103,7 +103,7 @@ describe('PlayerScript', () => {
       const newborn = createPlayer({ x: 24, y: 16 });
 
       skipBorning(newborn);
-      tileMap.setTile(3, 2, TileType.Lava);
+      tileMap.setTile(3, 2, Tile.Lava);
       newborn.update();
       newborn.update();
 

@@ -1,9 +1,9 @@
-import { TileType } from '../tile-map/tile-map-types';
+import { Tile } from '../tile-map/tile-map-types';
 
-export type MirrorDirection = TileType.MirrorRB | TileType.MirrorB | TileType.MirrorLB | TileType.MirrorL |
-  TileType.MirrorLT | TileType.MirrorT | TileType.MirrorRT | TileType.MirrorR;
+export type MirrorDirection = Tile.MirrorRB | Tile.MirrorB | Tile.MirrorLB | Tile.MirrorL |
+  Tile.MirrorLT | Tile.MirrorT | Tile.MirrorRT | Tile.MirrorR;
 
 export const ORDERED_MIRROR_TILES: MirrorDirection[] = [
-  TileType.MirrorRB, TileType.MirrorB, TileType.MirrorLB, TileType.MirrorL,
-  TileType.MirrorLT, TileType.MirrorT, TileType.MirrorRT, TileType.MirrorR
+  Tile.MirrorRB, Tile.MirrorB, Tile.MirrorLB, Tile.MirrorL,
+  Tile.MirrorLT, Tile.MirrorT, Tile.MirrorRT, Tile.MirrorR
 ];

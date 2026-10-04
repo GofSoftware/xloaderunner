@@ -4,7 +4,7 @@ import { ObjectPosition } from './object-position';
 import { StateScript } from './state-script';
 import { TileMap } from './tile-map/tile-map';
 import { createTileGameObject, creatTileGameObjectName } from '../tile-bitmap-factory';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 
 import { Direction } from './direction';
 
@@ -56,7 +56,7 @@ export class BlastedBrickScript extends Script {
     const targetColumn = column + offset.column;
     const targetRow = row + offset.row + 1;
 
-    if (this.tileMap.getTile(targetColumn, targetRow) !== TileType.Brick) {
+    if (this.tileMap.getTile(targetColumn, targetRow) !== Tile.Brick) {
       return;
     }
 
@@ -66,18 +66,18 @@ export class BlastedBrickScript extends Script {
   private blast(column: number, row: number): void {
     const { engineState } = this.gameObject;
 
-    const brickGameObject = engineState.getGameObjectByName(creatTileGameObjectName(TileType.Brick, column, row));
+    const brickGameObject = engineState.getGameObjectByName(creatTileGameObjectName(Tile.Brick, column, row));
     if (brickGameObject) {
       engineState.removeGameObject(brickGameObject);
     }
-    this.tileMap.setTile(column, row, TileType.BlastedBrick);
+    this.tileMap.setTile(column, row, Tile.BlastedBrick);
 
     setTimeout(() => this.restore(column, row), RESTORE_DELAY_MS);
   }
 
   private restore(column: number, row: number): void {
-    this.tileMap.setTile(column, row, TileType.Brick);
-    const brickGameObject = createTileGameObject(this.gameObject.engineState, column, row, TileType.Brick);
+    this.tileMap.setTile(column, row, Tile.Brick);
+    const brickGameObject = createTileGameObject(this.gameObject.engineState, column, row, Tile.Brick);
     if (brickGameObject) {
       this.gameObject.engineState.addGameObject(brickGameObject);
     }

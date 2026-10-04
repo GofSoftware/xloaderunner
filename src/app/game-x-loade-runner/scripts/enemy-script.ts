@@ -3,7 +3,7 @@ import { GameObject } from '../../engine/game-object/game-object';
 import { StateScript } from './state-script';
 import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { DelayedAction } from '../../engine/delayed-action';
 import { DEATH_ENEMY_JINGLE } from '../../engine/audio/music-player';
 import { IMapPosition } from './tile-map/i-map-position';
@@ -136,7 +136,7 @@ export class EnemyScript extends Script {
         result.push({ column: column + 1, row });
       }
     }
-    if (this.tileMap.getTile(column, row) === TileType.Stairs && this.isPassable(column, row - 1)) {
+    if (this.tileMap.getTile(column, row) === Tile.Stairs && this.isPassable(column, row - 1)) {
       result.push({ column, row: row - 1 });
     }
     if (this.isPassable(column, row + 1)) {
@@ -149,7 +149,7 @@ export class EnemyScript extends Script {
   private isSupported(column: number, row: number): boolean {
     return (
       this.tileMap.isSolid(column, row + 1) ||
-      this.tileMap.getTile(column, row + 1) === TileType.BlastedBrick ||
+      this.tileMap.getTile(column, row + 1) === Tile.BlastedBrick ||
       this.tileMap.isClimbable(column, row)
     );
   }

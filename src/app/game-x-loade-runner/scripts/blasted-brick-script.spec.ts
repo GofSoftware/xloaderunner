@@ -2,7 +2,7 @@ import { BlastedBrickScript } from './blasted-brick-script';
 import { BuilderScript } from './builder-script';
 import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { StateScript } from './state-script';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { LivesScript } from './lives-script';
@@ -48,7 +48,7 @@ describe('BlastedBrickScript', () => {
   // turns/moves it and BlastedBrickScript can read a facing direction other than the Right fallback.
   function createMovingPlayer(): GameObject {
     for (let column = 0; column <= 8; column++) {
-      tileMap.setTile(column, 6, TileType.Brick);
+      tileMap.setTile(column, 6, Tile.Brick);
     }
     const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2, () => {})]);
     gameObjectsByName.set('Lives', livesGameObject);
@@ -119,7 +119,7 @@ describe('BlastedBrickScript', () => {
     vi.useRealTimers();
   });
 
-  function createTrackedTile(column: number, row: number, type: TileType): GameObject {
+  function createTrackedTile(column: number, row: number, type: Tile): GameObject {
     tileMap.setTile(column, row, type);
     const tileGameObject = GameObject.create(`Tile-${type}-${column}-${row}`, engineState, { x: column * 8, y: row * 8 }, [
       (go) => ObjectPosition.create(go, column, row),
@@ -129,68 +129,68 @@ describe('BlastedBrickScript', () => {
   }
 
   it('does nothing when Space is not pressed', () => {
-    createTrackedTile(6, 6, TileType.Brick);
+    createTrackedTile(6, 6, Tile.Brick);
 
     player.update();
 
-    expect(tileMap.getTile(6, 6)).toBe(TileType.Brick);
+    expect(tileMap.getTile(6, 6)).toBe(Tile.Brick);
   });
 
   it('does nothing when the ground ahead (in the facing direction, one row down) is not a Brick', () => {
     press('Space');
     player.update();
 
-    expect(tileMap.getTile(6, 6)).toBe(TileType.Empty);
+    expect(tileMap.getTile(6, 6)).toBe(Tile.Empty);
   });
 
   it('blasts the brick ahead and one row down, in the facing direction (Right by default), and destroys its game object', () => {
-    createTrackedTile(6, 6, TileType.Brick);
+    createTrackedTile(6, 6, Tile.Brick);
 
     press('Space');
     player.update();
 
-    expect(tileMap.getTile(6, 6)).toBe(TileType.BlastedBrick);
-    expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-6`)).toBe(false);
+    expect(tileMap.getTile(6, 6)).toBe(Tile.BlastedBrick);
+    expect(gameObjectsByName.has(`Tile-${Tile.Brick}-6-6`)).toBe(false);
   });
 
   it('does not let the player build over a blasted cell', () => {
     // Simulates a cell that was already blasted (rather than re-deriving it here) so this test is
     // only about BuilderScript's own Empty-only check, not about the blast targeting math above.
-    tileMap.setTile(6, 5, TileType.BlastedBrick);
+    tileMap.setTile(6, 5, Tile.BlastedBrick);
 
     press('Digit1');
     player.update();
 
-    expect(tileMap.getTile(6, 5)).toBe(TileType.BlastedBrick);
+    expect(tileMap.getTile(6, 5)).toBe(Tile.BlastedBrick);
     expect(gameObjectsByName.has('Tile-6-5')).toBe(false);
   });
 
   it('reverts a blasted brick back to a regular Brick after 5 seconds', () => {
-    createTrackedTile(6, 6, TileType.Brick);
+    createTrackedTile(6, 6, Tile.Brick);
 
     press('Space');
     player.update();
 
     vi.advanceTimersByTime(5000);
 
-    expect(tileMap.getTile(6, 6)).toBe(TileType.Brick);
-    expect(gameObjectsByName.has(`Tile-${TileType.Brick}-6-6`)).toBe(true);
+    expect(tileMap.getTile(6, 6)).toBe(Tile.Brick);
+    expect(gameObjectsByName.has(`Tile-${Tile.Brick}-6-6`)).toBe(true);
   });
 
   it('does not revert before the 5 seconds have elapsed', () => {
-    createTrackedTile(6, 6, TileType.Brick);
+    createTrackedTile(6, 6, Tile.Brick);
 
     press('Space');
     player.update();
 
     vi.advanceTimersByTime(4999);
 
-    expect(tileMap.getTile(6, 6)).toBe(TileType.BlastedBrick);
+    expect(tileMap.getTile(6, 6)).toBe(Tile.BlastedBrick);
   });
 
   it('blasts in whichever direction the player is currently facing, not always to the right', () => {
     const movingPlayer = createMovingPlayer();
-    createTrackedTile(3, 6, TileType.Brick);
+    createTrackedTile(3, 6, Tile.Brick);
 
     press('ArrowLeft');
     movingPlayer.update();
@@ -201,6 +201,6 @@ describe('BlastedBrickScript', () => {
     press('Space');
     movingPlayer.update();
 
-    expect(tileMap.getTile(3, 6)).toBe(TileType.BlastedBrick);
+    expect(tileMap.getTile(3, 6)).toBe(Tile.BlastedBrick);
   });
 });

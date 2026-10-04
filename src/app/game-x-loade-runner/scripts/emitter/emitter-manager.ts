@@ -15,7 +15,7 @@ import {
   OBJECT_BEAM_VERTICAL_1,
 } from '../../data/sprites';
 import { BitmapSpriteRenderer } from '../../../engine/scripts/renderer/bitmap-sprite-renderer';
-import { TileType } from '../tile-map/tile-map-types';
+import { Tile } from '../tile-map/tile-map-types';
 import { MirrorHelper } from '../mirror/mirror-helper';
 import { BeamScript } from '../beam-script';
 import { IBeamSegmentDescriptor } from './i-beam-segment-descriptor';
@@ -219,10 +219,10 @@ export class EmitterManager extends Script {
     }
 
     if (
-      (segment.direction === Direction.Left && !(mirrorTile === TileType.MirrorRT || mirrorTile === TileType.MirrorRB)) ||
-      (segment.direction === Direction.Right && !(mirrorTile === TileType.MirrorLT || mirrorTile === TileType.MirrorLB)) ||
-      (segment.direction === Direction.Down && !(mirrorTile === TileType.MirrorLT || mirrorTile === TileType.MirrorRT)) ||
-      (segment.direction === Direction.Up && !(mirrorTile === TileType.MirrorLB || mirrorTile === TileType.MirrorRB))
+      (segment.direction === Direction.Left && !(mirrorTile === Tile.MirrorRT || mirrorTile === Tile.MirrorRB)) ||
+      (segment.direction === Direction.Right && !(mirrorTile === Tile.MirrorLT || mirrorTile === Tile.MirrorLB)) ||
+      (segment.direction === Direction.Down && !(mirrorTile === Tile.MirrorLT || mirrorTile === Tile.MirrorRT)) ||
+      (segment.direction === Direction.Up && !(mirrorTile === Tile.MirrorLB || mirrorTile === Tile.MirrorRB))
     ) {
       return true;
     }
@@ -230,29 +230,29 @@ export class EmitterManager extends Script {
     segment.prevDirection = segment.direction;
 
     if (
-      (segment.direction === Direction.Left && mirrorTile === TileType.MirrorRB) ||
-      (segment.direction === Direction.Right && mirrorTile === TileType.MirrorLB)
+      (segment.direction === Direction.Left && mirrorTile === Tile.MirrorRB) ||
+      (segment.direction === Direction.Right && mirrorTile === Tile.MirrorLB)
     ) {
       segment.direction = Direction.Down;
     }
 
     if (
-      (segment.direction === Direction.Left && mirrorTile === TileType.MirrorRT) ||
-      (segment.direction === Direction.Right && mirrorTile === TileType.MirrorLT)
+      (segment.direction === Direction.Left && mirrorTile === Tile.MirrorRT) ||
+      (segment.direction === Direction.Right && mirrorTile === Tile.MirrorLT)
     ) {
       segment.direction = Direction.Up;
     }
 
     if (
-      (segment.direction === Direction.Up && mirrorTile === TileType.MirrorRB) ||
-      (segment.direction === Direction.Down && mirrorTile === TileType.MirrorRT)
+      (segment.direction === Direction.Up && mirrorTile === Tile.MirrorRB) ||
+      (segment.direction === Direction.Down && mirrorTile === Tile.MirrorRT)
     ) {
       segment.direction = Direction.Right;
     }
 
     if (
-      (segment.direction === Direction.Up && mirrorTile === TileType.MirrorLB) ||
-      (segment.direction === Direction.Down && mirrorTile === TileType.MirrorLT)
+      (segment.direction === Direction.Up && mirrorTile === Tile.MirrorLB) ||
+      (segment.direction === Direction.Down && mirrorTile === Tile.MirrorLT)
     ) {
       segment.direction = Direction.Left;
     }
@@ -287,7 +287,7 @@ export class EmitterManager extends Script {
   }
 
   private isOverSwitch(column: number, row: number): boolean {
-    return this.tileMap.getTile(column, row) === TileType.BeamSwitchBlue || this.tileMap.getTile(column, row) === TileType.BeamSwitchGreen;
+    return this.tileMap.getTile(column, row) === Tile.BeamSwitchBlue || this.tileMap.getTile(column, row) === Tile.BeamSwitchGreen;
   }
 
   private static key(column: number, row: number): string {

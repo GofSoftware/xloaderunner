@@ -3,7 +3,7 @@ import { ObjectPosition } from './scripts/object-position';
 import { BitmapRenderer } from '../engine/scripts/renderer/bitmap-renderer';
 import { BitmapSpriteRenderer } from '../engine/scripts/renderer/bitmap-sprite-renderer';
 import { GoldItem } from './scripts/gold-item';
-import { TileType } from './scripts/tile-map/tile-map-types';
+import { Tile } from './scripts/tile-map/tile-map-types';
 import { EmitterScript, EMITTER_INFO_BY_TILE_TYPE } from './scripts/emitter/emitter-script';
 import { MIDDLE_TILE_LAYER, BACKGROUND_LAYER, CELL_SIZE, LAYER_COUNT } from '../engine/screen/screen.constants';
 import { ScreenBuffer } from '../engine/screen/screen-buffer';
@@ -17,12 +17,12 @@ describe('createTileGameObject', () => {
   } as unknown as IEngineState;
 
   it('returns undefined for tile types with no visual representation', () => {
-    expect(createTileGameObject(engineState, 1, 1, TileType.Empty)).toBeUndefined();
-    expect(createTileGameObject(engineState, 1, 1, TileType.EnemyStart)).toBeUndefined();
+    expect(createTileGameObject(engineState, 1, 1, Tile.Empty)).toBeUndefined();
+    expect(createTileGameObject(engineState, 1, 1, Tile.EnemyStart)).toBeUndefined();
   });
 
   it('positions a static tile at the given cell and gives it a bitmap renderer', () => {
-    const gameObject = createTileGameObject(engineState, 3, 4, TileType.Brick)!;
+    const gameObject = createTileGameObject(engineState, 3, 4, Tile.Brick)!;
 
     expect(gameObject.position).toEqual({ x: 3 * CELL_SIZE, y: 4 * CELL_SIZE });
     expect(gameObject.getScript(BitmapRenderer)).toBeDefined();
@@ -31,21 +31,21 @@ describe('createTileGameObject', () => {
   });
 
   it('gives an animated tile a sprite renderer instead of a static one', () => {
-    const gameObject = createTileGameObject(engineState, 2, 2, TileType.Lava)!;
+    const gameObject = createTileGameObject(engineState, 2, 2, Tile.Lava)!;
 
     expect(gameObject.getScript(BitmapSpriteRenderer)).toBeDefined();
     expect(gameObject.getScript(BitmapRenderer)).toBeUndefined();
   });
 
   it('tags a gold tile with GoldItem so GoldScript can recognize it', () => {
-    const gameObject = createTileGameObject(engineState, 5, 6, TileType.Gold)!;
+    const gameObject = createTileGameObject(engineState, 5, 6, Tile.Gold)!;
 
     expect(gameObject.getScript(GoldItem)).toBeDefined();
     expect(gameObject.getScript(BitmapRenderer)).toBeDefined();
   });
 
   it('does not tag non-gold tiles with GoldItem', () => {
-    const gameObject = createTileGameObject(engineState, 3, 4, TileType.Brick)!;
+    const gameObject = createTileGameObject(engineState, 3, 4, Tile.Brick)!;
 
     expect(gameObject.getScript(GoldItem)).toBeUndefined();
   });
@@ -53,7 +53,7 @@ describe('createTileGameObject', () => {
   it('draws gold on MIDDLE_TILE_LAYER, not the background layer', () => {
     const screenBuffer = ScreenBuffer.create(LAYER_COUNT);
     const renderEngineState = { ...engineState, screenBuffer } as unknown as IEngineState;
-    const gameObject = createTileGameObject(renderEngineState, 5, 6, TileType.Gold)!;
+    const gameObject = createTileGameObject(renderEngineState, 5, 6, Tile.Gold)!;
 
     gameObject.start();
     gameObject.update();
@@ -69,7 +69,7 @@ describe('createTileGameObject', () => {
   describe('emitters', () => {
     it('tags each emitter tile type with an EmitterScript carrying its color and direction', () => {
       for (const [type, info] of Object.entries(EMITTER_INFO_BY_TILE_TYPE)) {
-        const gameObject = createTileGameObject(engineState, 1, 1, type as TileType)!;
+        const gameObject = createTileGameObject(engineState, 1, 1, type as Tile)!;
         const emitter = gameObject.getScript(EmitterScript)!;
 
         expect(emitter).toBeDefined();
@@ -80,7 +80,7 @@ describe('createTileGameObject', () => {
     });
 
     it('does not tag non-emitter tiles with EmitterScript', () => {
-      const gameObject = createTileGameObject(engineState, 3, 4, TileType.Brick)!;
+      const gameObject = createTileGameObject(engineState, 3, 4, Tile.Brick)!;
 
       expect(gameObject.getScript(EmitterScript)).toBeUndefined();
     });

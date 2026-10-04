@@ -3,7 +3,7 @@ import { EnemyScript } from './enemy-script';
 import { StateScript } from './state-script';
 import { ObjectPosition } from './object-position';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { GameObject } from '../../engine/game-object/game-object';
 import { Keyboard } from '../../engine/keyboard/keyboard';
 import { ScreenBuffer } from '../../engine/screen/screen-buffer';
@@ -19,7 +19,7 @@ describe('EnemyScript', () => {
 
   function createFloor(row: number, fromColumn: number, toColumn: number): void {
     for (let column = fromColumn; column <= toColumn; column++) {
-      tileMap.setTile(column, row, TileType.Brick);
+      tileMap.setTile(column, row, Tile.Brick);
     }
   }
 
@@ -126,8 +126,8 @@ describe('EnemyScript', () => {
   });
 
   it('forces up to climb stairs toward a player standing above', () => {
-    tileMap.setTile(4, 4, TileType.Stairs);
-    tileMap.setTile(4, 5, TileType.Stairs);
+    tileMap.setTile(4, 4, Tile.Stairs);
+    tileMap.setTile(4, 5, Tile.Stairs);
     createPlayer(4, 3);
     const enemy = createEnemy(4, 5);
     const stateScript = enemy.getScript(StateScript)!;
@@ -173,7 +173,7 @@ describe('EnemyScript', () => {
   it('leaves every force false when no path to the player exists', () => {
     createFloor(6, 0, 10);
     for (let row = 0; row <= 6; row++) {
-      tileMap.setTile(5, row, TileType.Brick);
+      tileMap.setTile(5, row, Tile.Brick);
     }
     createPlayer(8, 5);
     const enemy = createEnemy(2, 5);
@@ -193,7 +193,7 @@ describe('EnemyScript', () => {
     // (2, 5) to the player at (6, 5) is to fall to the floor, walk under the stairs, then climb
     // back up, never a direct horizontal step through the open air in between.
     for (let row = 5; row <= 8; row++) {
-      tileMap.setTile(6, row, TileType.Stairs);
+      tileMap.setTile(6, row, Tile.Stairs);
     }
     createFloor(9, 0, 10);
     createPlayer(6, 5);
@@ -211,7 +211,7 @@ describe('EnemyScript', () => {
 
   it('treats a temporarily-blasted brick as solid ground and walks out over the hole, unlike StateScript', () => {
     createFloor(6, 0, 10);
-    tileMap.setTile(5, 6, TileType.BlastedBrick);
+    tileMap.setTile(5, 6, Tile.BlastedBrick);
     createPlayer(8, 5);
     const enemy = createEnemy(2, 5);
     const stateScript = enemy.getScript(StateScript)!;
@@ -229,7 +229,7 @@ describe('EnemyScript', () => {
     // Drives the whole GameObject (not just EnemyScript directly, like the pathfinding tests
     // above) - StateScript is what actually notices the lava and sets isDying().
     function killEnemy(enemy: GameObject, column: number, row: number): void {
-      tileMap.setTile(column, row, TileType.Lava);
+      tileMap.setTile(column, row, Tile.Lava);
       enemy.update(); // StateScript notices the lava and starts dying.
       enemy.update(); // EnemyScript sees isDying() and begins its own dying sequence.
     }

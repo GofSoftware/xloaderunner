@@ -3,19 +3,19 @@ import { GameObject } from '../../../engine/game-object/game-object';
 import { ObjectPosition } from '../object-position';
 import { EmitterColor } from './emitter-color';
 import { EmitterManager } from './emitter-manager';
-import { TileType } from '../tile-map/tile-map-types';
+import { Tile } from '../tile-map/tile-map-types';
 
 import { Direction } from '../direction';
 
-export const EMITTER_INFO_BY_TILE_TYPE: Partial<Record<TileType, { color: EmitterColor; direction: Direction }>> = {
-  [TileType.EmitterGreenLeft]: { color: EmitterColor.Green, direction: Direction.Left },
-  [TileType.EmitterGreenRight]: { color: EmitterColor.Green, direction: Direction.Right },
-  [TileType.EmitterGreenUp]: { color: EmitterColor.Green, direction: Direction.Up },
-  [TileType.EmitterGreenDown]: { color: EmitterColor.Green, direction: Direction.Down },
-  [TileType.EmitterBlueLeft]: { color: EmitterColor.Blue, direction: Direction.Left },
-  [TileType.EmitterBlueRight]: { color: EmitterColor.Blue, direction: Direction.Right },
-  [TileType.EmitterBlueUp]: { color: EmitterColor.Blue, direction: Direction.Up },
-  [TileType.EmitterBlueDown]: { color: EmitterColor.Blue, direction: Direction.Down },
+export const EMITTER_INFO_BY_TILE_TYPE: Partial<Record<Tile, { color: EmitterColor; direction: Direction }>> = {
+  [Tile.EmitterGreenLeft]: { color: EmitterColor.Green, direction: Direction.Left },
+  [Tile.EmitterGreenRight]: { color: EmitterColor.Green, direction: Direction.Right },
+  [Tile.EmitterGreenUp]: { color: EmitterColor.Green, direction: Direction.Up },
+  [Tile.EmitterGreenDown]: { color: EmitterColor.Green, direction: Direction.Down },
+  [Tile.EmitterBlueLeft]: { color: EmitterColor.Blue, direction: Direction.Left },
+  [Tile.EmitterBlueRight]: { color: EmitterColor.Blue, direction: Direction.Right },
+  [Tile.EmitterBlueUp]: { color: EmitterColor.Blue, direction: Direction.Up },
+  [Tile.EmitterBlueDown]: { color: EmitterColor.Blue, direction: Direction.Down },
 };
 
 /**

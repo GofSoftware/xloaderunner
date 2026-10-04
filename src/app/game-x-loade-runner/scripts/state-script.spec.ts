@@ -1,6 +1,6 @@
 import { StateScript } from './state-script';
 import { TileMap } from './tile-map/tile-map';
-import { TileType } from './tile-map/tile-map-types';
+import { Tile } from './tile-map/tile-map-types';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { KeyboardInputScript } from '../../engine/scripts/keyboard-input-script';
 import { ObjectPosition } from './object-position';
@@ -83,7 +83,7 @@ describe('StateScript', () => {
 
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
     tileMap = tileMapGameObject.getScript(TileMap)!;
-    tileMap.setTile(1, 3, TileType.Brick);
+    tileMap.setTile(1, 3, Tile.Brick);
     gameObjectsByName.set('Map', tileMapGameObject);
 
     const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [
@@ -141,7 +141,7 @@ describe('StateScript', () => {
   });
 
   it('should move right while the right arrow is held and the ground holds', () => {
-    tileMap.setTile(2, 3, TileType.Brick);
+    tileMap.setTile(2, 3, Tile.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -151,7 +151,7 @@ describe('StateScript', () => {
   });
 
   it('should not move right when forceRight(false) clears the force before StateScript reads it', () => {
-    tileMap.setTile(2, 3, TileType.Brick);
+    tileMap.setTile(2, 3, Tile.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.getScript(KeyboardInputScript)!.update();
@@ -162,7 +162,7 @@ describe('StateScript', () => {
   });
 
   it('should not move right when a brick blocks the target cell', () => {
-    tileMap.setTile(2, 2, TileType.Brick);
+    tileMap.setTile(2, 2, Tile.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -171,7 +171,7 @@ describe('StateScript', () => {
   });
 
   it('should not move left when a brick blocks the target cell', () => {
-    tileMap.setTile(0, 2, TileType.Brick);
+    tileMap.setTile(0, 2, Tile.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
 
     player.update();
@@ -189,8 +189,8 @@ describe('StateScript', () => {
 
   it('should not move up when a brick blocks the target cell above, even while on stairs', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Stairs);
-    tileMap.setTile(4, 1, TileType.Brick);
+    tileMap.setTile(4, 2, Tile.Stairs);
+    tileMap.setTile(4, 1, Tile.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();
@@ -208,7 +208,7 @@ describe('StateScript', () => {
   });
 
   it('should hesitate before stepping toward a lava cell, without moving immediately', () => {
-    tileMap.setTile(2, 3, TileType.Lava);
+    tileMap.setTile(2, 3, Tile.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -218,7 +218,7 @@ describe('StateScript', () => {
   });
 
   it('should step toward the lava once the hesitation pause elapses while the key is held', () => {
-    tileMap.setTile(2, 3, TileType.Lava);
+    tileMap.setTile(2, 3, Tile.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -231,7 +231,7 @@ describe('StateScript', () => {
   });
 
   it('should stay put if the key is released and never pressed again before the pause elapses', () => {
-    tileMap.setTile(2, 3, TileType.Lava);
+    tileMap.setTile(2, 3, Tile.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -247,7 +247,7 @@ describe('StateScript', () => {
   });
 
   it('should step toward the lava if the key is released and pressed again before the pause elapses', () => {
-    tileMap.setTile(2, 3, TileType.Lava);
+    tileMap.setTile(2, 3, Tile.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -265,7 +265,7 @@ describe('StateScript', () => {
   });
 
   it('should skip the hesitation pause the next time the player moves in the same direction after already being warned', () => {
-    tileMap.setTile(2, 3, TileType.Lava);
+    tileMap.setTile(2, 3, Tile.Lava);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -285,8 +285,8 @@ describe('StateScript', () => {
   });
 
   it('should require hesitating again after moving in a different direction clears the skip', () => {
-    tileMap.setTile(2, 3, TileType.Lava);
-    tileMap.setTile(0, 3, TileType.Brick);
+    tileMap.setTile(2, 3, Tile.Lava);
+    tileMap.setTile(0, 3, Tile.Brick);
     engineState.deltaTime = 0.1;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -325,7 +325,7 @@ describe('StateScript', () => {
 
   it('should clamp horizontal movement so the player never leaves the screen', () => {
     for (let column = 0; column < tileMap.columns; column++) {
-      tileMap.setTile(column, 3, TileType.Brick);
+      tileMap.setTile(column, 3, Tile.Brick);
     }
     teleportPlayer(player, tileMap.columns - 1, 2);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
@@ -344,7 +344,7 @@ describe('StateScript', () => {
   });
 
   it('should finish the current 8px step even if the key is released mid-step', () => {
-    tileMap.setTile(2, 3, TileType.Brick);
+    tileMap.setTile(2, 3, Tile.Brick);
     engineState.deltaTime = 0.05;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -365,7 +365,7 @@ describe('StateScript', () => {
   });
 
   it('should ignore a direction change until the in-progress step completes', () => {
-    tileMap.setTile(2, 3, TileType.Brick);
+    tileMap.setTile(2, 3, Tile.Brick);
     engineState.deltaTime = 0.05;
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -403,7 +403,7 @@ describe('StateScript', () => {
 
   it('should stay in place on a stairs tile even without ground below, when no key is pressed', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Stairs);
+    tileMap.setTile(4, 2, Tile.Stairs);
 
     player.update();
 
@@ -412,7 +412,7 @@ describe('StateScript', () => {
 
   it('should still allow climbing while on a stairs tile with no ground below', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Stairs);
+    tileMap.setTile(4, 2, Tile.Stairs);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();
@@ -423,8 +423,8 @@ describe('StateScript', () => {
 
   it('should keep climbing when the next cell up is also a stairs tile', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Stairs);
-    tileMap.setTile(4, 1, TileType.Stairs);
+    tileMap.setTile(4, 2, Tile.Stairs);
+    tileMap.setTile(4, 1, Tile.Stairs);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
     player.update();
@@ -435,7 +435,7 @@ describe('StateScript', () => {
 
   it('should stay in place on a crossbar tile even without ground below, when no key is pressed', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Crossbar);
+    tileMap.setTile(4, 2, Tile.Crossbar);
 
     player.update();
 
@@ -444,7 +444,7 @@ describe('StateScript', () => {
 
   it('should stop falling once it reaches a crossbar tile', () => {
     teleportPlayer(player, 12, 2);
-    tileMap.setTile(12, 3, TileType.Crossbar);
+    tileMap.setTile(12, 3, Tile.Crossbar);
     engineState.deltaTime = 0.05;
 
     player.update();
@@ -460,8 +460,8 @@ describe('StateScript', () => {
 
   it('should move left along a crossbar', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Crossbar);
-    tileMap.setTile(3, 2, TileType.Crossbar);
+    tileMap.setTile(4, 2, Tile.Crossbar);
+    tileMap.setTile(3, 2, Tile.Crossbar);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
 
     player.update();
@@ -472,8 +472,8 @@ describe('StateScript', () => {
 
   it('should move right along a crossbar', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Crossbar);
-    tileMap.setTile(5, 2, TileType.Crossbar);
+    tileMap.setTile(4, 2, Tile.Crossbar);
+    tileMap.setTile(5, 2, Tile.Crossbar);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
     player.update();
@@ -484,8 +484,8 @@ describe('StateScript', () => {
 
   it('should not move along a crossbar when a brick blocks the target cell', () => {
     teleportPlayer(player, 4, 2);
-    tileMap.setTile(4, 2, TileType.Crossbar);
-    tileMap.setTile(3, 2, TileType.Brick);
+    tileMap.setTile(4, 2, Tile.Crossbar);
+    tileMap.setTile(3, 2, Tile.Brick);
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft' }));
 
     player.update();
@@ -503,7 +503,7 @@ describe('StateScript', () => {
 
   it('should transition to Dying and freeze in place when standing on a dangerous tile', () => {
     teleportPlayer(player, 5, 2);
-    tileMap.setTile(5, 2, TileType.Lava);
+    tileMap.setTile(5, 2, Tile.Lava);
 
     player.update();
 
@@ -513,7 +513,7 @@ describe('StateScript', () => {
   it('should ignore movement input while dying', () => {
     engineState.deltaTime = 0.3;
     teleportPlayer(player, 5, 2);
-    tileMap.setTile(5, 2, TileType.Lava);
+    tileMap.setTile(5, 2, Tile.Lava);
 
     player.update();
 
@@ -529,7 +529,7 @@ describe('StateScript', () => {
   // there indefinitely; see player-script.spec.ts for the respawn/game-over flow.
   it('should stay in the Dying state indefinitely once it begins dying, never respawning on its own', () => {
     teleportPlayer(player, 5, 2);
-    tileMap.setTile(5, 2, TileType.Lava);
+    tileMap.setTile(5, 2, Tile.Lava);
 
     player.update();
     player.update();
@@ -544,7 +544,7 @@ describe('StateScript', () => {
   // embedded in solid terrain forever instead of dying.
   it('should die when left standing inside a tile that has become a solid wall', () => {
     teleportPlayer(player, 5, 2);
-    tileMap.setTile(5, 2, TileType.Brick);
+    tileMap.setTile(5, 2, Tile.Brick);
 
     player.update();
 
@@ -588,7 +588,7 @@ describe('StateScript', () => {
     it('turns to face a new direction immediately, but only starts running after the turn delay elapses', () => {
       // Same run-right-then-reverse sequence as 'should ignore a direction change until the
       // in-progress step completes' above - see that test for the frame-by-frame trace.
-      tileMap.setTile(2, 3, TileType.Brick);
+      tileMap.setTile(2, 3, Tile.Brick);
       engineState.deltaTime = 0.05;
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -612,7 +612,7 @@ describe('StateScript', () => {
     });
 
     it('never pauses while continuing to hold the same direction', () => {
-      tileMap.setTile(2, 3, TileType.Brick);
+      tileMap.setTile(2, 3, Tile.Brick);
       engineState.deltaTime = 0.05;
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
@@ -633,7 +633,7 @@ describe('StateScript', () => {
     });
 
     it('turns to face right even when a brick blocks the step', () => {
-      tileMap.setTile(2, 2, TileType.Brick);
+      tileMap.setTile(2, 2, Tile.Brick);
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
 
       player.update();
@@ -644,8 +644,8 @@ describe('StateScript', () => {
 
     it('turns to face up even when a brick blocks the step above, while on stairs', () => {
       teleportPlayer(player, 4, 2);
-      tileMap.setTile(4, 2, TileType.Stairs);
-      tileMap.setTile(4, 1, TileType.Brick);
+      tileMap.setTile(4, 2, Tile.Stairs);
+      tileMap.setTile(4, 1, Tile.Brick);
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
 
       player.update();
@@ -655,7 +655,7 @@ describe('StateScript', () => {
     });
 
     it('lets a released key be re-affirmed in the same direction without paying the turn delay again', () => {
-      tileMap.setTile(2, 3, TileType.Brick);
+      tileMap.setTile(2, 3, Tile.Brick);
       engineState.deltaTime = 0.05;
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }));
       player.update();
@@ -679,7 +679,7 @@ describe('StateScript', () => {
   describe('blasted brick holes', () => {
     it('keeps falling straight through a blasted-open brick by default (getsTrappedInHoles is off)', () => {
       teleportPlayer(player, 12, 2);
-      tileMap.setTile(12, 3, TileType.BlastedBrick);
+      tileMap.setTile(12, 3, Tile.BlastedBrick);
       engineState.deltaTime = 0.05;
 
       player.update();
@@ -694,7 +694,7 @@ describe('StateScript', () => {
 
     it('pins a trapping character in place once it drops onto a blasted-open brick, instead of falling further', () => {
       const enemy = createTrappingCharacter({ x: 96, y: 16 });
-      tileMap.setTile(12, 3, TileType.BlastedBrick);
+      tileMap.setTile(12, 3, Tile.BlastedBrick);
       engineState.deltaTime = 0.05;
 
       enemy.update();
@@ -709,7 +709,7 @@ describe('StateScript', () => {
 
     it('lets a trapping character stand on top of a blasted-open brick once something occupies it', () => {
       const enemy = createTrappingCharacter({ x: 96, y: 8 });
-      tileMap.setTile(12, 2, TileType.BlastedBrick);
+      tileMap.setTile(12, 2, Tile.BlastedBrick);
       const occupant = GameObject.create('TrappedEnemy', engineState, { x: 96, y: 16 }, [(go) => ObjectPosition.create(go, 12, 2)]);
       occupant.start();
 
@@ -720,7 +720,7 @@ describe('StateScript', () => {
 
     it('falls into an unoccupied blasted-open brick rather than treating it as solid ground', () => {
       teleportPlayer(player, 12, 2);
-      tileMap.setTile(12, 3, TileType.BlastedBrick);
+      tileMap.setTile(12, 3, Tile.BlastedBrick);
 
       player.update();
 
