@@ -99,6 +99,7 @@ export class StateScript extends Script {
   private isForcedRight = false;
   private isForcedUp = false;
   private isForcedDown = false;
+  private isBorn = false;
 
   private constructor(
     gameObject: GameObject,
@@ -150,12 +151,16 @@ export class StateScript extends Script {
   }
 
   public startLife(): void {
-    this.state = PlayerState.Stand;
+    this.isBorn = true;
   }
 
   public clearState(): void {
     this.state = null;
     this.dying = false;
+    // Drop any not-yet-consumed wake-up from a startLife() called before this clearState() -
+    // otherwise the very next resolveState() call would immediately skip the fresh Borning freeze
+    // this is meant to re-enter, instead of waiting for a new startLife() call.
+    this.isBorn = false;
   }
 
   public isDying(): boolean {
@@ -214,9 +219,15 @@ export class StateScript extends Script {
     this.updateFacingDirection();
     const { column, row } = this.objectPosition;
 
-    if (this.state == null || this.state === PlayerState.Borning) {
+    // this.state itself stays null/Borning until setState() below runs with whatever real state
+    // resolveState() returns from here on - which, since isBorn has unfrozen it, is never Borning
+    // again. That guarantees setState()'s own "did the state actually change" check sees a real
+    // change on this first post-Borning frame, even if the resolved state happens to be Stand -
+    // otherwise the sprite would stay pinned on the last Borning frame forever (see startLife()).
+    if ((this.state == null || this.state === PlayerState.Borning) && !this.isBorn) {
       return PlayerState.Borning;
     }
+    this.isBorn = false;
 
     if (this.dying) {
       return PlayerState.Dying;

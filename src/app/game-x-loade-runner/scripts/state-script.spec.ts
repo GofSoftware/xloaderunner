@@ -132,6 +132,21 @@ describe('StateScript', () => {
 
       expect(newborn.position.x).toBeGreaterThan(8);
     });
+
+    it('should refresh the sprite off the Borning animation even when no key is held, so it does not stay pinned on the last Born frame', () => {
+      // Grounded and with nothing forcing movement, resolveState() resolves straight back to Stand -
+      // the same PlayerState the old startLife() used to set directly, which made setState()'s
+      // "did the state change" check a no-op and left the sprite frozen on Borning forever.
+      tileMap.setTile(1, 3, Tile.Brick);
+      const newborn = createNewbornPlayer();
+      const spriteRenderer = newborn.getScript(BitmapSpriteRenderer)!;
+      const setAnimation = vi.spyOn(spriteRenderer, 'setAnimation');
+
+      newborn.getScript(StateScript)!.startLife();
+      newborn.update();
+
+      expect(setAnimation).toHaveBeenCalled();
+    });
   });
 
   it('should stand still when grounded and no key is pressed', () => {
