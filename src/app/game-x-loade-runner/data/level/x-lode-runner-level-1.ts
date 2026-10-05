@@ -3,17 +3,19 @@ import { ___, Brh, Brk, BSG, Crb, EbL, EbR, EmD, EmL, EmU, EnS, GGT, Gld, Lav, P
 import { IEngineState } from '../../../engine/i-engine-state';
 import { XLodeRunnerLevel } from './x-lode-runner-level';
 import { GameObject } from '../../../engine/game-object/game-object';
+import { IGoldenGateLockOptions } from '../../scripts/golden-gate/i-golden-gate-lock-options';
+import { IBeamSwitchOptions } from '../../scripts/beam-switch/i-beam-switch-options';
 
 const BEAM_SWITCH_1_NAME = 'BEAM_SWITCH_1_NAME'
 
-const SGT: TileWithOptions = {
+const SGT: TileWithOptions<IGoldenGateLockOptions> = {
   type: GGT,
   options: {
-    onOffName: BEAM_SWITCH_1_NAME
+    linkedOnOffScriptName: BEAM_SWITCH_1_NAME
   },
 }
 
-const SSG: TileWithOptions = { type: BSG, options: {onOffName: BEAM_SWITCH_1_NAME} }
+const SSG: TileWithOptions<IBeamSwitchOptions> = { type: BSG, options: {onOffName: BEAM_SWITCH_1_NAME} }
 
 // prettier-ignore
 const map: TileElement[][] = [

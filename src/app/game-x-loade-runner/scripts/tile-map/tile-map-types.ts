@@ -6,9 +6,9 @@ export const MAP_ROWS = Math.floor(SCREEN_HEIGHT / CELL_SIZE);
 export interface IBaseTileElementOptions {
 }
 
-export interface TileWithOptions {
+export interface TileWithOptions<T extends IBaseTileElementOptions = any> {
   type: Tile;
-  options: IBaseTileElementOptions;
+  options: T;
 }
 
 export type TileElement = Tile | TileWithOptions;
