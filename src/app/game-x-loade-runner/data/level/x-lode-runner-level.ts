@@ -23,6 +23,11 @@ import { EmitterManager } from '../../scripts/emitter/emitter-manager';
 import { PortalManagerScript } from '../../scripts/portal-manager-script';
 import { OnOffManager } from '../../scripts/on-off/on-off-manager';
 
+interface IMapWithScreenPosition {
+  mapPosition: IMapPosition;
+  screenPosition: IVector2;
+}
+
 export abstract class XLodeRunnerLevel implements ILevel {
   public engineState: IEngineState;
   public abstract map: TileElement[][];
@@ -34,8 +39,8 @@ export abstract class XLodeRunnerLevel implements ILevel {
 
   protected setup(): GameObject[] {
     const { tileMap, tileGameObjects, mapGameObject } = this.setupTileMap();
-    const playerPosition = this.getPositionAndClear(tileMap, Tile.PlayerStart);
-    const enemyPosition = this.getPositionAndClear(tileMap, Tile.EnemyStart);
+    const playerPositions = this.getPositionAndClear(tileMap, Tile.PlayerStart);
+    const enemyPositions = this.getPositionAndClear(tileMap, Tile.EnemyStart);
 
     return [
       GameObject.create('Emitters', this.engineState, { x: 0, y: 0 }, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
@@ -47,8 +52,8 @@ export abstract class XLodeRunnerLevel implements ILevel {
       ]),
       mapGameObject,
       ...tileGameObjects,
-      this.createPlayer(playerPosition),
-      this.createEnemy(enemyPosition),
+      this.createPlayer(playerPositions[0]),
+      ...(enemyPositions.map((enemyPosition) => this.createEnemy(enemyPosition)))
     ];
   }
 
@@ -72,7 +77,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
     return { tileMap, tileGameObjects, mapGameObject };
   }
 
-  private createPlayer(playerPosition: { mapPosition: IMapPosition; screenPosition: IVector2 }): GameObject {
+  private createPlayer(playerPosition: IMapWithScreenPosition): GameObject {
     return GameObject.create('Player', this.engineState, playerPosition.screenPosition, [
       (gameObject: GameObject) => PlayerScript.create(gameObject),
       (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
@@ -94,7 +99,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
     ]);
   }
 
-  private createEnemy(enemyPosition: { mapPosition: IMapPosition; screenPosition: IVector2 }): GameObject {
+  private createEnemy(enemyPosition: IMapWithScreenPosition): GameObject {
     return GameObject.create('Enemy', this.engineState, enemyPosition.screenPosition, [
       (gameObject: GameObject) => EnemyScript.create(gameObject, enemyPosition.mapPosition),
       (gameObject: GameObject) => RunnerScript.create(gameObject),
@@ -111,16 +116,23 @@ export abstract class XLodeRunnerLevel implements ILevel {
   }
 
   private getPositionAndClear(
-    tileMap: TileMap,
-    type: Tile,
-    defaultPosition: IMapPosition = { column: 0, row: 0 },
-  ): { mapPosition: IMapPosition; screenPosition: IVector2 } {
-    const startTile = tileMap.getTiles().find((tile) => tile.type === type);
-    const spawnCell = startTile ? { column: startTile.column, row: startTile.row } : defaultPosition;
-    const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
-    // PlayerStart/EnemyStart have no bitmap and never renders anything, but the tile grid still remembers it as
-    // non-Empty - clear it, so BuilderScript can build on the spawn cell once the player has moved off it.
-    tileMap.setTile(spawnCell.column, spawnCell.row, Tile.Empty);
-    return { mapPosition: spawnCell, screenPosition: spawnPosition };
+    tileMap: TileMap, type: Tile, defaultPosition: IMapPosition = { column: 0, row: 0 },
+  ): IMapWithScreenPosition[] {
+    const spawnCells = tileMap.getTiles().filter((tile) => tile.type === type).map((tile) => ({ column: tile.column, row: tile.row }));
+    if (spawnCells.length === 0) {
+      spawnCells.push(defaultPosition);
+    }
+
+    const res: IMapWithScreenPosition[] = [];
+
+    spawnCells.forEach((spawnCell) => {
+      const spawnPosition = MapHelper.mapToScreen(spawnCell.column, spawnCell.row);
+      // PlayerStart/EnemyStart have no bitmap and never renders anything, but the tile grid still remembers it as
+      // non-Empty - clear it, so BuilderScript can build on the spawn cell once the player has moved off it.
+      tileMap.setTile(spawnCell.column, spawnCell.row, Tile.Empty);
+      res.push({ mapPosition: spawnCell, screenPosition: spawnPosition });
+    });
+
+    return res;
   }
 }
