@@ -46,7 +46,9 @@ describe('KeyboardInputScript', () => {
     const tileMapGameObject = GameObject.create('Map', engineState, { x: 0, y: 0 }, [(go) => TileMap.create(go)]);
     gameObjectsByName.set('Map', tileMapGameObject);
 
-    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2, () => {})]);
+    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
+      (go) => LivesScript.create(go, 2, () => {}, () => {}),
+    ]);
     gameObjectsByName.set('Lives', livesGameObject);
 
     const portalManagerGameObject = GameObject.create('PortalManager', engineState, { x: 0, y: 0 }, [

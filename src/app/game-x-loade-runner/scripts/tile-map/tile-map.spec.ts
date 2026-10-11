@@ -77,6 +77,23 @@ describe('TileMap', () => {
     expect(tileMap.isDangerous(7, 3)).toBe(false);
   });
 
+  it('should only treat PlayerFinish tiles as finish, not brick, stairs, lava, player-start, or gold', () => {
+    tileMap.setTile(1, 3, Tile.PlayerFinish);
+    tileMap.setTile(2, 3, Tile.Brick);
+    tileMap.setTile(3, 3, Tile.Stairs);
+    tileMap.setTile(4, 3, Tile.Lava);
+    tileMap.setTile(5, 3, Tile.PlayerStart);
+    tileMap.setTile(6, 3, Tile.Gold);
+
+    expect(tileMap.isFinish(1, 3)).toBe(true);
+    expect(tileMap.isFinish(0, 3)).toBe(false);
+    expect(tileMap.isFinish(2, 3)).toBe(false);
+    expect(tileMap.isFinish(3, 3)).toBe(false);
+    expect(tileMap.isFinish(4, 3)).toBe(false);
+    expect(tileMap.isFinish(5, 3)).toBe(false);
+    expect(tileMap.isFinish(6, 3)).toBe(false);
+  });
+
   it('should only treat brick, stairs, and crossbar tiles as removable, not lava, player-start, gold, or empty cells', () => {
     tileMap.setTile(1, 3, Tile.Brick);
     tileMap.setTile(2, 3, Tile.Stairs);

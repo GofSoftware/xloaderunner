@@ -1,6 +1,6 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
-import { DEATH_JINGLE } from '../../engine/audio/music-player';
+import { DEATH_JINGLE, FINISH_JINGLE } from '../../engine/audio/music-player';
 import { DelayedAction } from '../../engine/delayed-action';
 import { LivesScript } from './lives-script';
 import { StateScript } from './state-script';
@@ -9,6 +9,7 @@ import { ObjectPosition } from './object-position';
 import { EnemyScript } from './enemy-script';
 
 const DYING_DURATION_SECONDS = 0.9;
+const FINISHING_DURATION_SECONDS = 0.9;
 const BORNING_DURATION_SECONDS = 1.1;
 
 export class PlayerScript extends Script {
@@ -17,6 +18,7 @@ export class PlayerScript extends Script {
   }
 
   private _stateScript: StateScript | null = null;
+  private finishing: DelayedAction | null = null;
   private dying: DelayedAction | null = null;
   private borning: DelayedAction = DelayedAction.create(BORNING_DURATION_SECONDS, () => this.stateScript.startLife());
 
@@ -40,6 +42,11 @@ export class PlayerScript extends Script {
   }
 
   public override update(): void {
+    if (this.finishing != null) {
+      this.finishing.advance(this.gameObject.engineState.deltaTime);
+      return;
+    }
+
     if (this.borning.isPending) {
       this.borning.advance(this.gameObject.engineState.deltaTime);
       return;
@@ -47,6 +54,11 @@ export class PlayerScript extends Script {
 
     if (this.dying != null) {
       this.dying.advance(this.gameObject.engineState.deltaTime);
+      return;
+    }
+
+    if (this.stateScript.isOverFinish()) {
+      this.beginFinishing();
       return;
     }
 
@@ -62,6 +74,13 @@ export class PlayerScript extends Script {
     const { musicPlayer } = this.gameObject.engineState;
     musicPlayer.register('Death', DEATH_JINGLE);
     musicPlayer.play('Death');
+  }
+
+  private beginFinishing(): void {
+    this.finishing = DelayedAction.create(FINISHING_DURATION_SECONDS, () => this.lives.nextLevel());
+    const { musicPlayer } = this.gameObject.engineState;
+    musicPlayer.register('Finish', FINISH_JINGLE);
+    musicPlayer.play('Finish');
   }
 
   private checkEnemy(): void {

@@ -84,6 +84,10 @@ export class TileMap extends Script {
     );
   }
 
+  public isFinish(column: number, row: number): boolean {
+    return this.getTile(column, row) === Tile.PlayerFinish;
+  }
+
   public isClimbable(column: number, row: number): boolean {
     return this.getTile(column, row) === Tile.Stairs || this.getTile(column, row) === Tile.Crossbar;
   }

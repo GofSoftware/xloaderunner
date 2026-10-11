@@ -566,6 +566,19 @@ describe('StateScript', () => {
     expect(player.getScript(StateScript)!.isDying()).toBe(true);
   });
 
+  describe('isOverFinish()', () => {
+    it('should report false while standing on an ordinary tile', () => {
+      expect(player.getScript(StateScript)!.isOverFinish()).toBe(false);
+    });
+
+    it('should report true once the character is standing on a PlayerFinish tile', () => {
+      teleportPlayer(player, 5, 2);
+      tileMap.setTile(5, 2, Tile.PlayerFinish);
+
+      expect(player.getScript(StateScript)!.isOverFinish()).toBe(true);
+    });
+  });
+
   describe('die() and clearState()', () => {
     it('die() should start dying immediately, regardless of the current tile', () => {
       player.getScript(StateScript)!.die();

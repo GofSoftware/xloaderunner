@@ -1,18 +1,46 @@
 import { IMusicNote } from './i-music-note';
 import { SoundPlayer } from './sound-player';
 
+const C3 = 130.81;
+const D3 = 146.83;
+const E3 = 164.81;
+const F3 = 174.61;
+const G3 = 196.0;
+const A3 = 220.0;
+const B3 = 246.94;
+
 const C4 = 261.63;
 const D4 = 293.66;
 const E4 = 329.63;
 const F4 = 349.23;
 const G4 = 392.0;
 const A4 = 440.0;
+const B4 = 493.88;
+
+const C5 = 523.25;
+const D5 = 587.33;
+const E5 = 659.25;
+const F5 = 698.46;
+const G5 = 783.99;
+const A5 = 880.0;
+const B5 = 987.77;
+
+const C6 = 1046.5;
 
 export const DEATH_JINGLE: IMusicNote[] = [
   { frequency: G4, duration: 0.15 },
   { frequency: F4, duration: 0.15 },
   { frequency: D4, duration: 0.15 },
   { frequency: C4, duration: 0.4 },
+];
+
+export const FINISH_JINGLE: IMusicNote[] = [
+  { frequency: C4, duration: 0.15 },
+  { frequency: E4, duration: 0.15 },
+  { frequency: G4, duration: 0.15 },
+  { frequency: A4, duration: 0.4 },
+  { frequency: G4, duration: 0.15 },
+  { frequency: A4, duration: 0.4 },
 ];
 
 export const DEATH_ENEMY_JINGLE: IMusicNote[] = [{ frequency: 50, duration: 0.3 }];

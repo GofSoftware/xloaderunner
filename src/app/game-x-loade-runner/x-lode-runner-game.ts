@@ -13,6 +13,7 @@ import { HeartsRenderer } from './scripts/hearts-renderer';
 import { LivesScript } from './scripts/lives-script';
 import { MAX_LIVES } from './x-lode-runner-constants';
 import { Tile } from './scripts/tile-map/tile-map-types';
+import { XLodeRunnerLevel2 } from './data/level/x-lode-runner-level-2';
 
 export class XLodeRunnerGame implements IGame {
   public static create(): XLodeRunnerGame {
@@ -27,7 +28,11 @@ export class XLodeRunnerGame implements IGame {
     return this._engineState!;
   }
 
-  private levels: ((engineState: IEngineState) => ILevel)[] = [(engineState: IEngineState) => XLodeRunnerLevel1.create(engineState)];
+  private levels: ((engineState: IEngineState) => ILevel)[] = [
+    (engineState: IEngineState) => XLodeRunnerLevel1.create(engineState),
+    (engineState: IEngineState) => XLodeRunnerLevel2.create(engineState)
+  ];
+  private currentLevelIndex: number = 0;
   private lives: number = MAX_LIVES;
 
   private constructor() {}
@@ -37,35 +42,22 @@ export class XLodeRunnerGame implements IGame {
 
     await this.startLevel(
       StartMenuLevel.create(this.engineState, () => {
-        this.startLevel(this.levels[0](this.engineState));
+        this.startLevel(0);
       }),
     );
   }
 
-  public async startLevel(level: ILevel): Promise<void> {
+  public async startLevel(level: ILevel | number): Promise<void> {
     this.engineState.reset();
+    let isPlayableLevel = false;
+    if (typeof level === 'number') {
+      isPlayableLevel = true;
+      level = this.levels[level](this.engineState);
+    }
 
     const gameObjects = await level.initialize();
     [
-      GameObject.create('Lives', this.engineState, { x: 0, y: 0 }, [
-        (gameObject: GameObject) =>
-          LivesScript.create(gameObject, this.lives, () => {
-            this.lives--;
-            this.lives > 0
-              ? this.startLevel(level)
-              : this.startLevel(
-                  GameOverLevel.create(this.engineState, () => {
-                    this.lives = MAX_LIVES;
-                    this.startLevel(
-                      StartMenuLevel.create(this.engineState, () => {
-                        this.startLevel(this.levels[0](this.engineState));
-                      }),
-                    );
-                  }),
-                );
-          }),
-        (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),
-      ]),
+      ...(isPlayableLevel ? [this.createLives()] : []),
       GameObject.create('Stars', this.engineState, { x: 0, y: 0 }, [
         (gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER),
       ]),
@@ -89,5 +81,40 @@ export class XLodeRunnerGame implements IGame {
       return;
     }
     console.log(`Screen coords: x ${screenX} y ${screenY} Map coords: column ${column} row ${row}; Tile: ${tile}`, objects);
+  }
+
+  private createLives(): GameObject {
+    return GameObject.create('Lives', this.engineState, { x: 0, y: 0 }, [
+      (gameObject: GameObject) =>
+        LivesScript.create(gameObject, this.lives, () => {
+            this.lives--;
+            this.lives > 0
+              ? this.startLevel(this.currentLevelIndex)
+              : this.startGameOverLevel()
+          },
+          () => this.startNextLevel()
+        ),
+      (gameObject: GameObject) => HeartsRenderer.create(gameObject, HUD_LAYER),
+    ]);
+  }
+
+  private async startMenuLevel(): Promise<void> {
+    this.lives = MAX_LIVES;
+    this.currentLevelIndex = 0;
+    await this.startLevel(
+      StartMenuLevel.create(this.engineState, () => this.startLevel(this.currentLevelIndex))
+    );
+  }
+
+  private async startGameOverLevel(): Promise<void> {
+    await this.startLevel(
+      GameOverLevel.create(this.engineState, () => this.startMenuLevel()));
+  }
+
+  private async startNextLevel(): Promise<void> {
+    if (++this.currentLevelIndex >= this.levels.length) {
+      return await this.startGameOverLevel();
+    }
+    await this.startLevel(this.currentLevelIndex);
   }
 }

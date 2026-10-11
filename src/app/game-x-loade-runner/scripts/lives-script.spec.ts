@@ -4,9 +4,16 @@ import { GameObject } from '../../engine/game-object/game-object';
 import { IEngineState } from '../../engine/i-engine-state';
 
 describe('LivesScript', () => {
-  function createLives(count: number, loseLifeCallback: () => void, registerAfterUpdate: (fn: () => void) => void): LivesScript {
+  function createLives(
+    count: number,
+    loseLifeCallback: () => void,
+    registerAfterUpdate: (fn: () => void) => void,
+    nextLevelCallback: () => void = () => {},
+  ): LivesScript {
     const engineState = { registerAfterUpdate } as unknown as IEngineState;
-    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, count, loseLifeCallback)]);
+    const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
+      (go) => LivesScript.create(go, count, loseLifeCallback, nextLevelCallback),
+    ]);
     return gameObject.getScript(LivesScript)!;
   }
 
@@ -48,5 +55,28 @@ describe('LivesScript', () => {
     registeredFn!();
 
     expect(loseLifeCallback).toHaveBeenCalledTimes(1);
+  });
+
+  // Same deferred-callback shape as loseLife() above, but for advancing to the next level instead
+  // of losing a life - XLodeRunnerGame's startNextLevel() is wired up to this one.
+  it("should defer the nextLevel callback through the engine's registerAfterUpdate, not call it immediately", () => {
+    const nextLevelCallback = vi.fn();
+    let registeredFn: (() => void) | undefined;
+    const lives = createLives(
+      1,
+      () => {},
+      (fn) => {
+        registeredFn = fn;
+      },
+      nextLevelCallback,
+    );
+
+    lives.nextLevel();
+
+    expect(nextLevelCallback).not.toHaveBeenCalled();
+
+    registeredFn!();
+
+    expect(nextLevelCallback).toHaveBeenCalledTimes(1);
   });
 });

@@ -81,7 +81,9 @@ describe('PlayerScript', () => {
     portalManagerGameObject.start();
     gameObjectsByName.set('PortalManager', portalManagerGameObject);
 
-    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [(go) => LivesScript.create(go, 2, () => {})]);
+    const livesGameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
+      (go) => LivesScript.create(go, 2, () => {}, () => {}),
+    ]);
     livesScript = livesGameObject.getScript(LivesScript)!;
     gameObjectsByName.set('Lives', livesGameObject);
 
@@ -165,6 +167,56 @@ describe('PlayerScript', () => {
     player.update();
 
     expect(loseLife).toHaveBeenCalledTimes(1);
+  });
+
+  describe('finishing', () => {
+    function reachFinish(): void {
+      tileMap.setTile(1, 2, Tile.PlayerFinish);
+    }
+
+    it('should start the finish jingle exactly once, as soon as the player reaches the finish tile', () => {
+      reachFinish();
+
+      player.update();
+      player.update();
+
+      expect(musicPlayer.register).toHaveBeenCalledTimes(1);
+      expect(musicPlayer.play).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not advance to the next level before the finishing timer elapses', () => {
+      const nextLevel = vi.spyOn(livesScript, 'nextLevel');
+      reachFinish();
+
+      player.update();
+
+      expect(nextLevel).not.toHaveBeenCalled();
+    });
+
+    it('should advance to the next level exactly once the finishing timer elapses', () => {
+      const nextLevel = vi.spyOn(livesScript, 'nextLevel');
+      reachFinish();
+
+      player.update();
+      player.update();
+
+      expect(nextLevel).toHaveBeenCalledTimes(1);
+    });
+
+    // Mirrors the equivalent dying test above - the DelayedAction backing `finishing` latches once
+    // fired, so further updates can't retrigger the jingle or advance a second time.
+    it('should not retrigger the jingle or advance twice even if updates keep coming after finishing', () => {
+      const nextLevel = vi.spyOn(livesScript, 'nextLevel');
+      reachFinish();
+
+      player.update();
+      player.update();
+      player.update();
+      player.update();
+
+      expect(musicPlayer.play).toHaveBeenCalledTimes(1);
+      expect(nextLevel).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('touching an enemy', () => {

@@ -22,7 +22,7 @@ describe('HeartsRenderer', () => {
   it('should draw one heart per remaining life, right-anchored in the top row', () => {
     const engineState = createEngineState();
     const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
-      (go) => LivesScript.create(go, MAX_LIVES, () => {}),
+      (go) => LivesScript.create(go, MAX_LIVES, () => {}, () => {}),
       (go) => HeartsRenderer.create(go, 0),
     ]);
 
@@ -39,7 +39,7 @@ describe('HeartsRenderer', () => {
   it('should draw fewer hearts when constructed with a lower count', () => {
     const engineState = createEngineState();
     const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
-      (go) => LivesScript.create(go, MAX_LIVES - 1, () => {}),
+      (go) => LivesScript.create(go, MAX_LIVES - 1, () => {}, () => {}),
       (go) => HeartsRenderer.create(go, 0),
     ]);
 
@@ -54,7 +54,7 @@ describe('HeartsRenderer', () => {
   it('should draw onto the given layer only', () => {
     const engineState = { screenBuffer: ScreenBuffer.create(2) } as IEngineState;
     const gameObject = GameObject.create('Lives', engineState, { x: 0, y: 0 }, [
-      (go) => LivesScript.create(go, 1, () => {}),
+      (go) => LivesScript.create(go, 1, () => {}, () => {}),
       (go) => HeartsRenderer.create(go, 1),
     ]);
 

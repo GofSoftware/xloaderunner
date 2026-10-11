@@ -167,6 +167,11 @@ export class StateScript extends Script {
     return this.dying;
   }
 
+  public isOverFinish(): boolean {
+    const { column, row } = this.objectPosition;
+    return this.tileMap.isFinish(column, row);
+  }
+
   public forceLeft(value: boolean): void {
     this.isForcedLeft = value;
   }
