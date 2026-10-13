@@ -6,6 +6,7 @@ import { TextRenderer } from '../../../engine/scripts/text-renderer';
 import { CELL_SIZE, HUD_LAYER } from '../../../engine/screen/screen.constants';
 import { StartMenuScript } from '../../scripts/start/start-menu-script';
 import { ColorOverrideTextureEffect } from '../../../engine/scripts/effects/color-override-texture-effect';
+import { BG_JINGLE } from '../../../engine/audio/music-player';
 
 export type VoidCallback = () => void;
 
@@ -25,6 +26,10 @@ export class StartMenuLevel implements ILevel {
   }
 
   public async initialize(): Promise<GameObject[]> {
+    const { musicPlayer } = this.engineState;
+    musicPlayer.register('BackMusic', BG_JINGLE);
+    musicPlayer.play('BackMusic', 0, true);
+
     const title = GameObject.create('Title', this.engineState, { x: CELL_SIZE * 10, y: CELL_SIZE * 9 }, [
       (gameObject: GameObject) =>
         TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [

@@ -1,6 +1,6 @@
 import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
-import { DEATH_JINGLE, FINISH_JINGLE } from '../../engine/audio/music-player';
+import { BORN_JINGLE, DEATH_JINGLE, FINISH_JINGLE } from '../../engine/audio/music-player';
 import { DelayedAction } from '../../engine/delayed-action';
 import { LivesScript } from './lives-script';
 import { StateScript } from './state-script';
@@ -39,6 +39,12 @@ export class PlayerScript extends Script {
 
   private get stateScript(): StateScript {
     return this._stateScript ?? (this._stateScript = this.gameObject.getScript(StateScript)!);
+  }
+
+  public override start(): void {
+    const { musicPlayer } = this.gameObject.engineState;
+    musicPlayer.register('Born', BORN_JINGLE);
+    musicPlayer.play('Born');
   }
 
   public override update(): void {

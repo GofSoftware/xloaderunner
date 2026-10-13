@@ -27,6 +27,26 @@ const B5 = 987.77;
 
 const C6 = 1046.5;
 
+
+export const BG_JINGLE: IMusicNote[] = [
+  { frequency: C4, duration: 0.05 },
+  { frequency: 0, duration: 1 },
+  { frequency: C4, duration: 0.05 },
+  { frequency: 0, duration: 1 },
+  { frequency: C4, duration: 0.05 },
+  { frequency: 0, duration: 0.5 },
+  { frequency: D4, duration: 0.05 },
+  { frequency: 0, duration: 0.5 },
+  { frequency: C4, duration: 0.05 },
+  { frequency: 0, duration: 1 },
+];
+
+export const BORN_JINGLE: IMusicNote[] = [
+  { frequency: C4, duration: 0.05 },
+  { frequency: E4, duration: 0.05 },
+  { frequency: G4, duration: 0.05 },
+];
+
 export const DEATH_JINGLE: IMusicNote[] = [
   { frequency: G4, duration: 0.15 },
   { frequency: F4, duration: 0.15 },
@@ -38,9 +58,9 @@ export const FINISH_JINGLE: IMusicNote[] = [
   { frequency: C4, duration: 0.15 },
   { frequency: E4, duration: 0.15 },
   { frequency: G4, duration: 0.15 },
-  { frequency: A4, duration: 0.4 },
+  { frequency: A4, duration: 0.3 },
   { frequency: G4, duration: 0.15 },
-  { frequency: A4, duration: 0.4 },
+  { frequency: A4, duration: 0.3 },
 ];
 
 export const DEATH_ENEMY_JINGLE: IMusicNote[] = [{ frequency: 50, duration: 0.3 }];
@@ -66,6 +86,7 @@ export const TWINKLE_TWINKLE_LITTLE_STAR: IMusicNote[] = [
 interface IPlaybackState {
   index: number;
   timeoutId: ReturnType<typeof setTimeout> | undefined;
+  infinite: boolean;
 }
 
 export class MusicPlayer {
@@ -82,9 +103,9 @@ export class MusicPlayer {
     this.sequences.set(name, notes);
   }
 
-  public play(name: string, from: number = 0): void {
+  public play(name: string, from: number = 0, infinite: boolean = false): void {
     this.clearScheduled(name);
-    this.playbackStates.set(name, { index: from, timeoutId: undefined });
+    this.playbackStates.set(name, { index: from, timeoutId: undefined, infinite });
     this.advance(name);
   }
 
@@ -112,9 +133,17 @@ export class MusicPlayer {
     }
 
     const notes = this.sequences.get(name);
-    if (!notes || state.index >= notes.length) {
-      this.playbackStates.delete(name);
+    if (!notes) {
       return;
+    }
+
+    if (state.index >= notes.length) {
+      if (state.infinite) {
+        state.index = 0;
+      } else {
+        this.playbackStates.delete(name);
+        return;
+      }
     }
 
     const note = notes[state.index];
