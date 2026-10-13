@@ -63,7 +63,7 @@ export class TileMap extends Script {
 
   public isPortableSurface(column: number, row: number): boolean {
     const tile = this.getTile(column, row);
-    return tile === Tile.Brick || tile === Tile.BrickHard || tile === Tile.Stairs;
+    return tile === Tile.Brick || tile === Tile.BrickHard/* || tile === Tile.Stairs*/;
   }
 
   public isDangerous(column: number, row: number): boolean {

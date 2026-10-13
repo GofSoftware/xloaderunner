@@ -117,17 +117,18 @@ export class PortalManagerScript extends BaseScript {
       }
 
       if (this.tileMap.isPortableSurface(column, row)) {
-        if (!this.isEmpty(projectile.objectPosition.column, projectile.objectPosition.row)) {
+        const {column, row} = {column: projectile.objectPosition.column, row: projectile.objectPosition.row};
+        if (!this.isEmpty(column, row)) {
           this.removeProjectile(projectile);
           return;
         }
 
         if (projectile.portalType === PortalType.Blue) {
           this.gameObject.engineState.removeGameObject(this.bluePortal!);
-          this.bluePortal = this.spawnPortal(projectile.objectPosition.column, projectile.objectPosition.row, PortalType.Blue);
+          this.bluePortal = this.spawnPortal(column, row, PortalType.Blue);
         } else {
           this.gameObject.engineState.removeGameObject(this.orangePortal!);
-          this.orangePortal = this.spawnPortal(projectile.objectPosition.column, projectile.objectPosition.row, PortalType.Orange);
+          this.orangePortal = this.spawnPortal(column, row, PortalType.Orange);
         }
 
         this.removeProjectile(projectile);
