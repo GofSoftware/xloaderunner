@@ -7,6 +7,7 @@ import { CELL_SIZE, HUD_LAYER } from '../../../engine/screen/screen.constants';
 import { StartMenuScript } from '../../scripts/start/start-menu-script';
 import { ColorOverrideTextureEffect } from '../../../engine/scripts/effects/color-override-texture-effect';
 import { BG_JINGLE } from '../../../engine/audio/music-player';
+import { Vector2 } from '../../../engine/math/vector-2';
 
 export type VoidCallback = () => void;
 
@@ -30,7 +31,7 @@ export class StartMenuLevel implements ILevel {
     musicPlayer.register('BackMusic', BG_JINGLE);
     musicPlayer.play('BackMusic', 0, true);
 
-    const title = GameObject.create('Title', this.engineState, { x: CELL_SIZE * 10, y: CELL_SIZE * 9 }, [
+    const title = GameObject.create('Title', this.engineState, Vector2.create(CELL_SIZE * 10, CELL_SIZE * 9), [
       (gameObject: GameObject) =>
         TextRenderer.create(gameObject, 'xLode Runner', HUD_LAYER, [
           ColorOverrideTextureEffect.create(this.engineState, (v: number, x: number, y: number) => {
@@ -40,7 +41,7 @@ export class StartMenuLevel implements ILevel {
           }),
         ]),
     ]);
-    const anyKey = GameObject.create('Any Key', this.engineState, { x: CELL_SIZE * 5, y: CELL_SIZE * 11 }, [
+    const anyKey = GameObject.create('Any Key', this.engineState, Vector2.create(CELL_SIZE * 5, CELL_SIZE * 11), [
       (gameObject: GameObject) =>
         TextRenderer.create(gameObject, 'Press Any Key To Play!', HUD_LAYER, [
           ColorOverrideTextureEffect.create(this.engineState, (v: number, x: number, y: number) => {

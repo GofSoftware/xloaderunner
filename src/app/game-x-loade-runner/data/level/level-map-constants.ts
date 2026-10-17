@@ -19,6 +19,7 @@ export const EbR = Tile.EmitterBlueRight;
 export const EbU = Tile.EmitterBlueUp;
 export const EbD = Tile.EmitterBlueDown;
 export const MRR = Tile.MirrorR;
+export const MRL = Tile.MirrorL;
 export const MRB = Tile.MirrorRB;
 export const MLt = Tile.MirrorLB;
 export const MRT = Tile.MirrorRT;

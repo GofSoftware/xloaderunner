@@ -17,7 +17,7 @@ export class GameObject implements IGameObject {
 
   public readonly engineState: IEngineState;
 
-  private readonly positionInstance: Vector2 = { x: 0, y: 0 };
+  private readonly positionInstance: Vector2 = Vector2.zero;
   private _name: string;
   private scriptInstances: Script[] = [];
 
@@ -31,7 +31,7 @@ export class GameObject implements IGameObject {
     // Clone rather than alias - callers may hold onto the position object they
     // passed in (e.g. a spawn point reused after death), and setPosition()
     // mutates positionInstance in place.
-    this.positionInstance = { x: position.x, y: position.y };
+    this.positionInstance = Vector2.create(position.x, position.y);
   }
 
   public get position(): Readonly<Vector2> {

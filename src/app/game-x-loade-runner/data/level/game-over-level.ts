@@ -7,6 +7,7 @@ import { TextRenderer } from '../../../engine/scripts/text-renderer';
 import { ColorOverrideTextureEffect } from '../../../engine/scripts/effects/color-override-texture-effect';
 import { StartMenuScript } from '../../scripts/start/start-menu-script';
 import { VoidCallback } from './start-menu-level';
+import { Vector2 } from '../../../engine/math/vector-2';
 
 export class GameOverLevel implements ILevel {
   public static create(engineState: IEngineState, continueCallback: VoidCallback): GameOverLevel {
@@ -23,7 +24,7 @@ export class GameOverLevel implements ILevel {
   }
 
   public async initialize(): Promise<GameObject[]> {
-    const title = GameObject.create('Title', this.engineState, { x: CELL_SIZE * 11, y: CELL_SIZE * 9 }, [
+    const title = GameObject.create('Title', this.engineState,Vector2.create(CELL_SIZE * 11, CELL_SIZE * 9), [
       (gameObject: GameObject) =>
         TextRenderer.create(gameObject, 'Game Over', HUD_LAYER, [
           ColorOverrideTextureEffect.create(this.engineState, (v: number, x: number, y: number) => {
@@ -33,7 +34,7 @@ export class GameOverLevel implements ILevel {
           }),
         ]),
     ]);
-    const anyKey = GameObject.create('Any Key', this.engineState, { x: CELL_SIZE * 4, y: CELL_SIZE * 11 }, [
+    const anyKey = GameObject.create('Any Key', this.engineState, Vector2.create(CELL_SIZE * 4, CELL_SIZE * 11), [
       (gameObject: GameObject) =>
         TextRenderer.create(gameObject, 'Press Any Key To Continue', HUD_LAYER, [
           ColorOverrideTextureEffect.create(this.engineState, (v: number, x: number, y: number) => {

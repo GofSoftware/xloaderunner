@@ -74,12 +74,12 @@ export class ParticleScript extends Script {
 
   private static randomDirection(): Vector2 {
     const angle = Math.random() * Math.PI * 2;
-    return { x: Math.cos(angle), y: Math.sin(angle) };
+    return Vector2.create(Math.cos(angle), Math.sin(angle));
   }
 
   private static normalize(vector: Vector2): Vector2 {
     const length = Math.sqrt(vector.x * vector.x + vector.y * vector.y) || 1;
-    return { x: vector.x / length, y: vector.y / length };
+    return Vector2.create(vector.x / length, vector.y / length);
   }
 
   private static randomInRange(min: number, max: number): number {

@@ -68,6 +68,7 @@ import { OnOffScript } from './scripts/on-off/on-off-script';
 import { BitmapAnimationDirection } from '../engine/scripts/i-bitmap-animation-description';
 import { IGoldenGateLockOptions } from './scripts/golden-gate/i-golden-gate-lock-options';
 import { IBeamSwitchOptions } from './scripts/beam-switch/i-beam-switch-options';
+import { Vector2 } from '../engine/math/vector-2';
 
 export const TILE_BITMAPS: Partial<Record<Tile, ITileBitmapDescription>> = {
   [Tile.Brick]: { bitmapType: TileBitmapType.Static, staticBitmap: OBJECT_BRICK },
@@ -184,7 +185,7 @@ export function createTileGameObject(engineState: IEngineState, column: number, 
           gravity: 40,
           direction: () => {
             const angle = Math.random() * Math.PI * 2;
-            return { x: Math.cos(angle), y: -1 * Math.abs(Math.sin(angle)) };
+            return Vector2.create(Math.cos(angle), -1 * Math.abs(Math.sin(angle)));
           },
           color: Yl,
           colorOverrides: [

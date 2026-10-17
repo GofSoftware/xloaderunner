@@ -2,7 +2,7 @@ import { Script } from '../../engine/game-object/script';
 import { GameObject } from '../../engine/game-object/game-object';
 import { BitmapSpriteRenderer } from '../../engine/scripts/renderer/bitmap-sprite-renderer';
 import { TileMap } from './tile-map/tile-map';
-import { BACKGROUND_LAYER, CELL_SIZE } from '../../engine/screen/screen.constants';
+import { CELL_SIZE, MIDDLE_TILE_LAYER } from '../../engine/screen/screen.constants';
 import {
   CLIMB_ANIMATION,
   DYING_ANIMATION,
@@ -19,14 +19,16 @@ import {
   STAND_ANIMATION_LOOK_RIGHT,
 } from '../../engine/scripts/animations';
 import { BitmapRenderer } from '../../engine/scripts/renderer/bitmap-renderer';
-import { OBJECT_EXCLAMATION } from '../data/sprites';
+import { OBJECT_EXCLAMATION, OBJECT_LOOK_ANIMATION_1, OBJECT_LOOK_ANIMATION_2 } from '../data/sprites';
 import { DestroyAfterTime } from '../../engine/scripts/destroy-after-time';
 import { ObjectPosition } from './object-position';
 import { Tile } from './tile-map/tile-map-types';
 import { PlayerState } from './state/state-types';
-import { Direction } from './direction';
+import { Direction, DIRECTION_SHIFT } from './direction';
 import { IMapPosition } from './tile-map/i-map-position';
 import { PortalManagerScript } from './portal-manager-script';
+import { Vector2 } from '../../engine/math/vector-2';
+import { BitmapAnimationDirection } from '../../engine/scripts/i-bitmap-animation-description';
 
 const MOVE_SPEED = 40;
 const FALL_SPEED = 60;
@@ -167,27 +169,6 @@ export class StateScript extends Script {
     return this.dying;
   }
 
-  public isOverFinish(): boolean {
-    const { column, row } = this.objectPosition;
-    return this.tileMap.isFinish(column, row);
-  }
-
-  public forceLeft(value: boolean): void {
-    this.isForcedLeft = value;
-  }
-
-  public forceRight(value: boolean): void {
-    this.isForcedRight = value;
-  }
-
-  public forceUp(value: boolean): void {
-    this.isForcedUp = value;
-  }
-
-  public forceDown(value: boolean): void {
-    this.isForcedDown = value;
-  }
-
   public override update(): void {
     if (this.state === PlayerState.GameOver) {
       this.resetForces();
@@ -207,6 +188,27 @@ export class StateScript extends Script {
     }
 
     this.setState(activeState);
+  }
+
+  public isOverFinish(): boolean {
+    const { column, row } = this.objectPosition;
+    return this.tileMap.isFinish(column, row);
+  }
+
+  public forceLeft(value: boolean): void {
+    this.isForcedLeft = value;
+  }
+
+  public forceRight(value: boolean): void {
+    this.isForcedRight = value;
+  }
+
+  public forceUp(value: boolean): void {
+    this.isForcedUp = value;
+  }
+
+  public forceDown(value: boolean): void {
+    this.isForcedDown = value;
   }
 
   public die(): void {
@@ -355,19 +357,26 @@ export class StateScript extends Script {
     if (this.lastMoveDirection === undefined || this.lastMoveDirection === direction) {
       this.lastMoveDirection = direction;
       this.turnPause = undefined;
+      console.log(`UNDEF OR EQUAL ${this.lastMoveDirection} === ${direction}`);
       return onReady();
     }
 
     if (!this.turnPause || this.turnPause.direction !== direction) {
       this.turnPause = { direction, elapsed: 0 };
+      console.log(`LOOOKING: ${this.turnPause.direction} : ${this.lastMoveDirection} : ${direction}`);
+      this.showLookAnimation();
+    } else {
+      this.turnPause.elapsed += this.gameObject.engineState.deltaTime;
+      console.log(`CONTINUE: ${this.turnPause.direction} : ${this.lastMoveDirection} : ${direction}`);
     }
-    this.turnPause.elapsed += this.gameObject.engineState.deltaTime;
+
     if (this.turnPause.elapsed < TURN_DELAY_SECONDS) {
       return TURN_STATE_BY_DIRECTION[direction];
     }
 
     this.turnPause = undefined;
     this.lastMoveDirection = direction;
+    console.log(`DONE: ${this.lastMoveDirection} : ${direction}`);
     return onReady();
   }
 
@@ -485,9 +494,9 @@ export class StateScript extends Script {
     const exclamation = GameObject.create(
       'ExclamationWarning',
       this.gameObject.engineState,
-      { x: this.gameObject.position.x, y: this.gameObject.position.y - CELL_SIZE - 1 },
+      Vector2.create(this.gameObject.position.x, this.gameObject.position.y - CELL_SIZE - 1),
       [
-        (gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_EXCLAMATION, BACKGROUND_LAYER),
+        (gameObject: GameObject) => BitmapRenderer.create(gameObject, OBJECT_EXCLAMATION, MIDDLE_TILE_LAYER),
         (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 200),
       ],
     );
@@ -512,5 +521,25 @@ export class StateScript extends Script {
       default:
         throw new Error(`calcPortalState: unknown Direction: ${calculatedPos.direction}`);
     }
+  }
+
+  private showLookAnimation(): void {
+    const { shiftColumn, shiftRow } = DIRECTION_SHIFT.get(this.currentDirection)!;
+    const middlePos = this.gameObject.position.add(Vector2.create(shiftColumn * CELL_SIZE, shiftRow * CELL_SIZE));
+    const lookObject = GameObject.create(this.gameObject.name + '-look', this.gameObject.engineState, middlePos, [
+      (gameObject: GameObject) => DestroyAfterTime.create(gameObject, 200),
+      (gameObject: GameObject) =>
+        BitmapSpriteRenderer.create(
+          gameObject,
+          {
+            bitmap: [OBJECT_LOOK_ANIMATION_1, OBJECT_LOOK_ANIMATION_2],
+            framePerSecond: 10,
+            oneTime: false,
+            direction: BitmapAnimationDirection.Forward,
+          },
+          MIDDLE_TILE_LAYER,
+        ),
+    ]);
+    this.gameObject.engineState.addGameObject(lookObject);
   }
 }

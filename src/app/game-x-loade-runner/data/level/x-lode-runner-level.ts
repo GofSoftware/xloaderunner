@@ -22,6 +22,7 @@ import { MapHelper } from '../../helpers/map.helper';
 import { EmitterManager } from '../../scripts/emitter/emitter-manager';
 import { PortalManagerScript } from '../../scripts/portal-manager-script';
 import { OnOffManager } from '../../scripts/on-off/on-off-manager';
+import { Vector2 } from '../../../engine/math/vector-2';
 
 interface IMapWithScreenPosition {
   mapPosition: IMapPosition;
@@ -43,11 +44,11 @@ export abstract class XLodeRunnerLevel implements ILevel {
     const enemyPositions = this.getPositionAndClear(tileMap, Tile.EnemyStart);
 
     return [
-      GameObject.create('Emitters', this.engineState, { x: 0, y: 0 }, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
-      GameObject.create('PortalManager', this.engineState, { x: 0, y: 0 }, [
+      GameObject.create('Emitters', this.engineState, Vector2.zero, [(gameObject: GameObject) => EmitterManager.create(gameObject)]),
+      GameObject.create('PortalManager', this.engineState, Vector2.zero, [
         (gameObject: GameObject) => PortalManagerScript.create(gameObject),
       ]),
-      GameObject.create('OnOffManager', this.engineState, { x: 0, y: 0 }, [
+      GameObject.create('OnOffManager', this.engineState, Vector2.zero, [
         (gameObject: GameObject) => OnOffManager.create(gameObject),
       ]),
       mapGameObject,
@@ -58,7 +59,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
   }
 
   protected setupTileMap(): { tileMap: TileMap; tileGameObjects: GameObject[]; mapGameObject: GameObject } {
-    const mapGameObject = GameObject.create('Map', this.engineState, { x: 0, y: 0 }, [
+    const mapGameObject = GameObject.create('Map', this.engineState, Vector2.zero, [
       (gameObject: GameObject) => TileMap.create(gameObject),
     ]);
     const tileMap = mapGameObject.getScript(TileMap)!;
@@ -78,7 +79,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
   }
 
   private createPlayer(playerPosition: IMapWithScreenPosition): GameObject {
-    return GameObject.create('Player', this.engineState, playerPosition.screenPosition, [
+    return GameObject.create('Player', this.engineState, Vector2.create(playerPosition.screenPosition.x, playerPosition.screenPosition.y), [
       (gameObject: GameObject) => PlayerScript.create(gameObject),
       (gameObject: GameObject) => KeyboardInputScript.create(gameObject),
       (gameObject: GameObject) => RunnerScript.create(gameObject),
@@ -100,7 +101,7 @@ export abstract class XLodeRunnerLevel implements ILevel {
   }
 
   private createEnemy(enemyPosition: IMapWithScreenPosition): GameObject {
-    return GameObject.create('Enemy', this.engineState, enemyPosition.screenPosition, [
+    return GameObject.create('Enemy', this.engineState, Vector2.fromVectorLike(enemyPosition.screenPosition), [
       (gameObject: GameObject) => EnemyScript.create(gameObject, enemyPosition.mapPosition),
       (gameObject: GameObject) => RunnerScript.create(gameObject),
       (gameObject: GameObject) => StateScript.create(gameObject, enemyPosition.mapPosition, 1 / ENEMY_SPEED_SLOWDOWN, true),

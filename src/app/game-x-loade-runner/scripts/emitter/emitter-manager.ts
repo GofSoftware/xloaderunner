@@ -22,6 +22,7 @@ import { IBeamSegmentDescriptor } from './i-beam-segment-descriptor';
 
 import { Direction, shiftByDirection } from '../direction';
 import { PortalManagerScript } from '../portal-manager-script';
+import { Vector2 } from '../../../engine/math/vector-2';
 
 const STEP_BY_DIRECTION: Record<Direction, { column: number; row: number }> = {
   [Direction.Left]: { column: -1, row: 0 },
@@ -103,7 +104,7 @@ export class EmitterManager extends Script {
     const beamGameObject = GameObject.create(
       `Beam-${segments.id}-${EmitterManager.key(segments.column, segments.row)}`,
       this.gameObject.engineState,
-      { x, y },
+      Vector2.create(x, y),
       [
         (gameObject) => BitmapSpriteRenderer.create(gameObject, { bitmap: HORIZONTAL_BEAM, framePerSecond: 2 }, this.layer),
         (gameObject) => BeamScript.create(gameObject, segments),

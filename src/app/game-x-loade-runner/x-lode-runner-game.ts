@@ -14,6 +14,7 @@ import { LivesScript } from './scripts/lives-script';
 import { MAX_LIVES } from './x-lode-runner-constants';
 import { Tile } from './scripts/tile-map/tile-map-types';
 import { XLodeRunnerLevel2 } from './data/level/x-lode-runner-level-2';
+import { Vector2 } from '../engine/math/vector-2';
 
 export class XLodeRunnerGame implements IGame {
   public static create(): XLodeRunnerGame {
@@ -29,8 +30,8 @@ export class XLodeRunnerGame implements IGame {
   }
 
   private levels: ((engineState: IEngineState) => ILevel)[] = [
-    (engineState: IEngineState) => XLodeRunnerLevel1.create(engineState),
-    (engineState: IEngineState) => XLodeRunnerLevel2.create(engineState)
+    (engineState: IEngineState) => XLodeRunnerLevel2.create(engineState),
+    (engineState: IEngineState) => XLodeRunnerLevel1.create(engineState)
   ];
   private currentLevelIndex: number = 0;
   private lives: number = MAX_LIVES;
@@ -58,7 +59,7 @@ export class XLodeRunnerGame implements IGame {
     const gameObjects = await level.initialize();
     [
       ...(isPlayableLevel ? [this.createLives()] : []),
-      GameObject.create('Stars', this.engineState, { x: 0, y: 0 }, [
+      GameObject.create('Stars', this.engineState, Vector2.zero, [
         (gameObject: GameObject) => BackgroundStars.create(gameObject, BACKGROUND_LAYER),
       ]),
       ...gameObjects,
@@ -84,7 +85,7 @@ export class XLodeRunnerGame implements IGame {
   }
 
   private createLives(): GameObject {
-    return GameObject.create('Lives', this.engineState, { x: 0, y: 0 }, [
+    return GameObject.create('Lives', this.engineState, Vector2.zero, [
       (gameObject: GameObject) =>
         LivesScript.create(gameObject, this.lives, () => {
             this.lives--;
